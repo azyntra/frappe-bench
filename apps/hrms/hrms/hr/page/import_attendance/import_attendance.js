@@ -915,6 +915,28 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
                     message: `✅ Attendance marked: ${totCreated} created, ${totUpdated} updated`,
                     indicator: totErrors > 0 ? 'orange' : 'green'
                 });
+
+                if (totCreated > 0 || totUpdated > 0) {
+                    const dates = empDates.map(e => e.date).sort();
+                    addLog('att-alog', 'linf', `\n🤖 Running Auto Leave Assignment in the background...`);
+                    frappe.call({
+                        method: "auto_leave_assignment.api.dashboard_api.run_manual_processing",
+                        args: {
+                            from_date: dates[0],
+                            to_date: dates[dates.length - 1]
+                        },
+                        callback: function(r) {
+                            if (!r.exc && r.message) {
+                                let res = r.message;
+                                addLog('att-alog', 'lok', `✅ Auto Leave Assignment Complete: ${res.assigned} assigned, ${res.skipped} skipped, ${res.errors} errors`);
+                                frappe.show_alert({
+                                    message: `🤖 Auto Leave Assignment: ${res.assigned} assigned, ${res.errors} errors`,
+                                    indicator: res.errors > 0 ? 'orange' : 'green'
+                                });
+                            }
+                        }
+                    });
+                }
             }
         );
     });
