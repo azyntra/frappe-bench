@@ -1,0 +1,12 @@
+{
+  "doctype": "Page",
+  "module": "HR",
+  "name": "hr-dashboard",
+  "page_name": "hr-dashboard",
+  "title": "HR Dashboard",
+  "roles": [
+    {"role": "HR Manager"},
+    {"role": "HR User"},
+    {"role": "System Manager"}
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "doctype": "Page",
+  "module": "HR",
+  "name": "import-attendance",
+  "page_name": "import-attendance",
+  "title": "Import Attendance",
+  "roles": [
+    {"role": "HR Manager"},
+    {"role": "HR User"},
+    {"role": "System Manager"}
+  ]
+}

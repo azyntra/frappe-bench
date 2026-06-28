@@ -1,0 +1,19 @@
+{
+ "doctype": "Page",
+ "module": "HR",
+ "name": "day-shift-assignment",
+ "page_name": "day-shift-assignment",
+ "roles": [
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "title": "Day Team Shift Assignment"
+}
+
