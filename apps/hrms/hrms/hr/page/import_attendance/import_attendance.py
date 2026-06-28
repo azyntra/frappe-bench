@@ -329,8 +329,9 @@ def _upsert_attendance(employee, work_date, status,
         doc.late_entry     = 1 if late_entry  else 0
         doc.early_exit     = 1 if early_exit  else 0
         doc.save(ignore_permissions=True)
-        # Auto-submit
+        # Auto-submit — skip auto leave hook (it runs after full batch)
         if doc.docstatus == 0:
+            doc.flags.skip_auto_leave = True
             doc.submit()
         return 'updated'
     else:
@@ -348,6 +349,8 @@ def _upsert_attendance(employee, work_date, status,
             'company':        _get_company(employee),
         })
         doc.insert(ignore_permissions=True)
+        # Skip auto leave hook — it runs after full batch completes
+        doc.flags.skip_auto_leave = True
         doc.submit()
         return 'created'
 

@@ -928,12 +928,15 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
                         callback: function(r) {
                             if (!r.exc && r.message) {
                                 let res = r.message;
-                                addLog('att-alog', 'lok', `✅ Auto Leave Assignment Complete:\n${res.message}`);
+                                addLog('att-alog', 'lok', `✅ Auto Leave Assignment Complete: ${res.assigned} assigned, ${res.skipped} skipped, ${res.errors} errors`);
                                 frappe.show_alert({
-                                    message: `🤖 Auto Leave Assignment Complete`,
-                                    indicator: 'green'
+                                    message: `🤖 Auto Leave: ${res.assigned} assigned, ${res.skipped} skipped` + (res.errors > 0 ? `, ${res.errors} errors` : ''),
+                                    indicator: res.errors > 0 ? 'orange' : 'green'
                                 });
                             }
+                        },
+                        error: function() {
+                            addLog('att-alog', 'ler', `✗ Auto Leave Assignment failed. Check Error Log for details.`);
                         }
                     });
                 }
