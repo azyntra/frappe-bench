@@ -1,0 +1,1199 @@
+2026-04-03 05:00:03,479 DEBUG cd /home/frappe/frappe-bench && uv venv env --seed --python python3.14
+2026-04-03 05:00:03,948 LOG Getting frappe
+2026-04-03 05:00:03,948 DEBUG cd /home/frappe/frappe-bench/apps && git clone https://github.com/frappe/frappe.git --branch version-16 --depth 1 --origin upstream
+2026-04-03 05:00:05,980 LOG Installing frappe
+2026-04-03 05:00:05,982 DEBUG cd /home/frappe/frappe-bench && uv pip install --quiet --upgrade -e /home/frappe/frappe-bench/apps/frappe  --python /home/frappe/frappe-bench/env/bin/python
+2026-04-03 05:00:07,614 DEBUG cd /home/frappe/frappe-bench/apps/frappe && yarn install --check-files
+2026-04-03 05:00:33,313 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe:
+2026-04-03 05:00:33,514 WARNING cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe: executed with exit code 2
+2026-04-03 05:00:33,514 WARNING restarting supervisor group `frappe:` failed. Use `bench restart` to retry.
+2026-04-03 05:00:33,514 DEBUG cd /home/frappe/frappe-bench && bench build
+2026-04-03 05:00:33,629 INFO /usr/local/bin/bench build
+2026-04-03 05:00:56,511 LOG setting up backups
+2026-04-03 05:00:56,523 LOG backups were set up
+2026-04-03 05:00:56,523 INFO Bench /home/frappe/frappe-bench initialized
+2026-04-03 05:01:31,675 INFO /usr/local/bin/bench get-app erpnext --branch version-16
+2026-04-03 05:01:31,967 LOG Getting erpnext
+2026-04-03 05:01:31,967 DEBUG cd ./apps && git clone https://github.com/frappe/erpnext.git --branch version-16 --depth 1 --origin upstream
+2026-04-03 05:01:36,019 LOG Installing erpnext
+2026-04-03 05:01:36,019 DEBUG cd /home/frappe/frappe-bench && uv pip install --quiet --upgrade -e /home/frappe/frappe-bench/apps/erpnext  --python /home/frappe/frappe-bench/env/bin/python
+2026-04-03 05:01:37,602 DEBUG cd /home/frappe/frappe-bench/apps/erpnext && yarn install --check-files
+2026-04-03 05:01:38,050 DEBUG bench build --app erpnext
+2026-04-03 05:01:38,164 INFO /usr/local/bin/bench build --app erpnext
+2026-04-03 05:01:46,598 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe:
+2026-04-03 05:01:46,812 WARNING cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe: executed with exit code 2
+2026-04-03 05:01:46,812 WARNING restarting supervisor group `frappe:` failed. Use `bench restart` to retry.
+2026-04-03 05:03:44,014 INFO /usr/local/bin/bench new-site 79.72.76.67 --db-root-password Sachira@1996 --admin-password Sachira@1996
+2026-04-03 05:06:01,651 INFO /usr/local/bin/bench new-site 79.72.76.67 --db-root-password Sachira@1996 --admin-password Sachira@1996
+2026-04-03 05:06:13,285 INFO /usr/local/bin/bench new-site 79.72.76.67 --db-root-password Sachira@1996 --admin-password Sachira@1996 --force
+2026-04-03 05:07:06,881 INFO /usr/local/bin/bench --site 79.72.76.67 install-app erpnext
+2026-04-03 05:09:37,608 INFO /usr/local/bin/bench setup redis
+2026-04-03 05:09:45,493 INFO /usr/local/bin/bench start
+2026-04-03 05:09:45,836 INFO /usr/local/bin/bench worker
+2026-04-03 05:09:45,982 INFO /usr/local/bin/bench serve --port 8000
+2026-04-03 05:09:45,987 INFO /usr/local/bin/bench watch
+2026-04-03 05:09:45,995 INFO /usr/local/bin/bench schedule
+2026-04-03 05:10:17,701 INFO /usr/local/bin/bench --site 79.72.76.67 install-app erpnext
+2026-04-03 05:10:34,468 INFO /usr/local/bin/bench setup production frappe
+2026-04-03 05:10:34,473 DEBUG sudo /usr/bin/python3 -m pip install ansible
+2026-04-03 05:10:56,724 DEBUG bench setup role fail2ban
+2026-04-03 05:10:56,836 INFO /usr/local/bin/bench setup role fail2ban
+2026-04-03 05:11:12,843 LOG Updated supervisord.conf: 'chmod' changed from '0700                       ; sockef file mode (default 0700)' to '0760'
+2026-04-03 05:11:12,843 LOG Updated supervisord.conf: 'chown' changed from '' to 'frappe:frappe'
+2026-04-03 05:11:12,899 DEBUG sudo /usr/sbin/nginx -t
+2026-04-03 05:11:12,919 DEBUG sudo systemctl reload nginx
+2026-04-03 05:11:13,257 INFO /usr/local/bin/bench --site 79.72.76.67 install-app erpnext
+2026-04-03 05:13:07,293 INFO /usr/local/bin/bench --site 79.72.76.67 install-app erpnext
+2026-04-03 05:13:19,491 INFO /usr/local/bin/bench --site 79.72.76.67 enable-scheduler
+2026-04-03 05:14:42,662 INFO /usr/local/bin/bench setup supervisor --yes
+2026-04-03 05:14:42,866 LOG Updated supervisord.conf: 'chmod' changed from '0700                       ; sockef file mode (default 0700)' to '0760'
+2026-04-03 05:14:42,866 LOG Updated supervisord.conf: 'chown' changed from '' to 'root:root'
+2026-04-03 05:16:04,197 INFO /usr/local/bin/bench schedule
+2026-04-03 05:16:04,198 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-03 05:16:04,200 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-03 05:24:47,108 INFO /usr/local/bin/bench --site 79.72.76.67 set-config host_name http://79.72.76.67
+2026-04-03 05:24:54,867 INFO /usr/local/bin/bench build --app frappe
+2026-04-03 05:25:14,081 INFO /usr/local/bin/bench build --app erpnext
+2026-04-03 05:25:18,733 INFO /usr/local/bin/bench schedule
+2026-04-03 05:25:18,810 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-03 05:25:18,811 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-03 05:57:55,944 INFO /usr/local/bin/bench get-app hrms --branch version-16
+2026-04-03 05:57:55,950 WARNING /usr/local/bin/bench get-app hrms --branch version-16 executed with exit code 1
+2026-04-03 05:59:03,195 INFO /usr/local/bin/bench get-app https://github.com/frappe/hrms --branch version-16
+2026-04-03 05:59:11,708 INFO App moved from apps/hrms to archived/apps/hrms-2026-04-03
+2026-04-03 05:59:11,711 LOG Getting hrms
+2026-04-03 05:59:11,711 DEBUG cd ./apps && git clone https://github.com/frappe/hrms --branch version-16 --depth 1 --origin upstream
+2026-04-03 05:59:12,870 LOG Installing hrms
+2026-04-03 05:59:12,870 DEBUG cd /home/frappe/frappe-bench && uv pip install --quiet --upgrade -e /home/frappe/frappe-bench/apps/hrms  --python /home/frappe/frappe-bench/env/bin/python
+2026-04-03 05:59:13,250 DEBUG cd /home/frappe/frappe-bench/apps/hrms && yarn install --check-files
+2026-04-03 06:00:01,458 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-03 06:00:18,055 DEBUG bench build --app hrms
+2026-04-03 06:00:18,172 INFO /usr/local/bin/bench build --app hrms
+2026-04-03 06:04:02,319 INFO /usr/local/bin/bench schedule
+2026-04-03 06:04:46,693 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-03 06:04:48,500 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-03 06:04:49,844 INFO /usr/local/bin/bench schedule
+2026-04-03 06:04:49,910 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-03 06:04:49,973 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-03 06:07:52,561 INFO /usr/local/bin/bench --site 79.72.76.67 install-app hrms
+2026-04-03 06:17:53,841 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-03 06:18:08,014 INFO /usr/local/bin/bench build --app hrms
+2026-04-03 06:18:34,268 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-03 06:18:34,391 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-03 06:18:34,392 INFO /usr/local/bin/bench schedule
+2026-04-03 06:28:18,696 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-03 06:28:33,227 INFO /usr/local/bin/bench build --app hrms
+2026-04-03 06:28:58,596 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-03 06:29:00,823 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-03 06:29:00,830 INFO /usr/local/bin/bench schedule
+2026-04-03 06:29:00,848 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-03 07:52:57,658 INFO /usr/local/bin/bench --site site1.local execute frappe.client.insert --args {"doc": {"doctype": "Custom Field", "dt": "Employee", "label": "Fingerprint ID", "fieldname": "fingerprint_id", "fieldtype": "Data", "insert_after": "employee_number", "module": "HR"}}
+2026-04-03 07:53:23,687 INFO /usr/local/bin/bench --site site1.79.72.76.67 execute frappe.client.insert --args {"doc": {"doctype": "Custom Field", "dt": "Employee", "label": "Fingerprint ID", "fieldname": "fingerprint_id", "fieldtype": "Data", "insert_after": "employee_number", "module": "HR"}}
+2026-04-03 07:53:36,672 INFO /usr/local/bin/bench --site site.79.72.76.67 execute frappe.client.insert --args {"doc": {"doctype": "Custom Field", "dt": "Employee", "label": "Fingerprint ID", "fieldname": "fingerprint_id", "fieldtype": "Data", "insert_after": "employee_number", "module": "HR"}}
+2026-04-03 07:53:47,165 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.client.insert --args {"doc": {"doctype": "Custom Field", "dt": "Employee", "label": "Fingerprint ID", "fieldname": "fingerprint_id", "fieldtype": "Data", "insert_after": "employee_number", "module": "HR"}}
+2026-04-03 08:03:32,702 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-03 08:03:46,860 INFO /usr/local/bin/bench schedule
+2026-04-03 08:03:46,862 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-03 08:03:46,863 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-03 08:05:07,732 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-03 08:05:22,348 INFO /usr/local/bin/bench build --app hrms
+2026-04-03 08:05:47,671 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-03 08:05:49,612 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-03 08:05:49,781 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-03 08:05:49,792 INFO /usr/local/bin/bench schedule
+2026-04-03 12:00:01,938 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-03 18:00:01,632 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-04 00:00:01,733 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-04 02:35:55,853 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-04 02:36:10,091 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 02:36:35,916 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 02:37:00,487 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 02:37:00,572 INFO /usr/local/bin/bench schedule
+2026-04-04 02:37:00,578 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 02:37:11,111 INFO /usr/local/bin/bench --site 79.72.76.67 execute /tmp/create_workspace.py
+2026-04-04 02:48:24,911 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-04 02:48:39,592 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 02:49:05,235 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 02:49:07,399 INFO /usr/local/bin/bench schedule
+2026-04-04 02:49:07,407 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 02:49:07,413 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 02:51:13,610 INFO /usr/local/bin/bench --site 79.72.76.67 execute /tmp/create_workspace.py
+2026-04-04 02:51:45,909 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-04 06:00:01,695 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-04 07:43:53,447 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-04 07:44:08,278 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 07:44:33,816 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 07:44:51,253 INFO /usr/local/bin/bench schedule
+2026-04-04 07:44:51,257 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 07:44:51,267 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 08:07:41,806 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 08:07:58,104 INFO /usr/local/bin/bench schedule
+2026-04-04 08:07:58,117 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 08:07:58,117 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 08:08:42,923 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 08:08:55,918 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-04 08:09:40,046 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 08:10:13,165 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 08:10:19,212 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 08:10:19,379 INFO /usr/local/bin/bench schedule
+2026-04-04 08:10:19,381 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 08:19:33,343 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 08:20:47,224 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.client.get_list --kwargs {'doctype':'Report','filters':[['module','in',['HR','Payroll']]],'fields':['name','module'],'limit_page_length':100}
+2026-04-04 08:25:36,952 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 08:25:38,224 INFO /usr/local/bin/bench restart
+2026-04-04 08:25:44,393 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 08:25:46,148 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 08:25:46,537 INFO /usr/local/bin/bench schedule
+2026-04-04 08:25:46,561 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 08:25:46,649 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 08:26:38,533 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 08:26:38,627 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 08:26:38,633 INFO /usr/local/bin/bench schedule
+2026-04-04 08:26:50,784 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-04 08:28:07,241 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 08:29:02,584 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 08:29:07,238 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 08:29:07,242 INFO /usr/local/bin/bench schedule
+2026-04-04 08:29:07,245 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 08:51:16,819 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 08:51:18,078 INFO /usr/local/bin/bench restart
+2026-04-04 08:51:28,231 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 08:51:29,859 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 08:51:31,205 INFO /usr/local/bin/bench schedule
+2026-04-04 08:51:31,273 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 08:51:31,341 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 08:57:15,353 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.client.get --kwargs {'doctype':'Report','name':'Employee Information','fields':['report_type','ref_doctype','query','script']}
+2026-04-04 08:57:39,204 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb --text
+2026-04-04 08:57:55,676 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb --text
+2026-04-04 08:58:16,506 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 08:58:42,917 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.db.sql --kwargs {'query':'SELECT name FROM tabCompany LIMIT 5','as_dict':1}
+2026-04-04 08:58:55,546 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.db.sql --kwargs {'query':'SELECT name, employee_name, company, status FROM tabEmployee LIMIT 5','as_dict':1}
+2026-04-04 08:59:02,985 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.db.sql --kwargs {'query':'SELECT report_type, ref_doctype FROM tabReport WHERE name = "Employee Information"','as_dict':1}
+2026-04-04 09:00:28,225 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 09:00:29,500 INFO /usr/local/bin/bench restart
+2026-04-04 09:00:29,909 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 09:00:31,762 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 09:00:34,112 INFO /usr/local/bin/bench schedule
+2026-04-04 09:00:34,194 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 09:00:34,245 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 09:02:00,190 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 09:02:10,016 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 09:02:37,850 INFO /usr/local/bin/bench restart
+2026-04-04 09:02:38,252 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 09:02:39,852 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 09:02:41,389 INFO /usr/local/bin/bench schedule
+2026-04-04 09:02:41,414 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 09:02:41,489 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 09:12:03,185 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 09:15:30,468 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.db.sql --kwargs {'query':'SELECT name FROM tabModule WHERE name LIKE "%HR%" OR name LIKE "%Payroll%" OR name LIKE "%hrms%"','as_dict':1}
+2026-04-04 09:16:22,710 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 09:16:28,483 INFO /usr/local/bin/bench restart
+2026-04-04 09:16:28,888 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 09:16:30,569 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 09:16:31,914 INFO /usr/local/bin/bench schedule
+2026-04-04 09:16:31,982 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 09:16:32,048 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 10:43:10,499 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 10:44:03,232 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 10:44:06,545 INFO /usr/local/bin/bench restart
+2026-04-04 10:44:13,449 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 10:44:15,491 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 10:44:16,887 INFO /usr/local/bin/bench schedule
+2026-04-04 10:44:16,908 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 10:44:16,994 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 10:53:46,184 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 10:53:49,928 INFO /usr/local/bin/bench restart
+2026-04-04 10:53:50,338 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 10:53:52,168 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 10:53:53,551 INFO /usr/local/bin/bench schedule
+2026-04-04 10:53:53,569 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 10:53:53,654 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 11:15:34,083 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-04 11:16:08,013 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 11:16:47,688 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 11:16:53,445 INFO /usr/local/bin/bench restart
+2026-04-04 11:17:01,832 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 11:17:03,552 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 11:17:05,919 INFO /usr/local/bin/bench schedule
+2026-04-04 11:17:05,985 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 11:17:06,059 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 11:23:08,850 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 11:23:19,887 INFO /usr/local/bin/bench restart
+2026-04-04 11:23:20,295 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 11:23:22,847 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 11:23:23,218 INFO /usr/local/bin/bench schedule
+2026-04-04 11:23:23,247 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 11:23:23,330 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 12:00:01,885 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-04 12:32:22,091 INFO /usr/local/bin/bench build --app hrms
+2026-04-04 12:38:02,493 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 12:38:08,215 INFO /usr/local/bin/bench restart
+2026-04-04 12:38:14,815 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 12:38:17,555 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 12:38:18,918 INFO /usr/local/bin/bench schedule
+2026-04-04 12:38:18,982 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 12:38:19,044 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 12:43:35,867 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 12:43:41,190 INFO /usr/local/bin/bench restart
+2026-04-04 12:43:41,612 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 12:43:44,224 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 12:43:45,596 INFO /usr/local/bin/bench schedule
+2026-04-04 12:43:45,621 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 12:43:45,710 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 12:52:16,367 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 12:54:44,833 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 12:57:10,309 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 13:00:07,608 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 13:01:02,889 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 13:01:07,994 INFO /usr/local/bin/bench restart
+2026-04-04 13:01:14,792 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 13:01:17,426 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 13:01:18,771 INFO /usr/local/bin/bench schedule
+2026-04-04 13:01:18,839 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 13:01:18,907 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 13:33:52,610 INFO /usr/local/bin/bench restart
+2026-04-04 13:33:59,675 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-04 13:34:01,637 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-04 13:34:03,013 INFO /usr/local/bin/bench schedule
+2026-04-04 13:34:03,037 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-04 13:34:03,114 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-04 14:04:29,755 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 14:04:57,451 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 14:08:51,032 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 14:09:12,488 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 14:10:02,134 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 14:10:18,553 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 14:11:14,277 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 14:12:41,250 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 14:13:43,698 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 14:13:44,994 INFO /usr/local/bin/bench --site 79.72.76.67 build --force
+2026-04-04 14:15:58,150 INFO /usr/local/bin/bench --site 79.72.76.67 mariadb
+2026-04-04 14:16:33,788 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-04 18:00:01,785 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-05 00:00:02,161 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-05 03:16:52,067 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-05 03:16:53,397 INFO /usr/local/bin/bench build --app hrms
+2026-04-05 03:17:18,433 INFO /usr/local/bin/bench restart
+2026-04-05 03:17:35,260 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-05 03:17:38,410 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-05 03:17:39,785 INFO /usr/local/bin/bench schedule
+2026-04-05 03:17:39,813 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-05 03:17:39,891 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-05 03:22:19,365 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-05 03:22:20,706 INFO /usr/local/bin/bench restart
+2026-04-05 03:22:21,112 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-05 03:22:22,702 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-05 03:22:24,083 INFO /usr/local/bin/bench schedule
+2026-04-05 03:22:24,108 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-05 03:22:24,171 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-05 03:23:40,368 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-05 03:23:41,725 INFO /usr/local/bin/bench restart
+2026-04-05 03:23:42,147 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-05 03:23:43,833 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-05 03:23:46,319 INFO /usr/local/bin/bench schedule
+2026-04-05 03:23:46,384 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-05 03:23:46,454 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-05 03:29:43,560 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-05 03:29:44,915 INFO /usr/local/bin/bench restart
+2026-04-05 03:29:45,330 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-05 03:29:47,995 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-05 03:29:50,362 INFO /usr/local/bin/bench schedule
+2026-04-05 03:29:50,430 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-05 03:29:50,495 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-05 03:32:06,768 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-05 03:32:08,061 INFO /usr/local/bin/bench restart
+2026-04-05 03:32:08,469 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-05 03:32:11,028 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-05 03:32:13,414 INFO /usr/local/bin/bench schedule
+2026-04-05 03:32:13,441 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-05 03:32:13,522 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-05 06:00:01,304 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-05 12:00:01,232 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-05 18:00:02,138 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-06 00:00:01,313 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-06 03:34:10,388 INFO /usr/local/bin/bench clear-cache
+2026-04-06 03:34:33,720 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-06 03:34:35,091 INFO /usr/local/bin/bench restart
+2026-04-06 03:34:43,421 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-06 03:34:45,330 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-06 03:34:47,687 INFO /usr/local/bin/bench schedule
+2026-04-06 03:34:47,753 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-06 03:34:47,819 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-06 03:47:54,200 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-06 03:47:55,521 INFO /usr/local/bin/bench restart
+2026-04-06 03:47:55,926 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-06 03:47:58,800 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-06 03:48:01,148 INFO /usr/local/bin/bench schedule
+2026-04-06 03:48:01,237 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-06 03:48:01,291 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-06 06:00:02,189 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-06 07:18:09,437 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-06 07:18:10,779 INFO /usr/local/bin/bench restart
+2026-04-06 07:18:11,184 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-06 07:18:12,974 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-06 07:18:15,326 INFO /usr/local/bin/bench schedule
+2026-04-06 07:18:15,392 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-06 07:18:15,468 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-06 12:00:01,587 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-06 18:00:01,934 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-07 00:00:01,917 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-07 06:00:01,909 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-07 12:00:01,847 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-07 18:00:01,943 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-08 00:00:01,832 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-08 06:00:01,683 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-08 12:00:01,730 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-08 15:04:31,613 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-08 15:04:48,201 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-08 15:04:49,533 INFO /usr/local/bin/bench restart
+2026-04-08 15:04:56,402 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-08 15:04:59,488 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-08 15:05:00,846 INFO /usr/local/bin/bench schedule
+2026-04-08 15:05:00,910 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-08 15:05:00,978 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-08 15:23:22,219 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-08 15:23:23,494 INFO /usr/local/bin/bench restart
+2026-04-08 15:23:29,406 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-08 15:23:31,117 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-08 15:23:33,490 INFO /usr/local/bin/bench schedule
+2026-04-08 15:23:33,519 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-08 15:23:33,598 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-08 15:25:54,303 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-08 15:25:55,571 INFO /usr/local/bin/bench restart
+2026-04-08 15:25:55,984 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-08 15:25:57,591 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-08 15:25:58,940 INFO /usr/local/bin/bench schedule
+2026-04-08 15:25:59,007 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-08 15:25:59,077 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-08 18:00:01,733 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-09 00:00:01,542 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-09 00:34:16,615 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-09 00:34:17,923 INFO /usr/local/bin/bench restart
+2026-04-09 00:34:50,137 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-09 00:34:51,880 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-09 00:34:54,263 INFO /usr/local/bin/bench schedule
+2026-04-09 00:34:54,284 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-09 00:34:54,370 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-09 06:00:01,531 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-09 12:00:01,671 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-09 18:00:01,809 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-10 00:00:01,578 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-10 06:00:01,635 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-10 12:00:01,571 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-10 16:22:45,307 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-10 16:22:46,622 INFO /usr/local/bin/bench restart
+2026-04-10 16:23:11,350 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-10 16:23:13,238 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-10 16:23:14,629 INFO /usr/local/bin/bench schedule
+2026-04-10 16:23:14,651 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-10 16:23:14,742 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-10 18:00:01,276 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-11 00:00:01,511 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-11 02:32:33,345 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-11 02:32:34,690 INFO /usr/local/bin/bench restart
+2026-04-11 02:32:48,910 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-11 02:32:50,597 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-11 02:32:50,962 INFO /usr/local/bin/bench schedule
+2026-04-11 02:32:51,031 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-11 02:32:51,105 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-11 06:00:01,595 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-11 10:00:18,702 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-11 10:05:06,431 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-11 10:15:49,400 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-11 12:00:01,877 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-11 15:38:44,321 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-11 18:00:02,044 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-12 00:00:01,887 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-12 05:13:07,214 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-12 05:13:22,046 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 05:13:23,314 INFO /usr/local/bin/bench restart
+2026-04-12 05:13:28,932 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 05:13:30,924 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 05:13:33,311 INFO /usr/local/bin/bench schedule
+2026-04-12 05:13:33,337 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 05:13:33,413 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 05:19:48,144 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 05:19:49,432 INFO /usr/local/bin/bench restart
+2026-04-12 05:19:49,839 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 05:19:51,459 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 05:19:52,803 INFO /usr/local/bin/bench schedule
+2026-04-12 05:19:52,870 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 05:19:52,939 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 05:45:54,522 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 05:45:55,789 INFO /usr/local/bin/bench restart
+2026-04-12 05:46:01,626 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 05:46:03,341 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 05:46:04,703 INFO /usr/local/bin/bench schedule
+2026-04-12 05:46:04,766 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 05:46:04,834 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 05:54:13,736 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 05:54:15,015 INFO /usr/local/bin/bench restart
+2026-04-12 05:54:15,417 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 05:54:17,992 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 05:54:19,355 INFO /usr/local/bin/bench schedule
+2026-04-12 05:54:19,419 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 05:54:19,488 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 06:00:01,932 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-12 06:03:50,162 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 06:03:54,278 INFO /usr/local/bin/bench restart
+2026-04-12 06:03:54,687 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 06:03:56,423 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 06:03:57,773 INFO /usr/local/bin/bench schedule
+2026-04-12 06:03:57,857 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 06:03:57,912 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 10:42:45,288 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-12 10:44:32,240 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 10:44:37,727 INFO /usr/local/bin/bench restart
+2026-04-12 10:44:43,549 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 10:44:45,170 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 10:44:47,536 INFO /usr/local/bin/bench schedule
+2026-04-12 10:44:47,601 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 10:44:47,675 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 10:52:02,549 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-12 12:00:01,466 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-12 15:08:23,240 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-12 15:08:38,031 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 15:08:40,882 INFO /usr/local/bin/bench restart
+2026-04-12 15:08:46,327 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 15:08:47,911 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 15:08:50,263 INFO /usr/local/bin/bench schedule
+2026-04-12 15:08:50,336 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 15:08:50,399 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 15:58:20,165 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-12 15:58:25,917 INFO /usr/local/bin/bench restart
+2026-04-12 15:58:32,309 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-12 15:58:34,043 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-12 15:58:35,419 INFO /usr/local/bin/bench schedule
+2026-04-12 15:58:35,450 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-12 15:58:35,531 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-12 18:00:01,277 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-13 00:00:01,795 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-13 01:10:49,096 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 01:10:55,282 INFO /usr/local/bin/bench restart
+2026-04-13 01:11:00,052 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 01:11:01,758 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 01:11:03,150 INFO /usr/local/bin/bench schedule
+2026-04-13 01:11:03,175 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 01:11:03,260 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 01:32:02,058 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 01:32:16,767 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 01:32:18,045 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 01:32:19,325 INFO /usr/local/bin/bench restart
+2026-04-13 01:32:19,734 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 01:32:21,402 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 01:32:23,758 INFO /usr/local/bin/bench schedule
+2026-04-13 01:32:23,824 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 01:32:23,900 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 01:33:09,369 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 01:33:23,341 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 01:33:24,623 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 01:33:25,894 INFO /usr/local/bin/bench restart
+2026-04-13 01:33:26,307 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 01:33:27,917 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 01:33:29,395 INFO /usr/local/bin/bench schedule
+2026-04-13 01:33:29,505 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 01:33:29,527 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 02:08:42,629 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 02:08:51,040 INFO /usr/local/bin/bench restart
+2026-04-13 02:09:01,708 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 02:09:03,343 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 02:09:05,721 INFO /usr/local/bin/bench schedule
+2026-04-13 02:09:05,748 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 02:09:05,833 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 06:00:01,679 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-13 06:48:19,841 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 06:48:34,466 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 06:48:35,804 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 06:48:37,121 INFO /usr/local/bin/bench restart
+2026-04-13 06:48:47,277 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 06:48:49,045 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 06:48:50,431 INFO /usr/local/bin/bench schedule
+2026-04-13 06:48:50,459 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 06:48:50,545 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 06:59:14,387 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 06:59:20,227 INFO /usr/local/bin/bench restart
+2026-04-13 06:59:20,641 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 06:59:22,247 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 06:59:23,610 INFO /usr/local/bin/bench schedule
+2026-04-13 06:59:23,675 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 06:59:23,741 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:03:55,721 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:04:02,882 INFO /usr/local/bin/bench restart
+2026-04-13 07:04:03,300 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:04:04,967 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:04:07,323 INFO /usr/local/bin/bench schedule
+2026-04-13 07:04:07,404 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:04:07,455 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:08:23,963 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 07:08:38,734 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 07:08:40,026 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:08:41,307 INFO /usr/local/bin/bench restart
+2026-04-13 07:08:41,713 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:08:43,316 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:08:44,704 INFO /usr/local/bin/bench schedule
+2026-04-13 07:08:44,725 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:08:44,810 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:09:51,110 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:10:04,120 INFO /usr/local/bin/bench restart
+2026-04-13 07:10:04,538 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:10:06,204 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:10:08,683 INFO /usr/local/bin/bench schedule
+2026-04-13 07:10:08,785 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:10:08,817 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:12:33,211 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:12:40,411 INFO /usr/local/bin/bench restart
+2026-04-13 07:12:40,831 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:12:43,399 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:12:44,789 INFO /usr/local/bin/bench schedule
+2026-04-13 07:12:44,814 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:12:44,889 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:20:26,700 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 07:21:06,464 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:21:15,850 INFO /usr/local/bin/bench restart
+2026-04-13 07:21:16,267 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:21:17,871 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:21:19,249 INFO /usr/local/bin/bench schedule
+2026-04-13 07:21:19,269 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:21:19,348 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:30:52,062 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 07:31:06,970 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 07:31:08,280 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:31:09,565 INFO /usr/local/bin/bench restart
+2026-04-13 07:31:09,971 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:31:12,621 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:31:14,967 INFO /usr/local/bin/bench schedule
+2026-04-13 07:31:15,034 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:31:15,099 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:32:43,489 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:32:52,161 INFO /usr/local/bin/bench restart
+2026-04-13 07:32:52,579 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:32:54,221 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:32:56,583 INFO /usr/local/bin/bench schedule
+2026-04-13 07:32:56,647 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:32:56,717 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:36:42,435 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:36:49,733 INFO /usr/local/bin/bench restart
+2026-04-13 07:36:50,137 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:36:51,768 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:36:53,128 INFO /usr/local/bin/bench schedule
+2026-04-13 07:36:53,192 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:36:53,263 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:46:10,776 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 07:46:25,537 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 07:46:26,878 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:46:28,188 INFO /usr/local/bin/bench restart
+2026-04-13 07:46:28,589 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:46:30,197 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:46:31,571 INFO /usr/local/bin/bench schedule
+2026-04-13 07:46:31,596 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:46:31,679 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:53:58,120 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 07:54:12,823 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 07:54:14,112 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:54:15,388 INFO /usr/local/bin/bench restart
+2026-04-13 07:54:15,800 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:54:17,448 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:54:18,793 INFO /usr/local/bin/bench schedule
+2026-04-13 07:54:18,866 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 07:54:18,932 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:57:25,196 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 07:57:39,917 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 07:57:41,221 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 07:57:42,477 INFO /usr/local/bin/bench restart
+2026-04-13 07:57:42,883 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 07:57:44,498 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 07:57:44,853 INFO /usr/local/bin/bench schedule
+2026-04-13 07:57:44,919 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 07:57:44,987 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 08:00:52,089 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 08:01:07,153 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 08:01:08,554 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 08:01:09,859 INFO /usr/local/bin/bench restart
+2026-04-13 08:01:10,278 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 08:01:11,902 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 08:01:13,264 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 08:01:13,339 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 08:01:13,379 INFO /usr/local/bin/bench schedule
+2026-04-13 08:02:17,557 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 08:02:31,698 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 08:02:32,989 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 08:02:34,276 INFO /usr/local/bin/bench restart
+2026-04-13 08:02:34,691 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 08:02:36,286 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 08:02:37,838 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 08:02:37,858 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 08:02:37,896 INFO /usr/local/bin/bench schedule
+2026-04-13 11:57:36,980 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 11:57:51,547 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 11:57:52,821 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 11:57:54,082 INFO /usr/local/bin/bench restart
+2026-04-13 12:00:01,971 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-13 12:12:57,025 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 12:12:58,801 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 12:13:00,185 INFO /usr/local/bin/bench schedule
+2026-04-13 12:13:00,201 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 12:13:00,289 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 12:13:27,369 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-13 12:13:42,018 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-13 12:13:43,378 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-13 12:13:44,660 INFO /usr/local/bin/bench restart
+2026-04-13 12:13:45,069 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-13 12:13:46,681 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-13 12:13:48,024 INFO /usr/local/bin/bench schedule
+2026-04-13 12:13:48,096 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-13 12:13:48,165 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-13 18:00:01,634 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-14 00:00:01,865 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-14 03:21:58,298 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-14 03:22:13,185 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-14 03:22:14,517 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-14 03:22:15,861 INFO /usr/local/bin/bench restart
+2026-04-14 03:22:22,644 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-14 03:22:24,405 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-14 03:22:25,768 INFO /usr/local/bin/bench schedule
+2026-04-14 03:22:25,831 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-14 03:22:25,898 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-14 03:32:01,725 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-14 03:32:16,985 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-14 03:32:18,290 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-14 03:32:19,585 INFO /usr/local/bin/bench restart
+2026-04-14 03:32:19,997 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-14 03:32:21,665 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-14 03:32:22,024 INFO /usr/local/bin/bench schedule
+2026-04-14 03:32:22,093 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-14 03:32:22,162 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-14 03:51:35,950 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-14 03:51:50,874 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-14 03:51:52,157 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-14 03:51:53,441 INFO /usr/local/bin/bench restart
+2026-04-14 03:52:00,846 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-14 03:52:02,567 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-14 03:52:03,971 INFO /usr/local/bin/bench schedule
+2026-04-14 03:52:04,035 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-14 03:52:04,114 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-14 06:00:01,845 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-14 12:00:01,856 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-14 17:52:14,091 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-14 17:52:28,803 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-14 17:52:30,092 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-14 17:52:31,340 INFO /usr/local/bin/bench restart
+2026-04-14 17:52:37,642 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-14 17:52:39,343 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-14 17:52:41,696 INFO /usr/local/bin/bench schedule
+2026-04-14 17:52:41,759 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-14 17:52:41,833 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-14 18:00:02,102 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-15 00:00:01,945 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-15 01:31:47,601 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-15 01:32:02,477 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-15 01:32:03,989 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-15 01:32:05,369 INFO /usr/local/bin/bench restart
+2026-04-15 01:32:15,138 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-15 01:32:16,861 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-15 01:32:19,223 INFO /usr/local/bin/bench schedule
+2026-04-15 01:32:19,286 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-15 01:32:19,359 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-15 01:35:13,239 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-04-15 01:35:27,872 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-04-15 01:35:29,121 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-15 01:35:30,399 INFO /usr/local/bin/bench restart
+2026-04-15 01:35:30,804 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-15 01:35:32,414 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-15 01:35:32,885 INFO /usr/local/bin/bench schedule
+2026-04-15 01:35:32,950 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-15 01:35:33,017 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-15 06:00:01,893 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-15 12:00:01,808 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-15 18:00:01,632 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-16 00:00:01,534 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-16 06:00:01,492 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-16 10:55:51,202 INFO /usr/local/bin/bench --site 79.72.76.67 execute create_day_team_salary_structures.create_all
+2026-04-16 10:56:44,629 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.create_day_team_salary_structures.create_all
+2026-04-16 10:57:31,583 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.client.get_list --kwargs {"doctype":"Company","fields":["name"]}
+2026-04-16 10:58:38,354 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.client.get_list --kwargs {"doctype":"Company","fields":["name"]}
+2026-04-16 10:58:43,127 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.client.get_list --kwargs {"doctype":"Company","fields":["name"]}
+2026-04-16 10:58:49,283 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.create_day_team_salary_structures.create_all
+2026-04-16 12:00:01,261 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-16 18:00:01,240 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-17 00:00:01,269 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-17 06:00:01,903 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-17 12:00:01,301 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-17 18:00:02,083 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-18 00:00:02,126 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-18 06:00:01,337 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-18 12:00:01,861 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-18 18:00:01,761 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-19 00:00:01,782 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-19 06:00:01,823 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-19 12:00:01,758 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-19 18:00:01,655 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-20 00:00:01,533 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-20 06:00:01,179 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-20 12:00:02,085 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-20 18:00:01,251 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-21 00:00:01,889 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-21 06:00:01,864 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-21 12:00:01,840 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-21 18:00:01,866 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-22 00:00:01,721 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-22 06:00:01,738 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-22 12:00:01,490 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-22 18:00:01,542 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-23 00:00:02,112 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-23 06:00:01,470 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-23 12:00:02,174 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-23 18:00:01,418 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-24 00:00:02,061 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-24 06:00:01,339 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-24 12:00:01,243 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-24 18:00:01,957 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-25 00:00:01,979 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-25 06:00:01,918 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-25 12:00:01,977 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-25 18:00:01,897 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-26 00:00:01,749 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-26 06:00:01,857 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-26 12:00:01,814 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-26 18:00:01,611 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-27 00:00:01,348 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-27 06:00:01,613 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-27 12:00:01,548 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-27 18:00:01,136 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-28 00:00:02,064 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-28 06:00:01,170 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-28 12:00:02,053 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-28 18:00:02,046 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-29 00:00:01,940 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-29 06:00:02,114 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-29 12:00:01,852 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-29 16:04:03,031 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-04-29 16:04:04,635 INFO /usr/local/bin/bench restart
+2026-04-29 16:04:10,386 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-04-29 16:04:12,576 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-04-29 16:04:13,960 INFO /usr/local/bin/bench schedule
+2026-04-29 16:04:14,022 INFO /usr/local/bin/bench worker --queue short,default
+2026-04-29 16:04:14,103 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-04-29 18:00:01,854 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-30 00:00:01,450 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-30 06:00:01,356 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-30 12:00:01,958 INFO /usr/local/bin/bench --verbose --site all backup
+2026-04-30 18:00:02,096 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-01 00:00:02,088 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-01 06:00:01,245 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-01 12:00:01,964 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-01 18:00:01,928 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-02 00:00:01,947 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-02 06:00:02,032 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-02 12:00:02,058 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-02 18:00:01,966 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-03 00:00:02,063 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-03 06:00:02,117 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-03 12:00:01,902 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-03 18:00:02,030 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-04 00:00:01,981 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-04 06:00:02,051 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-04 12:00:02,095 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-04 18:00:01,950 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-05 00:00:02,075 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-05 06:00:02,098 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-05 12:00:01,185 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-05 18:00:01,765 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-06 00:00:02,083 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-06 06:00:01,134 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-06 12:00:02,024 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-06 18:00:01,184 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-07 00:00:01,872 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-07 06:00:01,267 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-07 12:00:01,970 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-07 18:00:02,081 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-08 00:00:02,035 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-08 06:00:01,926 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-08 12:00:01,844 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-08 18:00:01,895 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-09 00:00:02,050 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-09 06:00:02,141 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-09 12:00:02,050 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-09 18:00:02,025 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-10 00:00:01,993 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-10 04:26:42,299 INFO /usr/local/bin/bench worker --queue short,default
+2026-05-10 04:26:42,300 INFO /usr/local/bin/bench schedule
+2026-05-10 04:26:42,925 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-05-10 06:00:01,178 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-10 12:00:02,052 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-10 18:00:01,640 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-11 00:00:01,491 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-11 06:00:01,617 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-11 12:00:01,858 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-11 18:00:01,903 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-12 00:00:01,935 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-12 06:00:01,798 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-12 12:00:01,617 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-12 18:00:01,478 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-13 00:00:01,523 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-13 06:00:01,875 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-13 12:00:01,172 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-13 18:00:01,865 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-14 00:00:01,843 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-14 06:00:01,193 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-14 12:00:01,870 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-14 18:00:01,904 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-15 00:00:01,983 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-15 06:00:01,608 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-15 12:00:01,595 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-15 18:00:01,760 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-16 00:00:01,876 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-16 06:00:02,141 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-16 12:00:01,737 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-16 18:00:01,807 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-17 00:00:01,720 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-17 06:00:01,232 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-17 12:00:01,423 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-17 18:00:01,607 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-18 00:00:01,627 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-18 06:00:01,833 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-18 12:00:02,094 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-18 18:00:01,624 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-19 00:00:01,545 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-19 06:00:01,750 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-19 12:00:02,004 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-19 18:00:01,925 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-20 00:00:01,972 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-20 06:00:02,082 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-20 12:00:01,987 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-20 18:00:01,996 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-21 00:00:02,091 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-21 06:00:02,090 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-21 12:00:01,635 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-21 18:00:01,471 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-22 00:00:01,443 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-22 06:00:01,601 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-22 12:00:01,554 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-22 18:00:01,625 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-23 00:00:01,570 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-23 06:00:01,732 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-23 12:00:01,989 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-23 18:00:02,034 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-24 00:00:02,004 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-24 06:00:01,238 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-24 12:00:01,825 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-24 18:00:02,024 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-25 00:00:02,092 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-25 06:00:01,621 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-25 12:00:01,355 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-25 18:00:01,256 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-26 00:00:01,515 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-26 06:00:01,558 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-26 12:00:01,321 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-26 18:00:01,347 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-27 00:00:01,695 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-27 06:00:01,231 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-27 12:00:01,769 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-27 18:00:01,325 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-28 00:00:01,867 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-28 06:00:01,557 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-28 12:00:01,503 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-28 18:00:02,137 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-29 00:00:01,251 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-29 06:00:01,784 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-29 12:00:01,838 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-29 18:00:02,108 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-30 00:00:01,160 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-30 06:00:01,451 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-30 12:00:01,541 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-30 18:00:01,780 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-31 00:00:01,673 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-31 06:00:01,159 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-31 12:00:01,226 INFO /usr/local/bin/bench --verbose --site all backup
+2026-05-31 18:00:01,343 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-01 00:00:01,442 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-01 06:00:01,779 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-01 12:00:01,806 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-01 18:00:01,807 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-02 00:00:01,932 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-02 06:00:01,248 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-02 12:00:01,831 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-02 18:00:02,069 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-03 00:00:01,232 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-03 06:00:01,548 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-03 12:00:01,501 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-03 18:00:01,616 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-04 00:00:01,524 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-04 06:00:01,753 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-04 12:00:01,743 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-04 18:00:01,636 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-05 00:00:01,744 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-05 06:00:02,092 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-05 12:00:02,014 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-05 18:00:02,080 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-06 00:00:01,706 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-06 06:00:01,591 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-06 06:10:13,776 INFO /usr/local/bin/bench --site 79.72.76.67 execute import_remaining_employees.py
+2026-06-06 06:10:53,626 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-06-06 06:26:08,816 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-06-06 12:00:01,372 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-06 18:00:01,413 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-07 00:00:01,490 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-07 06:00:01,730 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-07 12:00:01,609 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-07 18:00:01,772 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-08 00:00:01,803 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-08 06:00:02,004 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-08 12:00:01,190 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-08 18:00:01,373 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-09 00:00:01,426 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-09 06:00:01,724 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-09 12:00:01,646 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-09 18:00:01,686 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-10 00:00:01,549 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-10 06:00:01,755 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-10 12:00:01,582 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-10 18:00:01,624 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-11 00:00:01,523 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-11 06:00:01,759 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-11 12:00:01,626 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-11 18:00:01,704 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-12 00:00:01,702 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-12 06:00:01,938 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-12 12:00:01,762 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-12 18:00:01,572 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-13 00:00:01,583 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-13 06:00:01,521 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-13 12:00:01,357 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-13 18:00:01,206 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-14 00:00:01,301 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-14 06:00:01,284 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-14 12:00:01,261 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-14 18:00:01,862 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-15 00:00:02,108 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-15 06:00:01,298 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-15 12:00:01,951 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-15 18:00:01,511 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-16 00:00:01,362 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-16 06:00:01,431 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-16 12:00:01,304 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-16 18:00:01,395 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-17 00:00:01,443 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-17 06:00:01,497 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-17 12:00:01,223 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-17 18:00:02,049 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-18 00:00:01,999 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-18 06:00:01,353 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-18 12:00:02,122 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-18 18:00:02,110 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-19 00:00:02,177 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-19 06:00:01,800 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-19 12:00:01,385 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-19 18:00:02,027 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-20 00:00:02,218 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-20 06:00:01,844 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-20 12:00:01,270 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-20 18:00:01,976 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-21 00:00:02,149 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-21 06:00:02,154 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-21 12:00:02,085 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-21 18:00:02,097 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-22 00:00:01,960 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-22 06:00:01,274 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-22 12:00:01,858 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-22 18:00:01,985 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-23 00:00:02,059 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-23 06:00:02,106 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-23 12:00:02,035 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-23 18:00:01,178 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-24 00:00:01,782 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-24 06:00:01,265 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-24 12:00:01,352 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-24 18:00:01,407 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-25 00:00:01,424 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-25 06:00:01,561 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-25 12:00:01,553 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-25 18:00:01,576 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-26 00:00:01,557 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-26 05:28:38,404 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-26 05:28:39,782 INFO /usr/local/bin/bench restart
+2026-06-26 05:28:48,237 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-26 05:28:50,348 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-26 05:28:52,697 INFO /usr/local/bin/bench schedule
+2026-06-26 05:28:52,764 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-26 05:28:52,829 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-26 05:28:53,811 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-26 06:00:01,611 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-26 06:48:53,686 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-26 06:48:55,002 INFO /usr/local/bin/bench restart
+2026-06-26 06:49:01,089 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-26 06:49:02,839 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-26 06:49:04,198 INFO /usr/local/bin/bench schedule
+2026-06-26 06:49:04,265 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-26 06:49:04,337 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-26 06:49:05,308 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-26 07:14:32,446 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-26 07:14:33,750 INFO /usr/local/bin/bench restart
+2026-06-26 07:14:45,476 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-26 07:14:47,179 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-26 07:14:49,569 INFO /usr/local/bin/bench schedule
+2026-06-26 07:14:49,590 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-26 07:14:49,675 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-26 07:14:50,676 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-26 12:00:02,144 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-26 18:00:01,819 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-27 00:00:01,669 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-27 06:00:01,654 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-27 12:00:01,417 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-27 18:00:01,470 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-28 00:00:02,142 INFO /usr/local/bin/bench --verbose --site all backup
+2026-06-28 02:42:20,590 INFO /usr/local/bin/bench schedule
+2026-06-28 02:42:20,655 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 02:42:20,747 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 02:47:05,138 INFO /usr/local/bin/bench get-app /home/frappe/frappe-bench/apps/auto_leave_assignment
+2026-06-28 02:47:05,144 WARNING /usr/local/bin/bench get-app /home/frappe/frappe-bench/apps/auto_leave_assignment executed with exit code 1
+2026-06-28 02:47:05,278 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 02:48:17,331 INFO /usr/local/bin/bench --site 79.72.76.67 install-app auto_leave_assignment
+2026-06-28 02:49:00,090 INFO /usr/local/bin/bench --site 79.72.76.67 install-app auto_leave_assignment
+2026-06-28 02:49:59,258 INFO /usr/local/bin/bench --site 79.72.76.67 install-app auto_leave_assignment
+2026-06-28 02:51:18,259 INFO /usr/local/bin/bench --site 79.72.76.67 install-app auto_leave_assignment
+2026-06-28 02:51:20,805 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-06-28 02:51:35,740 INFO /usr/local/bin/bench restart
+2026-06-28 02:51:43,029 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 02:51:45,602 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 02:51:46,985 INFO /usr/local/bin/bench schedule
+2026-06-28 02:51:47,006 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 02:51:47,074 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 02:51:48,079 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 02:53:00,406 INFO /usr/local/bin/bench --site 79.72.76.67 list-apps
+2026-06-28 02:58:16,342 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.reload_doc --args ['auto_leave_assignment', 'page', 'auto_leave_dashboard']
+2026-06-28 02:59:46,016 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-06-28 03:00:00,422 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:00:01,950 INFO /usr/local/bin/bench restart
+2026-06-28 03:00:02,386 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:00:05,335 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:00:08,017 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:00:08,123 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:00:08,133 INFO /usr/local/bin/bench schedule
+2026-06-28 03:00:09,148 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:01:50,302 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.db.sql --args "INSERT IGNORE INTO `tabPage` (name, page_name, title, module, system_page, creation, modified, owner, modified_by, docstatus) VALUES ('auto-leave-dashboard', 'auto-leave-dashboard', 'Auto Leave Dashboard', 'Auto Leave Assignment', 0, NOW(), NOW(), 'Administrator', 'Administrator', 0)" --kwargs {"as_dict": false}
+2026-06-28 03:02:19,121 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.db.sql --args "INSERT IGNORE INTO `tabPage` (name, page_name, title, module, system_page, creation, modified, owner, modified_by, docstatus) VALUES ('auto-leave-dashboard', 'auto-leave-dashboard', 'Auto Leave Dashboard', 'Auto Leave Assignment', 0, NOW(), NOW(), 'Administrator', 'Administrator', 0)"bench --site 79.72.76.67 execute frappe.db.sql --args "INSERT IGNORE INTO `tabPage` (name, page_name, title, module, system_page, creation, modified, owner, modified_by, docstatus) VALUES ('auto-leave-dashboard', 'auto-leave-dashboard', 'Auto Leave Dashboard', 'Auto Leave Assignment', 0, NOW(), NOW(), 'Administrator', 'Administrator', 0)"
+2026-06-28 03:02:27,626 INFO /usr/local/bin/bench --site 79.72.76.67 execute frappe.db.sql --args "INSERT IGNORE INTO `tabPage` (name, page_name, title, module, system_page, creation, modified, owner, modified_by, docstatus) VALUES ('auto-leave-dashboard', 'auto-leave-dashboard', 'Auto Leave Dashboard', 'Auto Leave Assignment', 0, NOW(), NOW(), 'Administrator', 'Administrator', 0)"
+2026-06-28 03:02:49,895 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-06-28 03:03:07,227 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:03:08,505 INFO /usr/local/bin/bench restart
+2026-06-28 03:03:08,914 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:03:10,568 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:03:10,958 INFO /usr/local/bin/bench schedule
+2026-06-28 03:03:10,977 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:03:11,054 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:03:12,058 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:05:15,929 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:05:17,242 INFO /usr/local/bin/bench restart
+2026-06-28 03:05:17,653 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:05:19,290 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:05:20,672 INFO /usr/local/bin/bench schedule
+2026-06-28 03:05:20,734 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:05:20,817 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:05:21,805 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:07:57,272 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:07:58,571 INFO /usr/local/bin/bench restart
+2026-06-28 03:07:58,977 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:08:00,568 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:08:03,106 INFO /usr/local/bin/bench schedule
+2026-06-28 03:08:03,176 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:08:03,254 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:08:04,232 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:10:03,084 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:10:04,388 INFO /usr/local/bin/bench restart
+2026-06-28 03:10:04,799 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:10:06,391 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:10:07,747 INFO /usr/local/bin/bench schedule
+2026-06-28 03:10:07,815 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:10:07,899 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:10:08,880 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:11:57,475 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:11:58,813 INFO /usr/local/bin/bench restart
+2026-06-28 03:11:59,225 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:12:00,837 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:12:02,271 INFO /usr/local/bin/bench schedule
+2026-06-28 03:12:02,339 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:12:02,418 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:12:03,391 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:13:57,880 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:13:59,211 INFO /usr/local/bin/bench --site 79.72.76.67 clear-website-cache
+2026-06-28 03:14:00,473 INFO /usr/local/bin/bench build --app auto_leave_assignment
+2026-06-28 03:14:02,677 INFO /usr/local/bin/bench restart
+2026-06-28 03:14:03,086 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:14:04,680 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:14:06,073 INFO /usr/local/bin/bench schedule
+2026-06-28 03:14:06,094 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:14:06,175 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:14:07,153 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:15:24,706 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:15:26,014 INFO /usr/local/bin/bench --site 79.72.76.67 clear-website-cache
+2026-06-28 03:15:27,274 INFO /usr/local/bin/bench restart
+2026-06-28 03:15:27,691 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:15:29,355 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:15:31,862 INFO /usr/local/bin/bench schedule
+2026-06-28 03:15:31,925 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:15:32,005 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:15:33,016 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:17:32,300 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:17:33,605 INFO /usr/local/bin/bench restart
+2026-06-28 03:17:34,014 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:17:35,680 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:17:37,069 INFO /usr/local/bin/bench schedule
+2026-06-28 03:17:37,092 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:17:37,157 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:17:38,215 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:19:05,497 INFO /usr/local/bin/bench --site 79.72.76.67 console
+2026-06-28 03:20:08,117 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:20:09,410 INFO /usr/local/bin/bench restart
+2026-06-28 03:20:09,827 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:20:11,464 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:20:12,822 INFO /usr/local/bin/bench schedule
+2026-06-28 03:20:12,891 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:20:12,975 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:20:13,919 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:24:16,660 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:24:17,925 INFO /usr/local/bin/bench restart
+2026-06-28 03:24:18,335 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:24:19,918 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:24:21,317 INFO /usr/local/bin/bench schedule
+2026-06-28 03:24:21,333 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:24:21,418 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:24:22,420 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 03:59:12,855 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-06-28 03:59:15,752 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 03:59:17,093 INFO /usr/local/bin/bench restart
+2026-06-28 03:59:17,484 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 03:59:19,071 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 03:59:21,470 INFO /usr/local/bin/bench schedule
+2026-06-28 03:59:21,484 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 03:59:21,572 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 03:59:22,548 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 04:35:14,802 INFO /usr/local/bin/bench get-app https://github.com/azyntra/erpnext-chanrich.git --branch main
+2026-06-28 04:35:14,811 LOG Getting erpnext-chanrich
+2026-06-28 04:35:14,811 DEBUG cd ./apps && git clone https://github.com/azyntra/erpnext-chanrich.git --branch main --depth 1 --origin upstream
+2026-06-28 04:35:15,285 LOG Installing auto_leave_assignment
+2026-06-28 04:35:15,286 DEBUG cd /home/frappe/frappe-bench && uv pip install --quiet --upgrade -e /home/frappe/frappe-bench/apps/auto_leave_assignment  --python /home/frappe/frappe-bench/env/bin/python
+2026-06-28 04:35:15,674 WARNING cd /home/frappe/frappe-bench && uv pip install --quiet --upgrade -e /home/frappe/frappe-bench/apps/auto_leave_assignment  --python /home/frappe/frappe-bench/env/bin/python executed with exit code 1
+2026-06-28 04:35:15,675 WARNING /usr/local/bin/bench get-app https://github.com/azyntra/erpnext-chanrich.git --branch main executed with exit code 167
+2026-06-28 04:35:15,800 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 04:36:15,977 INFO /usr/local/bin/bench get-app https://github.com/azyntra/erpnext-chanrich.git --branch main
+2026-06-28 04:36:15,986 LOG Getting erpnext-chanrich
+2026-06-28 04:36:15,986 DEBUG cd ./apps && git clone https://github.com/azyntra/erpnext-chanrich.git --branch main --depth 1 --origin upstream
+2026-06-28 04:36:16,430 LOG Installing auto_leave_assignment
+2026-06-28 04:36:16,430 DEBUG cd /home/frappe/frappe-bench && uv pip install --quiet --upgrade -e /home/frappe/frappe-bench/apps/auto_leave_assignment  --python /home/frappe/frappe-bench/env/bin/python
+2026-06-28 04:36:17,455 DEBUG bench build --app auto_leave_assignment
+2026-06-28 04:36:17,570 INFO /usr/local/bin/bench build --app auto_leave_assignment
+2026-06-28 04:36:25,729 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 04:36:27,339 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 04:36:28,699 INFO /usr/local/bin/bench schedule
+2026-06-28 04:36:28,802 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 04:36:28,837 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 04:36:29,821 INFO A newer version of bench is available: 5.29.1 → 5.31.0
+2026-06-28 04:36:29,996 INFO /usr/local/bin/bench --site 79.72.76.67 migrate
+2026-06-28 04:36:44,284 INFO /usr/local/bin/bench --site 79.72.76.67 clear-cache
+2026-06-28 04:36:45,582 INFO /usr/local/bin/bench restart
+2026-06-28 04:36:45,970 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-web:
+2026-06-28 04:36:49,579 DEBUG cd /home/frappe/frappe-bench && sudo supervisorctl restart frappe-bench-workers:
+2026-06-28 04:36:50,087 INFO /usr/local/bin/bench schedule
+2026-06-28 04:36:50,116 INFO /usr/local/bin/bench worker --queue long,default,short
+2026-06-28 04:36:50,181 INFO /usr/local/bin/bench worker --queue short,default
+2026-06-28 04:36:51,175 INFO A newer version of bench is available: 5.29.1 → 5.31.0

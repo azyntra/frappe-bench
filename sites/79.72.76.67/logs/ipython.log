@@ -1,0 +1,330 @@
+2026-04-04 05:57:36,011 INFO ipython === bench console session ===
+2026-04-04 05:57:36,011 INFO ipython if not frappe.db.exists('Workspace', 'HR Dashboard'):
+    ws = frappe.get_doc({
+        'doctype': 'Workspace',
+        'name': 'HR Dashboard',
+        'title': 'HR Dashboard',
+        'module': 'HR',
+        'icon': 'users',
+        'indicator_color': 'green',
+        'is_standard': 0,
+        'public': 1,
+        'shortcuts': [
+            {'label': 'HR Dashboard', 'link_to': 'hr-dashboard', 'type': 'Page', 'icon': 'users'},
+            {'label': 'Import Attendance', 'link_to': 'import-attendance', 'type': 'Page', 'icon': 'upload'}
+        ]
+    })
+    ws.insert(ignore_permissions=True)
+    frappe.db.commit()
+    print('Workspace created!')
+else:
+    print('Already exists!')
+    
+2026-04-04 05:57:36,011 INFO ipython ws = frappe.get_doc({
+    'doctype': 'Workspace',
+    'title': 'HR Dashboard',
+    'module': 'HR',
+    'icon': 'users',
+    'indicator_color': 'green',
+    'is_standard': 0,
+    'public': 1
+})
+ws.name = 'HR Dashboard'
+ws.insert(ignore_permissions=True)
+frappe.db.commit()
+print('Workspace created!')
+2026-04-04 05:57:36,011 INFO ipython frappe.get_meta('Workspace').autoname
+2026-04-04 05:57:36,011 INFO ipython ws = frappe.get_doc({
+    'doctype': 'Workspace',
+    'label': 'HR Dashboard',
+    'title': 'HR Dashboard',
+    'module': 'HR',
+    'icon': 'users',
+    'indicator_color': 'green',
+    'is_standard': 0,
+    'public': 1
+})
+ws.insert(ignore_permissions=True)
+frappe.db.commit()
+print('Workspace created!')
+2026-04-04 05:57:36,011 INFO ipython frappe.db.exists('Workspace', 'HR Dashboard')
+2026-04-04 05:57:36,011 INFO ipython frappe.db.get_all('Workspace', fields=['name', 'title', 'public'])
+2026-04-04 05:57:36,011 INFO ipython ws = frappe.get_doc({
+    'doctype': 'Workspace',
+    'label': 'HR-Dashboard',
+    'title': 'HR-Dashboard',
+    'module': 'HR',
+    'icon': 'users',
+    'indicator_color': 'green',
+    'is_standard': 0,
+    'public': 1
+})
+ws.insert(ignore_permissions=True)
+frappe.db.commit()
+print('Workspace created!')
+2026-04-04 05:57:36,011 INFO ipython ws = frappe.get_doc({
+    'doctype': 'Workspace',
+        'label': 'HR-Dashboard',
+            'title': 'HR-Dashboard',
+                'module': 'HR',
+                    'icon': 'users',
+                        'indicator_color': 'green',
+                            'is_standard': 0,
+                                'public': 1
+                                })
+2026-04-04 05:57:36,011 INFO ipython ws.insert(ignore_permissions=True)
+2026-04-04 05:57:36,011 INFO ipython frappe.db.commit()
+2026-04-04 05:57:36,011 INFO ipython print('Workspace created!')
+2026-04-04 05:57:36,011 INFO ipython === session end ===
+2026-04-11 10:04:34,823 INFO ipython === bench console session ===
+2026-04-11 10:04:34,825 INFO ipython exec(open('/home/frappe/frappe-bench/create_salary_structures.py').read())
+create_all()
+2026-04-11 10:04:34,825 INFO ipython exec(open('/home/frappe/frappe-bench/create_salary_structures.py').read(), globals())
+create_all()
+2026-04-11 10:04:34,825 INFO ipython ]\
+
+
+
+
+
+# Run this in bench console to get ALL employee names
+employees = frappe.get_all("Employee", 
+    filters={"status": "Active"}, 
+    fields=["name", "employee_name"],
+    order_by="name asc"
+)
+for e in employees:
+    print(f"{e.name:15} | {e.employee_name}")
+2026-04-11 10:04:34,825 INFO ipython # Run this in bench console to get ALL employee names
+employees = frappe.get_all("Employee", 
+    filters={"status": "Active"}, 
+    fields=["name", "employee_name"],
+    order_by="name asc"
+)
+for e in employees:
+    print(f"{e.name:15} | {e.employee_name}")
+    
+2026-04-11 10:04:34,825 INFO ipython === session end ===
+2026-04-11 10:15:36,274 INFO ipython === bench console session ===
+2026-04-11 10:15:36,274 INFO ipython exec(open('/home/frappe/frappe-bench/create_salary_structures.py').read(), globals())
+create_all()
+2026-04-11 10:15:36,274 INFO ipython exec(open('/home/frappe/frappe-bench/fix_remaining.py').read(), globals())
+fix_all()
+2026-04-11 10:15:36,274 INFO ipython exec(open('/home/frappe/frappe-bench/fix_remaining.py').read(), globals())
+2026-04-11 10:15:36,274 INFO ipython fix_all()
+2026-04-11 10:15:36,274 INFO ipython === session end ===
+2026-04-11 14:36:57,353 INFO ipython === bench console session ===
+2026-04-11 14:36:57,353 INFO ipython exec(open('/home/frappe/frappe-bench/create_all_salary.py').read(), globals())
+create_all()
+2026-04-11 14:36:57,353 INFO ipython exec(open('/home/frappe/frappe-bench/create_salary_structures.py').read(), globals())
+create_all()
+2026-04-11 14:36:57,353 INFO ipython === session end ===
+2026-04-11 17:39:26,057 INFO ipython === bench console session ===
+2026-04-11 17:39:26,057 INFO ipython import frappe
+
+COMPANY   = "CHAN RICH FRUITS (PVT) LTD"
+FROM_DATE = "2026-01-01"
+TO_DATE   = "2026-12-31"
+
+LEAVE_TYPES = [
+    ("Annual Leave", 14),
+    ("Casual Leave",  7),
+]
+
+employees = frappe.get_all("Employee",
+    filters={"status": "Active"},
+    fields=["name", "employee_name", "date_of_joining"]
+)
+
+print(f"Found {len(employees)} employees\n")
+
+for leave_type, days in LEAVE_TYPES:
+    print(f"--- {leave_type} ({days} days) ---")
+    for emp in employees:
+        # Use joining date if later than FROM_DATE
+        from_date = FROM_DATE
+        if emp.date_of_joining and str(emp.date_of_joining) > FROM_DATE:
+            from_date = str(emp.date_of_joining)
+
+        # Skip if already allocated
+        exists = frappe.db.exists("Leave Allocation", {
+            "employee": emp.name,
+            "leave_type": leave_type,
+            "docstatus": ["!=", 2]
+        })
+        if exists:
+            print(f"  [SKIP] {emp.employee_name}")
+            continue
+
+        try:
+            doc = frappe.get_doc({
+                "doctype": "Leave Allocation",
+                "employee": emp.name,
+                "employee_name": emp.employee_name,
+                "leave_type": leave_type,
+                "from_date": from_date,
+                "to_date": TO_DATE,
+                "new_leaves_allocated": days,
+                "company": COMPANY,
+            })
+            doc.insert(ignore_permissions=True)
+            doc.submit()
+            frappe.db.commit()
+            print(f"  [OK] {emp.employee_name} — {days} days")
+        except Exception as e:
+            print(f"  [ERROR] {emp.employee_name}: {e}")
+            frappe.db.rollback()
+
+print("\nDone!")
+2026-04-11 17:39:26,057 INFO ipython === session end ===
+2026-04-12 10:43:43,535 INFO ipython === bench console session ===
+2026-04-12 10:43:43,536 INFO ipython import frappe
+DEPT = "Day Team - CHAN RICH"
+day_team = frappe.get_all("Employee",
+    filters={"status": "Active", "department": DEPT},
+    fields=["name", "employee_name", "default_shift"]
+)
+print(f"Found {len(day_team)} Day Team employees")
+for emp in day_team:
+    # Cancel all existing shift assignments
+    assignments = frappe.get_all("Shift Assignment",
+        filters={"employee": emp.name, "docstatus": 1},
+        fields=["name", "shift_type"]
+    )
+    for a in assignments:
+        try:
+            doc = frappe.get_doc("Shift Assignment", a.name)
+            doc.cancel()
+            frappe.db.commit()
+            print(f"  [CANCELLED] {emp.employee_name} | {a.shift_type}")
+        except Exception as e:
+            print(f"  [ERROR] {emp.employee_name}: {e}")
+    # Clear default shift
+    if emp.default_shift:
+        doc = frappe.get_doc("Employee", emp.name)
+        doc.default_shift = ""
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+        print(f"  [CLEARED] {emp.employee_name} default shift")
+print("Done!")
+2026-04-12 10:43:43,537 INFO ipython === session end ===
+2026-04-12 10:59:40,262 INFO ipython === bench console session ===
+2026-04-12 10:59:40,262 INFO ipython import frappe
+
+DEPT = "Day Team - CHAN RICH"
+day_team = frappe.get_all("Employee",
+    filters={"status": "Active", "department": DEPT},
+    fields=["name", "employee_name", "default_shift"]
+)
+print(f"Found {len(day_team)} Day Team employees")
+
+for emp in day_team:
+    assignments = frappe.get_all("Shift Assignment",
+        filters={"employee": emp.name, "docstatus": 1},
+        fields=["name", "shift_type"]
+    )
+
+    for a in assignments:
+        try:
+            # Step 1: Find linked Employee Checkins and unlink them
+            linked_checkins = frappe.get_all("Employee Checkin",
+                filters={"shift_assignment": a.name},
+                fields=["name"]
+            )
+            for ck in linked_checkins:
+                frappe.db.set_value("Employee Checkin", ck.name, {
+                    "shift_assignment": None,
+                    "shift_type": None,
+                    "shift_actual_start": None,
+                    "shift_actual_end": None
+                }, update_modified=False)
+                print(f"  [UNLINKED] Checkin {ck.name} from {a.name}")
+            frappe.db.commit()
+
+            # Step 2: Now cancel the shift assignment
+            doc = frappe.get_doc("Shift Assignment", a.name)
+            doc.cancel()
+            frappe.db.commit()
+            print(f"  [CANCELLED] {emp.employee_name} | {a.shift_type}")
+
+        except Exception as e:
+            print(f"  [ERROR] {emp.employee_name} | {a.name}: {e}")
+
+    # Step 3: Clear default shift on employee
+    if emp.default_shift:
+        edoc = frappe.get_doc("Employee", emp.name)
+        edoc.default_shift = ""
+        edoc.save(ignore_permissions=True)
+        frappe.db.commit()
+        print(f"  [CLEARED] {emp.employee_name} default shift")
+
+print("Done!")
+2026-04-12 10:59:40,262 INFO ipython === session end ===
+2026-04-13 01:32:17,630 INFO ipython === bench console session ===
+2026-04-13 01:32:17,630 INFO ipython === session end ===
+2026-04-13 01:33:24,199 INFO ipython === bench console session ===
+2026-04-13 01:33:24,200 INFO ipython === session end ===
+2026-04-13 06:48:35,344 INFO ipython === bench console session ===
+2026-04-13 06:48:35,344 INFO ipython === session end ===
+2026-04-13 07:08:39,603 INFO ipython === bench console session ===
+2026-04-13 07:08:39,604 INFO ipython === session end ===
+2026-04-13 07:31:07,841 INFO ipython === bench console session ===
+2026-04-13 07:31:07,842 INFO ipython === session end ===
+2026-04-13 07:46:26,420 INFO ipython === bench console session ===
+2026-04-13 07:46:26,420 INFO ipython === session end ===
+2026-04-13 07:54:13,708 INFO ipython === bench console session ===
+2026-04-13 07:54:13,708 INFO ipython === session end ===
+2026-04-13 07:57:40,804 INFO ipython === bench console session ===
+2026-04-13 07:57:40,804 INFO ipython === session end ===
+2026-04-13 08:01:08,035 INFO ipython === bench console session ===
+2026-04-13 08:01:08,036 INFO ipython === session end ===
+2026-04-13 08:02:32,551 INFO ipython === bench console session ===
+2026-04-13 08:02:32,551 INFO ipython === session end ===
+2026-04-13 11:57:52,397 INFO ipython === bench console session ===
+2026-04-13 11:57:52,397 INFO ipython === session end ===
+2026-04-13 12:13:42,927 INFO ipython === bench console session ===
+2026-04-13 12:13:42,927 INFO ipython === session end ===
+2026-04-14 03:22:14,064 INFO ipython === bench console session ===
+2026-04-14 03:22:14,064 INFO ipython === session end ===
+2026-04-14 03:32:17,856 INFO ipython === bench console session ===
+2026-04-14 03:32:17,856 INFO ipython === session end ===
+2026-04-14 03:51:51,728 INFO ipython === bench console session ===
+2026-04-14 03:51:51,728 INFO ipython === session end ===
+2026-04-14 17:52:29,655 INFO ipython === bench console session ===
+2026-04-14 17:52:29,655 INFO ipython === session end ===
+2026-04-15 01:32:03,427 INFO ipython === bench console session ===
+2026-04-15 01:32:03,429 INFO ipython === session end ===
+2026-04-15 01:35:28,699 INFO ipython === bench console session ===
+2026-04-15 01:35:28,700 INFO ipython === session end ===
+2026-06-06 06:20:14,069 INFO ipython === bench console session ===
+2026-06-06 06:20:14,070 INFO ipython exec(open('/home/frappe/frappe-bench/import_remaining_employees.py').read())
+run_import()
+2026-06-06 06:20:14,070 INFO ipython exec(open('/home/frappe/frappe-bench/import_remaining_employees.py').read(), globals())
+run_import()
+2026-06-06 06:20:14,070 INFO ipython '
+2026-06-06 06:20:14,070 INFO ipython # Run this in the console to inspect an existing employee's fields
+emp = frappe.get_doc("Employee", "EMP-00003")
+print("name:", emp.name)
+print("employee:", emp.employee)
+print("employee_number:", emp.employee_number)
+print("naming_series:", emp.naming_series)
+print("date_of_joining:", emp.date_of_joining)
+print("date_of_birth:", emp.date_of_birth)
+2026-06-06 06:20:14,070 INFO ipython === session end ===
+2026-06-06 09:31:43,089 INFO ipython === bench console session ===
+2026-06-06 09:31:43,089 INFO ipython exec(open('/home/frappe/frappe-bench/import_remaining_employees.py').read(), globals())
+run_import()
+2026-06-06 09:31:43,089 INFO ipython === session end ===
+2026-06-28 03:03:05,328 INFO ipython === bench console session ===
+2026-06-28 03:03:05,328 INFO ipython frappe.db.sql("""INSERT IGNORE INTO `tabPage` (name, page_name, title, module, system_page, creation, modified, owner, modified_by, docstatus) VALUES ('auto-leave-dashboard', 'auto-leave-dashboard', 'Auto Leave Dashboard', 'Auto Leave Assignment', 0, NOW(), NOW(), 'Administrator', 'Administrator', 0)""")
+frappe.db.commit()
+print("Done!")
+2026-06-28 03:03:05,328 INFO ipython === session end ===
+2026-06-28 03:20:02,028 INFO ipython === bench console session ===
+2026-06-28 03:20:02,028 INFO ipython frappe.reload_doc("Auto Leave Assignment", "doctype", "auto_leave_log", force=True)
+frappe.db.commit()
+print("Done!")
+exit
+2026-06-28 03:20:02,029 INFO ipython exit(0
+)
+2026-06-28 03:20:02,029 INFO ipython === session end ===

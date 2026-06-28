@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auto_leave_assignment"
+version = "1.0.0"
+description = "Automatically assigns Casual Leave or LWP when employees are marked Absent"
+authors = [
+    {name = "Azyntra Technologies", email = "info@azyntra.com"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.setuptools.packages.find]
+include = ["auto_leave_assignment*"]

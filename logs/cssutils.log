@@ -1,0 +1,160 @@
+2026-04-04 17:07:32,202 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [13:3: color]
+2026-04-04 17:07:32,309 ERROR cssutils Invalid token: ('INVALID', '",', 109, 63)
+2026-04-04 17:07:32,309 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-04 17:07:32,309 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-05 05:49:13,067 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-05 05:49:13,104 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-05 05:49:13,104 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-05 05:49:13,104 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-05 05:49:25,863 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-05 05:49:25,899 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-05 05:49:25,899 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-05 05:49:25,900 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-05 05:49:31,764 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-05 05:49:31,770 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-05 05:49:31,770 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-05 05:49:31,771 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:10:53,895 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:10:53,933 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:10:53,934 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:10:53,934 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:19:33,557 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:19:33,593 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:19:33,593 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:19:33,593 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:35:03,808 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:35:03,861 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:35:03,861 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:35:03,861 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:39:50,659 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:39:50,665 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:39:50,665 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:39:50,665 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:40:11,449 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:40:11,456 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:40:11,456 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:40:11,456 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:45:06,786 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:45:06,823 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:45:06,823 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:45:06,823 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:51:49,359 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:51:49,395 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:51:49,395 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:51:49,395 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:52:27,353 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:52:27,359 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:52:27,359 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:52:27,359 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:52:30,491 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-04-06 07:52:30,498 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-04-06 07:52:30,498 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-04-06 07:52:30,498 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-06-20 07:39:32,314 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-06-20 07:39:32,365 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-06-20 07:39:32,365 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-06-20 07:39:32,365 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-06-20 08:49:54,912 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-06-20 08:49:54,963 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-06-20 08:49:54,963 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-06-20 08:49:54,963 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-06-20 08:56:19,986 ERROR cssutils Property: Invalid value for "CSS Level 2.1" property: var(--gray-900) [14:3: color]
+2026-06-20 08:56:20,027 ERROR cssutils Invalid token: ('INVALID', '",', 110, 63)
+2026-06-20 08:56:20,027 ERROR cssutils PropertyValue: Unknown syntax or no value:  
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif
+2026-06-20 08:56:20,027 ERROR cssutils CSSStyleDeclaration: Syntax Error in Property: font-family: 
+	"InterVariable", "Inter", -apple-system", "BlinkMacSystemFont",
+		"Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+		"Helvetica Neue", sans-serif

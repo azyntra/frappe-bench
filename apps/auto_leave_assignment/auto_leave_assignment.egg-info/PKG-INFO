@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: auto_leave_assignment
+Version: 1.0.0
+Summary: Automatically assigns Casual Leave or LWP when employees are marked Absent
+Author: Azyntra Technologies
+Author-email: Azyntra Technologies <info@azyntra.com>
+License: MIT
+Requires-Python: >=3.10
+Dynamic: author

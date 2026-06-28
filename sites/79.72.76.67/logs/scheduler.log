@@ -1,0 +1,282 @@
+2026-04-04 17:40:00,578 ERROR scheduler Exception in Enqueue Events for Site 79.72.76.67
+Traceback (most recent call last):
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 120, in enqueue_events_for_site
+    enqueue_events()
+    ~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 140, in enqueue_events
+    if job_type.enqueue():
+       ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/core/doctype/scheduled_job_type/scheduled_job_type.py", line 75, in enqueue
+    enqueue(
+    ~~~~~~~^
+    	"frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_job",
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    	scheduled_job_type=self.name,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 166, in enqueue
+    _check_queue_size(q)
+    ~~~~~~~~~~~~~~~~~^^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 735, in _check_queue_size
+    frappe.throw(
+    ~~~~~~~~~~~~^
+    	_("Too many queued background jobs ({0}). Please retry after some time.").format(max_jobs),
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    	primary_action=primary_action if frappe.has_permission("System Health Report") else None,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 159, in throw
+    msgprint(
+    ~~~~~~~~^
+    	msg,
+     ^^^^
+    ...<7 lines>...
+    	allow_dangerous_html=allow_dangerous_html,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 118, in msgprint
+    _raise_exception()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 59, in _raise_exception
+    raise exc
+frappe.exceptions.QueueOverloaded: Too many queued background jobs (550). Please retry after some time.
+2026-04-05 01:44:00,840 ERROR scheduler Exception in Enqueue Events for Site 79.72.76.67
+Traceback (most recent call last):
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 120, in enqueue_events_for_site
+    enqueue_events()
+    ~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 140, in enqueue_events
+    if job_type.enqueue():
+       ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/core/doctype/scheduled_job_type/scheduled_job_type.py", line 75, in enqueue
+    enqueue(
+    ~~~~~~~^
+    	"frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_job",
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    	scheduled_job_type=self.name,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 166, in enqueue
+    _check_queue_size(q)
+    ~~~~~~~~~~~~~~~~~^^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 735, in _check_queue_size
+    frappe.throw(
+    ~~~~~~~~~~~~^
+    	_("Too many queued background jobs ({0}). Please retry after some time.").format(max_jobs),
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    	primary_action=primary_action if frappe.has_permission("System Health Report") else None,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 159, in throw
+    msgprint(
+    ~~~~~~~~^
+    	msg,
+     ^^^^
+    ...<7 lines>...
+    	allow_dangerous_html=allow_dangerous_html,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 118, in msgprint
+    _raise_exception()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 59, in _raise_exception
+    raise exc
+frappe.exceptions.QueueOverloaded: Too many queued background jobs (550). Please retry after some time.
+2026-04-06 01:56:00,381 ERROR scheduler Exception in Enqueue Events for Site 79.72.76.67
+Traceback (most recent call last):
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 120, in enqueue_events_for_site
+    enqueue_events()
+    ~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 140, in enqueue_events
+    if job_type.enqueue():
+       ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/core/doctype/scheduled_job_type/scheduled_job_type.py", line 75, in enqueue
+    enqueue(
+    ~~~~~~~^
+    	"frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_job",
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    	scheduled_job_type=self.name,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 166, in enqueue
+    _check_queue_size(q)
+    ~~~~~~~~~~~~~~~~~^^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 735, in _check_queue_size
+    frappe.throw(
+    ~~~~~~~~~~~~^
+    	_("Too many queued background jobs ({0}). Please retry after some time.").format(max_jobs),
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    	primary_action=primary_action if frappe.has_permission("System Health Report") else None,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 159, in throw
+    msgprint(
+    ~~~~~~~~^
+    	msg,
+     ^^^^
+    ...<7 lines>...
+    	allow_dangerous_html=allow_dangerous_html,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 118, in msgprint
+    _raise_exception()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 59, in _raise_exception
+    raise exc
+frappe.exceptions.QueueOverloaded: Too many queued background jobs (550). Please retry after some time.
+2026-04-06 04:28:00,263 ERROR scheduler Exception in Enqueue Events for Site 79.72.76.67
+Traceback (most recent call last):
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 120, in enqueue_events_for_site
+    enqueue_events()
+    ~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 140, in enqueue_events
+    if job_type.enqueue():
+       ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/core/doctype/scheduled_job_type/scheduled_job_type.py", line 75, in enqueue
+    enqueue(
+    ~~~~~~~^
+    	"frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_job",
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    	scheduled_job_type=self.name,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 166, in enqueue
+    _check_queue_size(q)
+    ~~~~~~~~~~~~~~~~~^^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 735, in _check_queue_size
+    frappe.throw(
+    ~~~~~~~~~~~~^
+    	_("Too many queued background jobs ({0}). Please retry after some time.").format(max_jobs),
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    	primary_action=primary_action if frappe.has_permission("System Health Report") else None,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 159, in throw
+    msgprint(
+    ~~~~~~~~^
+    	msg,
+     ^^^^
+    ...<7 lines>...
+    	allow_dangerous_html=allow_dangerous_html,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 118, in msgprint
+    _raise_exception()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 59, in _raise_exception
+    raise exc
+frappe.exceptions.QueueOverloaded: Too many queued background jobs (550). Please retry after some time.
+2026-04-11 02:16:00,774 ERROR scheduler Exception in Enqueue Events for Site 79.72.76.67
+Traceback (most recent call last):
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 120, in enqueue_events_for_site
+    enqueue_events()
+    ~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 140, in enqueue_events
+    if job_type.enqueue():
+       ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/core/doctype/scheduled_job_type/scheduled_job_type.py", line 75, in enqueue
+    enqueue(
+    ~~~~~~~^
+    	"frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_job",
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    	scheduled_job_type=self.name,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 166, in enqueue
+    _check_queue_size(q)
+    ~~~~~~~~~~~~~~~~~^^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 735, in _check_queue_size
+    frappe.throw(
+    ~~~~~~~~~~~~^
+    	_("Too many queued background jobs ({0}). Please retry after some time.").format(max_jobs),
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    	primary_action=primary_action if frappe.has_permission("System Health Report") else None,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 159, in throw
+    msgprint(
+    ~~~~~~~~^
+    	msg,
+     ^^^^
+    ...<7 lines>...
+    	allow_dangerous_html=allow_dangerous_html,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 118, in msgprint
+    _raise_exception()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 59, in _raise_exception
+    raise exc
+frappe.exceptions.QueueOverloaded: Too many queued background jobs (550). Please retry after some time.
+2026-04-14 05:36:00,860 ERROR scheduler Exception in Enqueue Events for Site 79.72.76.67
+Traceback (most recent call last):
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 120, in enqueue_events_for_site
+    enqueue_events()
+    ~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/scheduler.py", line 140, in enqueue_events
+    if job_type.enqueue():
+       ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/core/doctype/scheduled_job_type/scheduled_job_type.py", line 75, in enqueue
+    enqueue(
+    ~~~~~~~^
+    	"frappe.core.doctype.scheduled_job_type.scheduled_job_type.run_scheduled_job",
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    	scheduled_job_type=self.name,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 166, in enqueue
+    _check_queue_size(q)
+    ~~~~~~~~~~~~~~~~~^^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/background_jobs.py", line 735, in _check_queue_size
+    frappe.throw(
+    ~~~~~~~~~~~~^
+    	_("Too many queued background jobs ({0}). Please retry after some time.").format(max_jobs),
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+    	primary_action=primary_action if frappe.has_permission("System Health Report") else None,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 159, in throw
+    msgprint(
+    ~~~~~~~~^
+    	msg,
+     ^^^^
+    ...<7 lines>...
+    	allow_dangerous_html=allow_dangerous_html,
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 118, in msgprint
+    _raise_exception()
+    ~~~~~~~~~~~~~~~~^^
+  File "/home/frappe/frappe-bench/apps/frappe/frappe/utils/messages.py", line 59, in _raise_exception
+    raise exc
+frappe.exceptions.QueueOverloaded: Too many queued background jobs (550). Please retry after some time.

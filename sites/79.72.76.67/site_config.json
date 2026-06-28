@@ -1,0 +1,10 @@
+{
+ "db_name": "_4525a4e60ed5b836",
+ "db_password": "YuNB4W8rYVweKGEm",
+ "db_type": "mariadb",
+ "db_user": "_4525a4e60ed5b836",
+ "host_name": "http://79.72.76.67",
+ "user_type_doctype_limit": {
+  "employee_self_service": 40
+ }
+}
