@@ -928,11 +928,21 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
                         callback: function(r) {
                             if (!r.exc && r.message) {
                                 let res = r.message;
-                                addLog('att-alog', 'lok', `✅ Auto Leave Assignment Complete: ${res.assigned} assigned, ${res.skipped} skipped, ${res.errors} errors`);
-                                frappe.show_alert({
-                                    message: `🤖 Auto Leave: ${res.assigned} assigned, ${res.skipped} skipped` + (res.errors > 0 ? `, ${res.errors} errors` : ''),
-                                    indicator: res.errors > 0 ? 'orange' : 'green'
-                                });
+                                // Handle structured dict format: {assigned, skipped, errors}
+                                if (typeof res.assigned !== 'undefined') {
+                                    addLog('att-alog', 'lok', `✅ Auto Leave Assignment Complete: ${res.assigned} assigned, ${res.skipped} skipped, ${res.errors} errors`);
+                                    frappe.show_alert({
+                                        message: `🤖 Auto Leave: ${res.assigned} assigned, ${res.skipped} skipped` + (res.errors > 0 ? `, ${res.errors} errors` : ''),
+                                        indicator: res.errors > 0 ? 'orange' : 'green'
+                                    });
+                                } else {
+                                    // Fallback for any other format
+                                    addLog('att-alog', 'lok', `✅ Auto Leave Assignment Complete`);
+                                    frappe.show_alert({
+                                        message: '🤖 Auto Leave Assignment Complete',
+                                        indicator: 'green'
+                                    });
+                                }
                             }
                         },
                         error: function() {

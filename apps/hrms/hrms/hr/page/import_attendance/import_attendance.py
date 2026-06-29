@@ -103,6 +103,10 @@ def process_attendance_for_employees(employee_dates):
             seen.add(key)
             unique.append(ed)
 
+    # Suppress msgprint popups during batch processing
+    # (check_leave_record generates "Employee X is on Leave" messages)
+    initial_log_length = len(frappe.local.message_log) if hasattr(frappe.local, 'message_log') else 0
+
     for ed in unique:
         employee   = ed['employee']
         work_date  = ed['date']          # "YYYY-MM-DD"
@@ -122,6 +126,10 @@ def process_attendance_for_employees(employee_dates):
             })
 
     frappe.db.commit()
+
+    # Clear all accumulated popup messages from the batch
+    if hasattr(frappe.local, 'message_log'):
+        frappe.local.message_log = frappe.local.message_log[:initial_log_length]
 
     return {
         'created':       created,
@@ -308,11 +316,19 @@ def _upsert_attendance(employee, work_date, status,
                        in_time, out_time, shift_type,
                        working_hours,
                        late_entry=False, early_exit=False):
-    """Create or update an Attendance record. Returns 'created'|'updated'."""
+    """Create or update an Attendance record. Returns 'created'|'updated'|'skipped'.
 
+    Handles:
+      - docstatus=0 (Draft): update fields and submit
+      - docstatus=1 (Submitted): skip — don't overwrite manual records
+      - docstatus=2 (Cancelled): ignore it and create a fresh record
+      - Suppresses frappe.msgprint popups during bulk processing
+    """
+
+    # Only look for non-cancelled attendance records
     existing = frappe.db.get_value(
         'Attendance',
-        {'employee': employee, 'attendance_date': work_date},
+        {'employee': employee, 'attendance_date': work_date, 'docstatus': ['!=', 2]},
         'name'
     )
 
@@ -332,7 +348,12 @@ def _upsert_attendance(employee, work_date, status,
         # Auto-submit — skip auto leave hook (it runs after full batch)
         if doc.docstatus == 0:
             doc.flags.skip_auto_leave = True
+            # Capture message_log length before submit to suppress
+            # "Employee X is on Leave" popups from check_leave_record()
+            _msg_before = len(frappe.local.message_log) if hasattr(frappe.local, 'message_log') else 0
             doc.submit()
+            if hasattr(frappe.local, 'message_log'):
+                frappe.local.message_log = frappe.local.message_log[:_msg_before]
         return 'updated'
     else:
         doc = frappe.get_doc({
@@ -351,7 +372,11 @@ def _upsert_attendance(employee, work_date, status,
         doc.insert(ignore_permissions=True)
         # Skip auto leave hook — it runs after full batch completes
         doc.flags.skip_auto_leave = True
+        # Suppress "Employee X is on Leave" popups from check_leave_record()
+        _msg_before = len(frappe.local.message_log) if hasattr(frappe.local, 'message_log') else 0
         doc.submit()
+        if hasattr(frappe.local, 'message_log'):
+            frappe.local.message_log = frappe.local.message_log[:_msg_before]
         return 'created'
 
 
