@@ -307,10 +307,11 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
                     callback: (r) => {
                         btn.textContent = "▶ Run Now";
                         btn.disabled = false;
-                        if (!r.exc) {
+                        if (!r.exc && r.message) {
+                            const res = r.message;
                             const banner = document.getElementById("ala-run-banner");
                             banner.style.display = "block";
-                            banner.textContent = "✅ " + (r.message?.message || "Processing complete.");
+                            banner.textContent = `✅ ${res.assigned} assigned, ${res.skipped} skipped, ${res.errors} errors`;
                             setTimeout(() => banner.style.display = "none", 8000);
                             loadAll();
                         }

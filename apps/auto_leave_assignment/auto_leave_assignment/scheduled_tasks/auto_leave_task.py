@@ -20,11 +20,13 @@ def process_absent_attendance(date=None):
     """
     Process all absent/half-day attendance for a given date (defaults to today).
     Can also be called manually from the HR Dashboard for any date range.
+
+    Returns a dict with counts: {assigned, skipped, errors, date}
     """
     process_date = date or today()
 
     frappe.logger().info(
-        f"[Auto Leave Assignment] Running nightly job for {process_date}"
+        f"[Auto Leave Assignment] Running job for {process_date}"
     )
 
     # Fetch all submitted Absent / Half Day attendance records for the date
@@ -38,9 +40,9 @@ def process_absent_attendance(date=None):
         fields=["name", "employee", "attendance_date", "status"],
     )
 
-    processed = 0
-    skipped   = 0
-    errors    = 0
+    assigned = 0
+    skipped  = 0
+    errors   = 0
 
     for rec in records:
         try:
@@ -56,7 +58,7 @@ def process_absent_attendance(date=None):
             # Load full doc and call core engine
             att_doc = frappe.get_doc("Attendance", rec.name)
             assign_leave_for_attendance(att_doc, called_from_scheduler=True)
-            processed += 1
+            assigned += 1
 
         except Exception:
             errors += 1
@@ -66,17 +68,25 @@ def process_absent_attendance(date=None):
             )
 
     summary = (
-        f"[Auto Leave Assignment] Nightly job complete for {process_date}: "
-        f"{processed} assigned, {skipped} skipped, {errors} errors."
+        f"[Auto Leave Assignment] Job complete for {process_date}: "
+        f"{assigned} assigned, {skipped} skipped, {errors} errors."
     )
     frappe.logger().info(summary)
-    return summary
+
+    return {
+        "date":     str(process_date),
+        "assigned": assigned,
+        "skipped":  skipped,
+        "errors":   errors,
+    }
 
 
 def process_date_range(from_date, to_date):
     """
     Utility: process a range of dates.
     Called from the HR Dashboard 'Reprocess' action.
+
+    Returns aggregated counts: {assigned, skipped, errors, days_processed}
     """
     from frappe.utils import date_diff, getdate
 
@@ -84,10 +94,21 @@ def process_date_range(from_date, to_date):
     end   = getdate(to_date)
     days  = date_diff(end, start) + 1
 
-    results = []
+    total_assigned = 0
+    total_skipped  = 0
+    total_errors   = 0
+
     for i in range(days):
         d = add_days(start, i)
         result = process_absent_attendance(str(d))
-        results.append(result)
+        total_assigned += result["assigned"]
+        total_skipped  += result["skipped"]
+        total_errors   += result["errors"]
 
-    return results
+    return {
+        "assigned":       total_assigned,
+        "skipped":        total_skipped,
+        "errors":         total_errors,
+        "days_processed": days,
+    }
+

@@ -110,20 +110,30 @@ def get_leave_log_list(from_date=None, to_date=None, status=None,
 @frappe.whitelist()
 def run_manual_processing(from_date=None, to_date=None):
     """
-    Triggered from the dashboard 'Run Now' button.
+    Triggered from the dashboard 'Run Now' button or after attendance import.
     Processes a date range manually.
+
+    Returns structured counts: {assigned, skipped, errors, ...}
     """
     frappe.only_for(["HR Manager", "System Manager"])
 
     from_date = from_date or today()
     to_date   = to_date   or today()
 
+    # Suppress any msgprint popups generated during processing
+    # (e.g. "Employee X is on Leave" from check_leave_record, balance warnings)
+    initial_log_length = len(frappe.local.message_log) if hasattr(frappe.local, 'message_log') else 0
+
     if from_date == to_date:
         result = process_absent_attendance(from_date)
-        return {"message": result}
     else:
-        results = process_date_range(from_date, to_date)
-        return {"message": "\n".join(results)}
+        result = process_date_range(from_date, to_date)
+
+    # Clear accumulated messages to prevent popup flood
+    if hasattr(frappe.local, 'message_log'):
+        frappe.local.message_log = frappe.local.message_log[:initial_log_length]
+
+    return result
 
 
 @frappe.whitelist()

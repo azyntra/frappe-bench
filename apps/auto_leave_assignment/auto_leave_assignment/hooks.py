@@ -11,7 +11,8 @@ app_version = "1.0.0"
 # ------------------------------------------------------------------
 doc_events = {
     "Attendance": {
-        "on_submit": "auto_leave_assignment.events.attendance_events.on_attendance_submit"
+        "on_submit": "auto_leave_assignment.events.attendance_events.on_attendance_submit",
+        "on_cancel": "auto_leave_assignment.events.attendance_events.on_attendance_cancel",
     }
 }
 
