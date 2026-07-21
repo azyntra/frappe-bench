@@ -121,14 +121,45 @@ def create_deduction_component():
 # ─────────────────────────────────────────────────────────────
 #  2. Stop prorating Basic Salary
 # ─────────────────────────────────────────────────────────────
-def stop_basic_proration():
-    cur = frappe.db.get_value("Salary Component", "Basic Salary", "depends_on_payment_days")
-    if cur == 0:
-        _log("  [SKIP] Basic Salary already has depends_on_payment_days = 0")
-        return
-    frappe.db.set_value("Salary Component", "Basic Salary", "depends_on_payment_days", 0)
+def stop_basic_proration(only=None):
+    """Turn off payment-day proration for Basic Salary.
+
+    IMPORTANT: the Salary Slip reads depends_on_payment_days from the
+    Salary Detail ROW inside each Salary Structure (copied at the time the
+    structure was built) — NOT from the Salary Component master. So the
+    master is updated for future structures AND every existing FT- row is
+    flipped, otherwise Basic keeps prorating.
+    """
+    # a) component master — governs structures created from now on
+    if frappe.db.get_value("Salary Component", "Basic Salary", "depends_on_payment_days"):
+        frappe.db.set_value("Salary Component", "Basic Salary", "depends_on_payment_days", 0)
+        _log("  [OK] Salary Component 'Basic Salary'.depends_on_payment_days -> 0")
+    else:
+        _log("  [SKIP] Salary Component 'Basic Salary' already 0")
+
+    # b) existing structure rows — governs slips generated from existing structures
+    filters = {
+        "salary_component": "Basic Salary",
+        "parenttype":       "Salary Structure",
+        "parentfield":      "earnings",
+    }
+    if only:
+        filters["parent"] = only
+    rows = frappe.get_all("Salary Detail", filters=filters,
+                          fields=["name", "parent", "depends_on_payment_days"])
+
+    flipped = 0
+    for r in rows:
+        if not r.parent.startswith("FT-"):
+            continue                      # never touch non-fixed structures
+        if r.depends_on_payment_days:
+            frappe.db.set_value("Salary Detail", r.name,
+                                "depends_on_payment_days", 0, update_modified=False)
+            frappe.clear_document_cache("Salary Structure", r.parent)
+            flipped += 1
     frappe.db.commit()
-    _log("  [OK] Basic Salary.depends_on_payment_days -> 0 (Basic now always full)")
+    _log(f"  [OK] Basic Salary structure rows set to full (not prorated): {flipped} flipped "
+         f"of {len(rows)} checked")
 
 
 # ─────────────────────────────────────────────────────────────
@@ -212,7 +243,7 @@ def setup_absent_deduction(only=None):
     _log("CHANRICH FRUITS — Full earnings + Absent/LWP deduction")
     _log("=" * 68)
     create_deduction_component()
-    stop_basic_proration()
+    stop_basic_proration(only=only)
     add_deduction_to_structures(only=only)
     _log("Done. Verify with preview_slip(employee, start, end) before running payroll.")
     _log("=" * 68)
