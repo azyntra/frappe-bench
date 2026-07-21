@@ -435,7 +435,12 @@ def _finalize_attendance(attendance_doc, applied, original_status, original_half
     if not payroll_type:
         raise Exception("refusing to finalize Attendance with a blank leave_type")
 
-    if len(applied) == 1 and total >= 1.0:
+    # A full day fully covered by PAID leave is "On Leave", even if it took two
+    # applications to get there (e.g. a Casual chunk that demoted to Annual).
+    # It must stay "Half Day" whenever an unpaid chunk is present, because that
+    # is what makes the salary slip charge exactly 0.5 (lwp += 1 - 0.5).
+    has_unpaid = any(_is_lwp_type(a["leave_type"]) for a in applied)
+    if total >= 1.0 and not has_unpaid:
         status, half_day_status = "On Leave", None
     else:
         status, half_day_status = "Half Day", "Present"
