@@ -88,9 +88,11 @@ def merge_employee(from_emp, to_emp, dry_run=True):
         WHERE  employee = %(frm)s
     """, {"to": to_emp, "to_name": to_name, "frm": from_emp})
 
-    # ── retire the duplicate so it can never capture punches again
+    # ── retire the duplicate so it can never capture punches again.
+    # custom_fingerprint_id is an INT column, so 0 (not "") is the unset
+    # value — and the importer skips 0 because it is falsy in JS.
     frappe.db.set_value("Employee", from_emp, {
-        "custom_fingerprint_id": "",
+        "custom_fingerprint_id": 0,
         "status": "Inactive",
     })
 
