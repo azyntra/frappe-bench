@@ -1,7 +1,53 @@
 import frappe
 import json
+import math
 from frappe import _
 from datetime import datetime, timedelta, date
+
+
+# ─────────────────────────────────────────────────────────────
+#  OVERTIME (fixed "FT-" staff — 160 LKR / hr past shift end)
+# ─────────────────────────────────────────────────────────────
+#  OT is credited only to employees whose assigned Salary Structure
+#  name starts with "FT-" (the monthly fixed staff). It is measured as
+#  the time worked *after* the assigned Shift Type's scheduled end time,
+#  rounded to the nearest 0.5 hour. The value is stamped onto the
+#  Attendance record (overtime_type + actual_overtime_duration) so the
+#  native HRMS Overtime Slip → Additional Salary flow pays it out.
+OT_TYPE_NAME = "Staff OT"
+_ot_eligibility_cache = {}
+
+
+def _is_fixed_ot_employee(employee, work_date):
+    """True if the employee's assigned Salary Structure name starts with 'FT-'."""
+    key = (employee, str(work_date))
+    if key in _ot_eligibility_cache:
+        return _ot_eligibility_cache[key]
+    eligible = False
+    try:
+        from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+            get_assigned_salary_structure,
+        )
+        structure = get_assigned_salary_structure(employee, work_date)
+        eligible = bool(structure) and str(structure).startswith("FT-")
+    except Exception:
+        eligible = False
+    _ot_eligibility_cache[key] = eligible
+    return eligible
+
+
+def _round_to_half(hours):
+    """Round to the nearest 0.5 (half-up)."""
+    return math.floor(hours * 2 + 0.5) / 2.0
+
+
+def _overtime_after_shift_end(out_time, shift_end):
+    """Hours worked past scheduled shift end, rounded to nearest 0.5 (0 if none)."""
+    if not out_time or not shift_end or out_time <= shift_end:
+        return 0.0
+    hrs = (out_time - shift_end).total_seconds() / 3600.0
+    ot = _round_to_half(hrs)
+    return ot if ot > 0 else 0.0
 
 
 # ─────────────────────────────────────────────────────────────
@@ -275,11 +321,24 @@ def _process_with_shift(employee, work_date, shift_type_name):
     if out_time and out_time < (shift_end - timedelta(minutes=early_grace)):
         early_exit = True
 
+    # ── Overtime: fixed (FT-) staff only, time worked past shift end ──
+    overtime_type   = None
+    overtime_hours  = 0.0
+    std_working_hrs = None
+    if status == 'Present' and out_time and _is_fixed_ot_employee(employee, work_date):
+        std_working_hrs = round((shift_end - shift_start).total_seconds() / 3600.0, 2)
+        overtime_hours  = _overtime_after_shift_end(out_time, shift_end)
+        if overtime_hours > 0:
+            overtime_type = OT_TYPE_NAME
+
     return _upsert_attendance(
         employee, work_date, status,
         in_time, out_time,
         shift_type_name, round(actual_hrs, 2),
-        late_entry=late_entry, early_exit=early_exit
+        late_entry=late_entry, early_exit=early_exit,
+        overtime_type=overtime_type,
+        actual_overtime_duration=overtime_hours,
+        standard_working_hours=std_working_hrs,
     )
 
 
@@ -315,7 +374,10 @@ def _process_without_shift(employee, work_date):
 def _upsert_attendance(employee, work_date, status,
                        in_time, out_time, shift_type,
                        working_hours,
-                       late_entry=False, early_exit=False):
+                       late_entry=False, early_exit=False,
+                       overtime_type=None,
+                       actual_overtime_duration=0.0,
+                       standard_working_hours=None):
     """Create or update an Attendance record. Returns 'created'|'updated'|'skipped'.
 
     Handles:
@@ -344,6 +406,12 @@ def _upsert_attendance(employee, work_date, status,
         doc.working_hours  = working_hours
         doc.late_entry     = 1 if late_entry  else 0
         doc.early_exit     = 1 if early_exit  else 0
+        # Overtime — only touched for OT-eligible Present records.
+        # Sentinel: standard_working_hours is set only in that case.
+        if standard_working_hours is not None:
+            doc.overtime_type            = overtime_type or ""
+            doc.actual_overtime_duration = actual_overtime_duration or 0
+            doc.standard_working_hours   = standard_working_hours
         doc.save(ignore_permissions=True)
         # Auto-submit — skip auto leave hook (it runs after full batch)
         if doc.docstatus == 0:
@@ -369,6 +437,11 @@ def _upsert_attendance(employee, work_date, status,
             'early_exit':     1 if early_exit  else 0,
             'company':        _get_company(employee),
         })
+        # Overtime — only for OT-eligible Present records.
+        if standard_working_hours is not None:
+            doc.overtime_type            = overtime_type or ""
+            doc.actual_overtime_duration = actual_overtime_duration or 0
+            doc.standard_working_hours   = standard_working_hours
         doc.insert(ignore_permissions=True)
         # Skip auto leave hook — it runs after full batch completes
         doc.flags.skip_auto_leave = True
