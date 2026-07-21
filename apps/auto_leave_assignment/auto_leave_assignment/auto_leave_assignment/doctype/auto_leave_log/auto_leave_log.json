@@ -12,10 +12,18 @@
   "half_day",
   "section_leave",
   "leave_type",
+  "leave_days",
   "status",
   "col_break2",
   "source_attendance",
   "leave_application",
+  "section_split",
+  "is_split",
+  "chunk_index",
+  "split_group",
+  "col_break3",
+  "original_attendance_status",
+  "original_half_day_status",
   "section_remarks",
   "remarks"
  ],
@@ -90,6 +98,59 @@
    "fieldtype": "Link",
    "label": "Leave Application",
    "options": "Leave Application"
+  },
+  {
+   "description": "Days covered by THIS chunk. A day split across two leave types writes one row per chunk (0.5 each).",
+   "fieldname": "leave_days",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Leave Days",
+   "precision": "2"
+  },
+  {
+   "fieldname": "section_split",
+   "fieldtype": "Section Break",
+   "label": "Split Details"
+  },
+  {
+   "default": "0",
+   "description": "Set when the day needed more than one leave type to be fully covered.",
+   "fieldname": "is_split",
+   "fieldtype": "Check",
+   "label": "Is Split"
+  },
+  {
+   "default": "1",
+   "description": "1-based position of this chunk within the day's allocation plan (chain order).",
+   "fieldname": "chunk_index",
+   "fieldtype": "Int",
+   "label": "Chunk Index"
+  },
+  {
+   "description": "Groups all chunks of one day together: employee|attendance_date",
+   "fieldname": "split_group",
+   "fieldtype": "Data",
+   "label": "Split Group",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "col_break3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Attendance status BEFORE leave was applied. Required to restore the record if the leave is cancelled.",
+   "fieldname": "original_attendance_status",
+   "fieldtype": "Data",
+   "label": "Original Attendance Status",
+   "read_only": 1
+  },
+  {
+   "description": "Attendance half_day_status before leave was applied.",
+   "fieldname": "original_half_day_status",
+   "fieldtype": "Data",
+   "label": "Original Half Day Status",
+   "read_only": 1
   },
   {
    "fieldname": "section_remarks",
