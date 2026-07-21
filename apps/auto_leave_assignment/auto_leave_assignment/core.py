@@ -5,8 +5,10 @@ Core engine for automatic leave assignment.
 Used by both the Attendance DocEvent and the nightly scheduler.
 """
 
+import math
+
 import frappe
-from frappe.utils import getdate
+from frappe.utils import cint, flt, getdate
 
 
 # ─────────────────────────────────────────────
@@ -258,22 +260,61 @@ def _sync_attendance_with_existing_leave(attendance_doc, employee, att_date):
 # ─────────────────────────────────────────────
 
 def _is_holiday(employee, date):
-    """Return True if `date` falls on a holiday in the employee's holiday list."""
-    holiday_list = frappe.db.get_value(
-        "Employee", employee, "holiday_list"
-    )
-    if not holiday_list:
-        # Fall back to company holiday list
-        company = frappe.db.get_value("Employee", employee, "company")
-        holiday_list = frappe.db.get_value("Company", company, "default_holiday_list")
+    """Return True if `date` is a holiday for this employee.
 
-    if not holiday_list:
+    MUST agree with Leave Application's own holiday arithmetic, otherwise we
+    create an application that its validate() immediately rejects with
+    "The day(s) on which you are applying for leave are holidays".
+
+    ERPNext v16 resolves an employee's holiday list through the
+    **Holiday List Assignment** doctype (hrms/utils/holiday_list.py, wired in
+    via hrms/hooks.py `employee_holiday_list`). The legacy
+    `Employee.holiday_list` / `Company.default_holiday_list` fields this
+    function used to read are BOTH empty on this site, so it returned False
+    for every date — the holiday guard never fired at all.
+    """
+    try:
+        from hrms.utils.holiday_list import get_holiday_dates_between_range
+
+        # raise_exception_for_holiday_list=False: a single employee with no
+        # holiday assignment must not break the whole nightly batch.
+        return bool(get_holiday_dates_between_range(
+            employee, date, date, raise_exception_for_holiday_list=False
+        ))
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Auto Leave holiday check failed — {employee} on {date}",
+        )
+        # Fall through as "not a holiday": _leave_days_for() below is the
+        # authoritative, per-leave-type gate and will still skip the day.
         return False
 
-    return frappe.db.exists("Holiday", {
-        "parent":       holiday_list,
-        "holiday_date": date,
-    })
+
+def _leave_days_for(employee, leave_type, date, half_day=False):
+    """Days a Leave Application of `leave_type` would actually cover on `date`.
+
+    This is byte-identical to what LeaveApplication.validate_balance_leaves()
+    computes, so a chunk we accept can never be rejected for being a holiday.
+    Returns 0.0 when the date is a holiday *for that leave type* — note
+    `include_holiday` is a per-Leave-Type flag, so a single global holiday
+    check can never be exactly right.
+    """
+    try:
+        from hrms.hr.doctype.leave_application.leave_application import (
+            get_number_of_leave_days,
+        )
+        return flt(get_number_of_leave_days(
+            employee, leave_type, date, date,
+            1 if half_day else 0,
+            date if half_day else None,
+        ))
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Auto Leave day-count failed — {employee} {leave_type} on {date}",
+        )
+        return 0.0
 
 
 def _leave_application_exists(employee, date):
