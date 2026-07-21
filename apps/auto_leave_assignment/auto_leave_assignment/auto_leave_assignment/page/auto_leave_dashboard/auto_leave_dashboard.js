@@ -72,6 +72,7 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
         .ala-card.red    { border-left-color: #c62828; }
         .ala-card.blue   { border-left-color: #1565c0; }
         .ala-card.purple { border-left-color: #6a1b9a; }
+        .ala-card.teal   { border-left-color: #00695c; }
         .ala-card-value  { font-size: 32px; font-weight: 700;
             color: var(--heading-color); line-height: 1; }
         .ala-card-label  { font-size: 12px; color: var(--text-muted);
@@ -116,8 +117,10 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
         .ala-badge.Error     { background: #ffebee; color: #c62828; }
         .ala-badge.Cancelled { background: #f5f5f5; color: #757575; }
         .ala-badge.cl { background: #e3f2fd; color: #1565c0; }
+        .ala-badge.al { background: #e0f2f1; color: #00695c; }
         .ala-badge.lwp{ background: #fce4ec; color: #880e4f; }
         .ala-badge.hd { background: #f3e5f5; color: #6a1b9a; }
+        .ala-badge.split { background: #ede7f6; color: #4527a0; }
 
         .ala-action-btn {
             font-size: 11px; padding: 3px 10px; border-radius: 4px;
@@ -166,6 +169,15 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
         loading:    false,
     };
 
+    // Employee names and remarks come from user-editable records and are
+    // interpolated into innerHTML below, so they must be escaped.
+    function esc(value) {
+        if (value === null || value === undefined) return "";
+        return String(value).replace(/[&<>"']/g, c => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        })[c]);
+    }
+
     // ── Build HTML ───────────────────────────────────────
     $(wrapper).find(".page-content").html(`
         <div class="ala-dashboard">
@@ -198,6 +210,7 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
                     <select id="ala-leave-type">
                         <option value="">All</option>
                         <option value="Casual Leave">Casual Leave</option>
+                        <option value="Annual Leave">Annual Leave</option>
                         <option value="Leave Without Pay">Leave Without Pay</option>
                     </select>
                 </div>
@@ -223,15 +236,19 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
                 </div>
                 <div class="ala-card green" data-filter="Casual Leave">
                     <div class="ala-card-value" id="kpi-casual">—</div>
-                    <div class="ala-card-label">Casual Leave</div>
+                    <div class="ala-card-label">Casual Leave (days)</div>
+                </div>
+                <div class="ala-card teal" data-filter="Annual Leave">
+                    <div class="ala-card-value" id="kpi-annual">—</div>
+                    <div class="ala-card-label">Annual Leave (days)</div>
                 </div>
                 <div class="ala-card orange" data-filter="Leave Without Pay">
                     <div class="ala-card-value" id="kpi-lwp">—</div>
-                    <div class="ala-card-label">Leave Without Pay</div>
+                    <div class="ala-card-label">Leave Without Pay (days)</div>
                 </div>
                 <div class="ala-card purple" data-filter="">
-                    <div class="ala-card-value" id="kpi-halfday">—</div>
-                    <div class="ala-card-label">Half Days</div>
+                    <div class="ala-card-value" id="kpi-split">—</div>
+                    <div class="ala-card-label">Split Days</div>
                 </div>
                 <div class="ala-card blue" data-filter="Skipped">
                     <div class="ala-card-value" id="kpi-skipped">—</div>
@@ -325,7 +342,7 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
     document.querySelectorAll(".ala-card").forEach(card => {
         card.addEventListener("click", () => {
             const f = card.dataset.filter;
-            if (f === "Casual Leave" || f === "Leave Without Pay") {
+            if (f === "Casual Leave" || f === "Annual Leave" || f === "Leave Without Pay") {
                 document.getElementById("ala-leave-type").value = f;
                 document.getElementById("ala-status").value = "Assigned";
             } else if (f === "Skipped" || f === "Error") {
@@ -358,8 +375,9 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
     }
 
     function loadSummary() {
-        ["total","casual","lwp","halfday","skipped","errors"].forEach(k => {
-            document.getElementById(`kpi-${k}`).textContent = "…";
+        ["total","casual","annual","lwp","split","skipped","errors"].forEach(k => {
+            const el = document.getElementById(`kpi-${k}`);
+            if (el) el.textContent = "…";
         });
 
         frappe.call({
@@ -370,8 +388,9 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
                     const d = r.message;
                     document.getElementById("kpi-total").textContent   = d.total;
                     document.getElementById("kpi-casual").textContent  = d.casual_leave;
+                    document.getElementById("kpi-annual").textContent  = d.annual_leave;
                     document.getElementById("kpi-lwp").textContent     = d.lwp;
-                    document.getElementById("kpi-halfday").textContent = d.half_days;
+                    document.getElementById("kpi-split").textContent   = d.split_days;
                     document.getElementById("kpi-skipped").textContent = d.skipped;
                     document.getElementById("kpi-errors").textContent  = d.errors;
                 }
@@ -424,12 +443,21 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
 
         let rows = records.map(rec => {
             const statusBadge = `<span class="ala-badge ${rec.status}">${rec.status}</span>`;
+            const LT = {
+                "Casual Leave":      { cls: "cl",  label: "Casual" },
+                "Annual Leave":      { cls: "al",  label: "Annual" },
+                "Leave Without Pay": { cls: "lwp", label: "LWP" },
+            };
+            const lt = LT[rec.leave_type];
             const ltBadge = rec.leave_type
-                ? `<span class="ala-badge ${rec.leave_type === "Casual Leave" ? "cl" : "lwp"}">
-                    ${rec.leave_type === "Casual Leave" ? "Casual" : "LWP"}</span>`
+                ? `<span class="ala-badge ${lt ? lt.cls : "cl"}">${
+                    lt ? lt.label : esc(rec.leave_type)}${
+                    rec.leave_days ? " " + rec.leave_days + "d" : ""}</span>`
                 : "—";
             const hdBadge = rec.half_day
                 ? `<span class="ala-badge hd">Half</span>` : "";
+            const splitBadge = rec.is_split
+                ? `<span class="ala-badge split">Split ${rec.chunk_index || ""}</span>` : "";
             const laLink = rec.leave_application
                 ? `<a href="/app/leave-application/${rec.leave_application}" target="_blank">${rec.leave_application}</a>`
                 : "—";
@@ -441,18 +469,22 @@ frappe.pages["auto-leave-dashboard"].on_page_load = function (wrapper) {
                 ? `<button class="ala-action-btn danger" onclick="cancelLeave('${rec.name}')">✕ Cancel</button>`
                 : "";
 
+            const remarks = rec.remarks
+                ? esc(rec.remarks.substring(0, 80)) + (rec.remarks.length > 80 ? "…" : "")
+                : "";
+
             return `<tr>
-                <td>${rec.attendance_date}</td>
+                <td>${esc(rec.attendance_date)}</td>
                 <td>
-                    <strong>${rec.employee_name}</strong><br>
-                    <small style="color:var(--text-muted)">${rec.employee}</small>
+                    <strong>${esc(rec.employee_name)}</strong><br>
+                    <small style="color:var(--text-muted)">${esc(rec.employee)}</small>
                 </td>
-                <td>${ltBadge} ${hdBadge}</td>
+                <td>${ltBadge} ${hdBadge} ${splitBadge}</td>
                 <td>${statusBadge}</td>
                 <td>${laLink}</td>
                 <td>${attLink}</td>
                 <td style="max-width:200px;font-size:11px;color:var(--text-muted)">
-                    ${rec.remarks ? rec.remarks.substring(0, 80) + (rec.remarks.length > 80 ? "…" : "") : ""}
+                    ${remarks}
                 </td>
                 <td>${cancelBtn}</td>
             </tr>`;
