@@ -10,11 +10,13 @@ from datetime import datetime, timedelta, date
 # ─────────────────────────────────────────────────────────────
 #  OT is credited only to employees whose assigned Salary Structure
 #  name starts with "FT-" (the monthly fixed staff). It is measured as
-#  the time worked *after* the assigned Shift Type's scheduled end time,
-#  rounded to the nearest 0.5 hour. The value is stamped onto the
-#  Attendance record (overtime_type + actual_overtime_duration) so the
-#  native HRMS Overtime Slip → Additional Salary flow pays it out.
-OT_TYPE_NAME = "Staff OT"
+#  the time worked *after* the assigned Shift Type's scheduled end time
+#  (late-outs shorter than OT_MIN_MINUTES are ignored), rounded to the
+#  nearest 0.5 hour. The value is stamped onto the Attendance record
+#  (overtime_type + actual_overtime_duration) so the native HRMS
+#  Overtime Slip → Additional Salary flow pays it out.
+OT_TYPE_NAME  = "Staff OT"
+OT_MIN_MINUTES = 30          # ignore OT shorter than this many minutes past shift end
 _ot_eligibility_cache = {}
 
 
@@ -42,11 +44,14 @@ def _round_to_half(hours):
 
 
 def _overtime_after_shift_end(out_time, shift_end):
-    """Hours worked past scheduled shift end, rounded to nearest 0.5 (0 if none)."""
+    """Hours worked past scheduled shift end, rounded to nearest 0.5.
+    Late-outs shorter than OT_MIN_MINUTES are ignored (return 0)."""
     if not out_time or not shift_end or out_time <= shift_end:
         return 0.0
-    hrs = (out_time - shift_end).total_seconds() / 3600.0
-    ot = _round_to_half(hrs)
+    minutes = (out_time - shift_end).total_seconds() / 60.0
+    if minutes < OT_MIN_MINUTES:
+        return 0.0
+    ot = _round_to_half(minutes / 60.0)
     return ot if ot > 0 else 0.0
 
 
