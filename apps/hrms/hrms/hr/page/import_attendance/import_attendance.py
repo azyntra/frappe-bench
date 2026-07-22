@@ -2,6 +2,7 @@ import frappe
 import json
 import math
 from frappe import _
+from frappe.utils import add_days, cint, flt, getdate
 from datetime import datetime, timedelta, date
 
 
@@ -589,6 +590,114 @@ def _get_company(employee):
         return frappe.db.get_value('Employee', employee, 'company')
     except Exception:
         return frappe.defaults.get_user_default('Company')
+
+
+# ─────────────────────────────────────────────────────────────
+#  2b. MARK UNMARKED WORKING DAYS AS ABSENT
+# ─────────────────────────────────────────────────────────────
+@frappe.whitelist()
+def mark_unmarked_absent(employees, from_date, to_date, dry_run=0):
+    """Create Absent Attendance for working days that have no punch at all.
+
+    WHY THIS EXISTS
+    ---------------
+    The importer only creates Attendance for (employee, date) pairs that
+    appear in the CSV. A day an employee simply did not come in produces no
+    punch, therefore no Attendance row — so the auto-leave engine, which only
+    ever looks at Attendance records, cannot see it and cannot spend the
+    employee's leave balance on it. Payroll still charges the day, because
+    Payroll Settings has consider_unmarked_attendance_as = "Absent".
+
+    Net effect before this ran: staff were docked for days their own Casual /
+    Annual balance would have covered (164 such days in one cycle, 97 of them
+    coverable).
+
+    Marking them Absent puts them in front of the leave chain, which then
+    consumes Casual -> Annual -> LWP as normal.
+
+    The date window must be the range actually covered by the punch data,
+    otherwise days the device never covered would be marked absent wrongly.
+    """
+    if isinstance(employees, str):
+        employees = json.loads(employees)
+    dry_run = cint(dry_run)
+
+    start, end = getdate(from_date), getdate(to_date)
+    today_d = date.today()
+    created, skipped, errors = 0, 0, 0
+    details = []
+
+    for employee in employees:
+        joining, relieving = frappe.db.get_value(
+            "Employee", employee, ["date_of_joining", "relieving_date"]
+        ) or (None, None)
+
+        marked = {
+            getdate(d) for d in frappe.get_all(
+                "Attendance",
+                filters={
+                    "employee": employee,
+                    "docstatus": ["!=", 2],
+                    "attendance_date": ["between", [start, end]],
+                },
+                pluck="attendance_date",
+            )
+        }
+
+        day = start
+        while day <= end:
+            skip = (
+                day > today_d                                   # never mark the future
+                or day in marked                                # already has a record
+                or (joining and day < getdate(joining))         # before employment
+                or (relieving and day > getdate(relieving))     # after employment
+                or _is_holiday_for(employee, day)               # Sunday / Poya
+            )
+            if skip:
+                day = add_days(day, 1)
+                continue
+
+            if dry_run:
+                created += 1
+                details.append({"employee": employee, "date": str(day)})
+                day = add_days(day, 1)
+                continue
+
+            try:
+                doc = frappe.get_doc({
+                    "doctype":         "Attendance",
+                    "employee":        employee,
+                    "attendance_date": day,
+                    "status":          "Absent",
+                    "company":         _get_company(employee),
+                })
+                # leave is applied for the whole batch afterwards, not per row
+                doc.flags.skip_auto_leave = True
+                doc.insert(ignore_permissions=True)
+                doc.submit()
+                created += 1
+            except Exception as e:
+                err = str(e).lower()
+                if "already marked" in err or "duplicate" in err:
+                    skipped += 1
+                else:
+                    errors += 1
+                    frappe.log_error(
+                        message=frappe.get_traceback(),
+                        title=f"Mark-absent failed — {employee} on {day}",
+                    )
+            day = add_days(day, 1)
+
+    if not dry_run:
+        frappe.db.commit()
+
+    return {
+        "created": created,
+        "skipped": skipped,
+        "errors":  errors,
+        "dry_run": bool(dry_run),
+        "details": details[:50],
+    }
 
 
 # ─────────────────────────────────────────────────────────────

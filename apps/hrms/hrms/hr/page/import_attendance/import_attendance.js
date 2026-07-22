@@ -918,12 +918,46 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
 
                 if (totCreated > 0 || totUpdated > 0) {
                     const dates = empDates.map(e => e.date).sort();
+                    const fromDate = dates[0];
+                    const toDate   = dates[dates.length - 1];
+                    // Employees the CSV actually mapped — only they can be judged absent.
+                    const matchedEmps = [...new Set(empDates.map(e => e.employee))];
+
+                    // ── Fill in working days that have NO punch at all ──
+                    // These produce no Attendance row, so the leave engine can never
+                    // see them and payroll silently charges them as absent. Marking
+                    // them first lets the leave chain spend Casual/Annual instead.
+                    addLog('att-alog', 'linf', `\n📅 Marking working days with no attendance...`);
+                    const markUnmarked = () => new Promise(resolve => {
+                        frappe.call({
+                            method: 'hrms.hr.page.import_attendance.import_attendance.mark_unmarked_absent',
+                            args: {
+                                employees: JSON.stringify(matchedEmps),
+                                from_date: fromDate,
+                                to_date:   toDate
+                            },
+                            callback: r => {
+                                const m = (r && r.message) || {};
+                                addLog('att-alog', m.errors ? 'ler' : 'lok',
+                                    `✅ Unmarked days marked Absent: ${m.created || 0} created` +
+                                    (m.skipped ? `, ${m.skipped} skipped` : '') +
+                                    (m.errors ? `, ${m.errors} errors` : ''));
+                                resolve();
+                            },
+                            error: () => {
+                                addLog('att-alog', 'ler', '✗ Marking unmarked days failed — see Error Log.');
+                                resolve();
+                            }
+                        });
+                    });
+
+                    markUnmarked().then(() => {
                     addLog('att-alog', 'linf', `\n🤖 Running Auto Leave Assignment in the background...`);
                     frappe.call({
                         method: "auto_leave_assignment.api.dashboard_api.run_manual_processing",
                         args: {
-                            from_date: dates[0],
-                            to_date: dates[dates.length - 1]
+                            from_date: fromDate,
+                            to_date: toDate
                         },
                         callback: function(r) {
                             if (!r.exc && r.message) {
@@ -949,6 +983,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
                             addLog('att-alog', 'ler', `✗ Auto Leave Assignment failed. Check Error Log for details.`);
                         }
                     });
+                    });   // end markUnmarked().then
                 }
             }
         );
