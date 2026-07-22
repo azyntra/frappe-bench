@@ -90,6 +90,41 @@ def audit():
 # ─────────────────────────────────────────────────────────────
 #  1. Deduction component
 # ─────────────────────────────────────────────────────────────
+def _ensure_component_account(component):
+    """Map a GL account onto the component.
+
+    Payroll Entry REFUSES to submit salary slips if any component in them has
+    no account for the company ("Please set account in Salary Component ..."),
+    because it cannot build the accrual Journal Entry. The account is copied
+    from Basic Salary so this matches whatever the site already uses (here
+    every earning AND deduction posts to the same salary expense account,
+    which is right for an absence deduction — it nets down salary expense).
+    """
+    src = frappe.get_all(
+        "Salary Component Account",
+        filters={"parent": "Basic Salary"},
+        fields=["company", "account"],
+        limit=1,
+    )
+    if not src:
+        _log(f"  [WARN] no account found on 'Basic Salary' to copy — set the "
+             f"account on '{component}' manually or payroll submission will fail")
+        return
+
+    company, account = src[0].company, src[0].account
+    if frappe.db.exists("Salary Component Account",
+                        {"parent": component, "company": company}):
+        _log(f"  [SKIP] {component} already has an account for {company}")
+        return
+
+    doc = frappe.get_doc("Salary Component", component)
+    doc.append("accounts", {"company": company, "account": account})
+    doc.flags.ignore_permissions = True
+    doc.save()
+    frappe.db.commit()
+    _log(f"  [OK] {component} account set to {account}")
+
+
 def create_deduction_component():
     if frappe.db.exists("Salary Component", DEDUCTION):
         frappe.db.set_value("Salary Component", DEDUCTION, {
@@ -99,6 +134,7 @@ def create_deduction_component():
         })
         frappe.db.commit()
         _log(f"  [SKIP] Component exists: {DEDUCTION} (formula re-synced)")
+        _ensure_component_account(DEDUCTION)
         return
     doc = frappe.get_doc({
         "doctype":                 "Salary Component",
@@ -116,6 +152,7 @@ def create_deduction_component():
     doc.insert(ignore_permissions=True)
     frappe.db.commit()
     _log(f"  [OK] Component created: {DEDUCTION} ({DEDUCTION_ABBR}, Deduction, formula-based)")
+    _ensure_component_account(DEDUCTION)
 
 
 # ─────────────────────────────────────────────────────────────
