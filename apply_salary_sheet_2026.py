@@ -133,6 +133,8 @@ def _create_employee(dry_run):
     doc.first_name       = NEW_EMPLOYEE["first_name"]
     doc.company          = COMPANY
     doc.status           = "Active"
+    # mandatory on this site, and by convention it mirrors the record name
+    doc.employee_number  = target
     doc.gender           = NEW_EMPLOYEE["gender"]
     doc.date_of_birth    = NEW_EMPLOYEE["date_of_birth"]
     doc.date_of_joining  = NEW_EMPLOYEE["date_of_joining"]
