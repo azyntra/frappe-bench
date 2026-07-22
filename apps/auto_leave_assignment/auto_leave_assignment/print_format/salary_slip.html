@@ -1,0 +1,242 @@
+<div style="font-family: Arial, Helvetica, sans-serif;">
+  {% set company = frappe.get_doc("Company", doc.company) %}
+  {% set emp = frappe.get_doc("Employee", doc.employee) %}
+  {% set website_settings = frappe.get_doc("Website Settings", "Website Settings") %}
+  {% set bd = get_slip_breakdown(doc) %}
+
+  <!-- Header Section -->
+  <div style="text-align: center; margin-bottom: 10px;">
+    {% if website_settings.banner_image %}
+      <img src="{{ website_settings.banner_image }}" alt="Company Logo"
+           style="max-height: 60px; max-width: 170px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;"/>
+    {% elif website_settings.top_bar_img %}
+      <img src="{{ website_settings.top_bar_img }}" alt="Company Logo"
+           style="max-height: 60px; max-width: 170px; margin-bottom: 5px; display: block; margin-left: auto; margin-right: auto;"/>
+    {% endif %}
+    <h2 style="margin: 2px 0; color: #2e7d32; font-size: 17px; font-weight: bold;">{{ doc.company }}</h2>
+    <h3 style="margin: 2px 0; color: #2e7d32; font-size: 13px; letter-spacing: 2px;">SALARY SLIP</h3>
+    <p style="margin: 2px 0; font-size: 11px;">For the month of: <strong>{{ frappe.utils.formatdate(doc.start_date, "MMMM yyyy") }}</strong></p>
+  </div>
+  <hr style="border: 1.5px solid #2e7d32; margin-bottom: 8px;"/>
+
+  <!-- Employee Details — optional fields are hidden when empty to save space -->
+  <table width="100%" cellpadding="3" cellspacing="0" style="margin-bottom: 8px; font-size: 11px;">
+    <tr>
+      <td width="50%"><b>Employee ID:</b> {{ doc.employee }}</td>
+      <td width="50%"><b>Employee Name:</b> {{ doc.employee_name }}</td>
+    </tr>
+    <tr>
+      <td><b>Date of Joining:</b> {{ emp.date_of_joining }}</td>
+      <td><b>Pay Period:</b> {{ doc.start_date }} to {{ doc.end_date }}</td>
+    </tr>
+    {% if doc.department or doc.designation %}
+    <tr>
+      <td>{% if doc.department %}<b>Department:</b> {{ doc.department }}{% endif %}</td>
+      <td>{% if doc.designation %}<b>Designation:</b> {{ doc.designation }}{% endif %}</td>
+    </tr>
+    {% endif %}
+  </table>
+
+  <!-- Working Days / Leaves Section -->
+  <table width="100%" cellpadding="4" cellspacing="0"
+         style="margin-bottom: 8px; font-size: 11px; border-collapse: collapse;">
+    <thead>
+      <tr style="background-color: #2e7d32; text-align: center;">
+        <th style="padding: 5px; color: #ffffff; font-weight: bold;">Total Working Days</th>
+        <th style="padding: 5px; color: #ffffff; font-weight: bold;">Days Paid</th>
+        <th style="padding: 5px; color: #ffffff; font-weight: bold;">Leave Without Pay</th>
+        <th style="padding: 5px; color: #ffffff; font-weight: bold;">Absent Days</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="text-align: center; background-color: #f1f8e9;">
+        <td style="padding: 5px; border: 1px solid #c8e6c9;">{{ doc.total_working_days | round(1) }}</td>
+        <td style="padding: 5px; border: 1px solid #c8e6c9;">{{ doc.payment_days | round(1) }}</td>
+        <td style="padding: 5px; border: 1px solid #c8e6c9;">{{ doc.leave_without_pay | round(1) }}</td>
+        <td style="padding: 5px; border: 1px solid #c8e6c9;">{{ doc.absent_days | round(1) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Earnings & Deductions Table -->
+  <table width="100%" border="1" cellpadding="4" cellspacing="0"
+         style="border-collapse: collapse; font-size: 11px; margin-bottom: 5px;">
+    <thead>
+      <tr style="background-color: #2e7d32; text-align: center;">
+        <th width="40%" style="padding: 5px; color: #ffffff; font-weight: bold;">Earnings</th>
+        <th width="10%" style="padding: 5px; color: #ffffff; font-weight: bold;">Amount</th>
+        <th width="40%" style="padding: 5px; color: #ffffff; font-weight: bold;">Deductions</th>
+        <th width="10%" style="padding: 5px; color: #ffffff; font-weight: bold;">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% set earnings = doc.earnings %}
+      {% set deductions = doc.deductions %}
+      {% set e_len = earnings | length %}
+      {% set d_len = deductions | length %}
+      {% set max_rows = e_len if e_len > d_len else d_len %}
+      {% for i in range(max_rows) %}
+      <tr>
+        <td style="padding: 4px;">{{ earnings[i].salary_component if i < e_len else '' }}</td>
+        <td style="text-align: right; padding: 4px;">
+          {% if i < e_len %}{{ "%.2f" | format(earnings[i].amount) }}{% endif %}
+        </td>
+        <td style="padding: 4px;">{{ deductions[i].salary_component if i < d_len else '' }}</td>
+        <td style="text-align: right; padding: 4px;">
+          {% if i < d_len %}{{ "%.2f" | format(deductions[i].amount) }}{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+      <tr style="background-color: #f1f8e9; font-weight: bold;">
+        <td style="padding: 5px;">Gross Pay</td>
+        <td style="text-align: right; padding: 5px;">{{ "%.2f" | format(doc.gross_pay) }}</td>
+        <td style="padding: 5px;">Total Deductions</td>
+        <td style="text-align: right; padding: 5px;">{{ "%.2f" | format(doc.total_deduction) }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Net Pay -->
+  <table width="100%" cellpadding="6" cellspacing="0"
+         style="border-collapse: collapse; margin-bottom: 6px;">
+    <tr style="background-color: #2e7d32; font-weight: bold; font-size: 13px;">
+      <td style="text-align: right; width: 75%; color: #ffffff;">NET PAY</td>
+      <td style="text-align: right; width: 25%; color: #ffffff;">{{ "%.2f" | format(doc.net_pay) }} {{ doc.currency }}</td>
+    </tr>
+  </table>
+
+  <p style="font-size: 11px; margin: 0 0 8px 0;">
+    <b>Amount in Words:</b> {{ doc.total_in_words }}
+  </p>
+
+  {% if bd and (bd.overtime or bd.absence) %}
+  <!-- ══════════ CALCULATION BREAKDOWN ══════════ -->
+  <div style="border-top: 1.5px solid #2e7d32; padding-top: 6px; margin-bottom: 6px;">
+    <div style="font-size: 11px; font-weight: bold; color: #2e7d32; letter-spacing: 1px; margin-bottom: 5px;">
+      CALCULATION BREAKDOWN
+    </div>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 10px;">
+      <tr valign="top">
+
+        <!-- ── Overtime ── -->
+        <td width="49%" style="padding-right: 6px;">
+          {% if bd.overtime %}
+          <table width="100%" cellpadding="3" cellspacing="0"
+                 style="border-collapse: collapse; border: 1px solid #c8e6c9;">
+            <tr style="background-color: #f1f8e9;">
+              <td colspan="2" style="font-weight: bold; color: #2e7d32; padding: 4px 6px;">
+                Overtime
+              </td>
+            </tr>
+            {% if bd.overtime.normal_hours %}
+            <tr>
+              <td style="padding: 2px 6px;">Working days &mdash; past shift end</td>
+              <td style="padding: 2px 6px; text-align: right;">{{ "%.1f" | format(bd.overtime.normal_hours) }} hrs</td>
+            </tr>
+            {% endif %}
+            {% if bd.overtime.holiday_hours %}
+            <tr>
+              <td style="padding: 2px 6px;">Sunday / Poya &mdash; full day</td>
+              <td style="padding: 2px 6px; text-align: right;">{{ "%.1f" | format(bd.overtime.holiday_hours) }} hrs</td>
+            </tr>
+            {% endif %}
+            <tr style="border-top: 1px solid #c8e6c9;">
+              <td style="padding: 3px 6px;">
+                Total {{ "%.1f" | format(bd.overtime.total_hours) }} hrs &times; {{ "%.2f" | format(bd.overtime.rate) }}/hr
+              </td>
+              <td style="padding: 3px 6px; text-align: right; font-weight: bold;">
+                {{ "%.2f" | format(bd.overtime.amount) }}
+              </td>
+            </tr>
+            {% if bd.overtime.days %}
+            <tr>
+              <td colspan="2" style="padding: 3px 6px; color: #666666; line-height: 1.5;">
+                {% for d in bd.overtime.days %}{{ d.date }}&nbsp;{{ "%.1f" | format(d.hours) }}h{% if d.is_holiday %}*{% endif %}{% if not loop.last %} &middot; {% endif %}{% endfor %}
+                {% if bd.overtime.holiday_hours %}<br/><i>* Sunday / Poya</i>{% endif %}
+              </td>
+            </tr>
+            {% endif %}
+          </table>
+          {% endif %}
+        </td>
+
+        <!-- ── Absent & LWP Deduction ── -->
+        <td width="51%">
+          {% if bd.absence %}
+          <table width="100%" cellpadding="3" cellspacing="0"
+                 style="border-collapse: collapse; border: 1px solid #ffcdd2;">
+            <tr style="background-color: #fdecea;">
+              <td colspan="2" style="font-weight: bold; color: #c62828; padding: 4px 6px;">
+                Absent &amp; LWP Deduction
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 2px 6px;">Monthly gross (excl. overtime)</td>
+              <td style="padding: 2px 6px; text-align: right;">{{ "%.2f" | format(bd.absence.fixed_gross) }}</td>
+            </tr>
+            <tr>
+              <td style="padding: 2px 6px;">&divide; Working days in period</td>
+              <td style="padding: 2px 6px; text-align: right;">{{ bd.absence.working_days | round(1) }}</td>
+            </tr>
+            <tr>
+              <td style="padding: 2px 6px;">= Rate per day</td>
+              <td style="padding: 2px 6px; text-align: right;">{{ "%.2f" | format(bd.absence.daily_rate) }}</td>
+            </tr>
+            <tr>
+              <td style="padding: 2px 6px;">
+                &times; Unpaid days
+                <span style="color: #666666;">(Absent {{ bd.absence.absent_days | round(1) }} + LWP {{ bd.absence.lwp_days | round(1) }})</span>
+              </td>
+              <td style="padding: 2px 6px; text-align: right;">{{ bd.absence.unpaid_days | round(1) }}</td>
+            </tr>
+            <tr style="border-top: 1px solid #ffcdd2;">
+              <td style="padding: 3px 6px; font-weight: bold;">Deduction</td>
+              <td style="padding: 3px 6px; text-align: right; font-weight: bold; color: #c62828;">
+                {{ "%.2f" | format(bd.absence.amount) }}
+              </td>
+            </tr>
+            {% if bd.absence.dates or bd.absence.unmarked_days %}
+            <tr>
+              <td colspan="2" style="padding: 3px 6px; color: #666666; line-height: 1.5;">
+                {% for d in bd.absence.dates %}{{ d.date }}&nbsp;({{ d.label }}){% if not loop.last %} &middot; {% endif %}{% endfor %}
+                {% if bd.absence.unmarked_days %}{% if bd.absence.dates %}<br/>{% endif %}<i>{{ bd.absence.unmarked_days | round(1) }} day(s) with no attendance recorded</i>{% endif %}
+              </td>
+            </tr>
+            {% endif %}
+          </table>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+
+    {% if bd.paid_leave %}
+    <p style="font-size: 10px; color: #555555; margin: 5px 0 0 0;">
+      <b>Paid leave used this period:</b>
+      {% for lt, days in bd.paid_leave.items() %}{{ lt }} {{ days | round(1) }} day(s){% if not loop.last %} &middot; {% endif %}{% endfor %}
+      &mdash; these days did not reduce your pay.
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Signature Section -->
+  <table width="100%" cellpadding="3" cellspacing="0" style="margin-top: 18px; font-size: 11px;">
+    <tr>
+      <td width="50%" style="text-align: center;">
+        ___________________________<br/>
+        <b>Employee Signature</b><br/>
+        {{ doc.employee_name }}
+      </td>
+      <td width="50%" style="text-align: center;">
+        ___________________________<br/>
+        <b>Authorized Signatory</b><br/>
+        {{ doc.company }}
+      </td>
+    </tr>
+  </table>
+
+  <p style="font-size: 9px; color: #777777; text-align: center; margin-top: 8px;">
+    This is a system generated salary slip and does not require a physical signature.
+  </p>
+</div>

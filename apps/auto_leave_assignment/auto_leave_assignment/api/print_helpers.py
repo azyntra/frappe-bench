@@ -109,7 +109,7 @@ def _absence_breakdown(doc):
     unpaid = absent + lwp
     daily  = (fixed_gross / working_days) if working_days else 0.0
 
-    dates = []
+    dates, accounted = [], 0.0
     for a in frappe.get_all(
         "Attendance",
         filters={
@@ -123,12 +123,22 @@ def _absence_breakdown(doc):
     ):
         # only unpaid days belong in this list
         if a.status == "Absent":
-            label = "Absent"
+            label, weight = "Absent", 1.0
         elif a.leave_type and frappe.db.get_value("Leave Type", a.leave_type, "is_lwp"):
-            label = "LWP" if a.status == "On Leave" else "LWP ½"
+            if a.status == "On Leave":
+                label, weight = "LWP", 1.0
+            else:
+                label, weight = "LWP ½", 0.5
         else:
             continue
+        accounted += weight
         dates.append({"date": formatdate(a.attendance_date, "dd MMM"), "label": label})
+
+    # Days with NO attendance record at all are still charged as absent
+    # (Payroll Settings: consider_unmarked_attendance_as = "Absent"), so they
+    # can never appear in the list above. Report them explicitly rather than
+    # leaving a deduction that looks unsupported.
+    unmarked = round(unpaid - accounted, 2)
 
     return {
         "amount":       flt(row.amount),
@@ -139,6 +149,7 @@ def _absence_breakdown(doc):
         "lwp_days":     lwp,
         "unpaid_days":  unpaid,
         "dates":        dates,
+        "unmarked_days": unmarked if unmarked > 0 else 0,
     }
 
 
