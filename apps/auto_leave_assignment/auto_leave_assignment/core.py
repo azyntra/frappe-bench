@@ -59,6 +59,26 @@ def _leave_chain():
     return chain
 
 
+def _is_leave_eligible(employee, date):
+    """Only the monthly fixed (FT-) staff consume leave for an absence.
+
+    The day/target team are paid `daily rate x days worked`, so an absent day
+    already costs them that day's pay — the arithmetic handles it. Granting
+    them Casual/Annual on top would mark the day PAID, so they would be paid
+    for a day they did not work; booking LWP would be harmless but pointless.
+    Either way the leave chain has no business touching them.
+    """
+    try:
+        from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+            get_assigned_salary_structure,
+        )
+        structure = str(get_assigned_salary_structure(employee, date) or "")
+        return structure.startswith("FT-")
+    except Exception:
+        # unknown pay model — stay out of it rather than risk paying a day off
+        return False
+
+
 def _is_lwp_type(leave_type):
     return bool(frappe.db.get_value("Leave Type", leave_type, "is_lwp"))
 
@@ -260,6 +280,11 @@ def assign_leave_for_attendance(attendance_doc, called_from_scheduler=False):
     att_date = getdate(attendance_doc.attendance_date)
     status   = attendance_doc.status
     if status not in ("Absent", "Half Day"):
+        return
+
+    # Day-team staff are paid by days worked, so absence needs no leave —
+    # see _is_leave_eligible().
+    if not _is_leave_eligible(emp, att_date):
         return
 
     original_status          = status

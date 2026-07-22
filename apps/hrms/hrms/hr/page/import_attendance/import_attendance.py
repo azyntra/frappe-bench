@@ -17,26 +17,50 @@ from datetime import datetime, timedelta, date
 #  (overtime_type + actual_overtime_duration) so the native HRMS
 #  Overtime Slip → Additional Salary flow pays it out.
 OT_TYPE_NAME  = "Staff OT"
-OT_MIN_MINUTES = 30          # ignore OT shorter than this many minutes past shift end
-_ot_eligibility_cache = {}
+OT_MIN_MINUTES = 30          # ignore overtime shorter than this many minutes
+FIXED_STRUCTURE_PREFIX = "FT-"
+DAY_STRUCTURE_PREFIX   = "Day Team"
+_pay_profile_cache = {}
 
 
-def _is_fixed_ot_employee(employee, work_date):
-    """True if the employee's assigned Salary Structure name starts with 'FT-'."""
+def clear_pay_profile_cache():
+    """Drop memoised profiles — needed after salary structures change, since
+    the cache is process-local and would otherwise outlive the change."""
+    _pay_profile_cache.clear()
+
+
+def _pay_profile(employee, work_date):
+    """Which pay model the employee is on: 'fixed' | 'day' | None.
+
+    Read from the assigned Salary Structure name: 'FT-…' are the monthly fixed
+    staff, 'Day Team…' are paid a daily rate. One source of truth for both the
+    overtime rule and whether the leave chain applies, so the two can never
+    disagree about who is who.
+    """
     key = (employee, str(work_date))
-    if key in _ot_eligibility_cache:
-        return _ot_eligibility_cache[key]
-    eligible = False
+    if key in _pay_profile_cache:
+        return _pay_profile_cache[key]
+
+    profile = None
     try:
         from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
             get_assigned_salary_structure,
         )
-        structure = get_assigned_salary_structure(employee, work_date)
-        eligible = bool(structure) and str(structure).startswith("FT-")
+        structure = str(get_assigned_salary_structure(employee, work_date) or "")
+        if structure.startswith(FIXED_STRUCTURE_PREFIX):
+            profile = "fixed"
+        elif structure.startswith(DAY_STRUCTURE_PREFIX):
+            profile = "day"
     except Exception:
-        eligible = False
-    _ot_eligibility_cache[key] = eligible
-    return eligible
+        profile = None
+
+    _pay_profile_cache[key] = profile
+    return profile
+
+
+def _is_fixed_ot_employee(employee, work_date):
+    """Back-compat shim — other modules (backfill_overtime.py) import this."""
+    return _pay_profile(employee, work_date) == "fixed"
 
 
 def _round_to_half(hours):
@@ -60,27 +84,43 @@ def _is_holiday_for(employee, work_date):
         return False
 
 
-def _overtime_hours(in_time, out_time, shift_end, is_holiday):
+def _overtime_hours(in_time, out_time, shift_end, is_holiday,
+                    shift_start=None, profile="fixed"):
     """Overtime hours for one day, rounded to nearest 0.5.
 
-    On a HOLIDAY the entire day worked is overtime: the monthly salary covers
-    only non-holiday working days (Payroll Settings has
-    include_holidays_in_total_working_days = 0), so a Sunday/Poya shift is not
-    paid for at all otherwise. Measuring it from shift end would return 0 for a
-    normal 08:00-17:00 Sunday, i.e. a full extra day worked for free.
+    HOLIDAY (either profile) — the whole day worked is overtime. The monthly
+    salary covers only non-holiday working days (Payroll Settings has
+    include_holidays_in_total_working_days = 0), so a Sunday/Poya shift is
+    otherwise unpaid; measuring from shift end would return 0 for a normal
+    08:00-17:00 Sunday, i.e. a full extra day worked for free.
 
-    On a normal working day only the time past the scheduled shift end counts.
+    NORMAL DAY, 'fixed' (FT- monthly staff) — ONLY time past the scheduled
+    shift end. Early arrival is deliberately not counted: they habitually clock
+    in about an hour early (3,116 punches at 07:00 against an 08:00 shift),
+    which is arrival habit rather than work, and paying it would add ~676 hrs
+    a month. This branch is unchanged from before the day team existed.
 
-    Late-outs / short stints below OT_MIN_MINUTES are ignored either way.
+    NORMAL DAY, 'day' (day / target team) — time worked BEFORE shift start AND
+    after shift end both count. Their shift varies by date (Normal 08:00-17:00
+    vs Target 08:00-15:00 / 06:00-15:00 / 06:00-14:30), so the boundaries come
+    from whichever shift is rostered for that date.
+
+    OT_MIN_MINUTES applies to the COMBINED total rather than each side, so two
+    short spells either end of the day can still add up to payable time.
+
+    `shift_start` and `profile` are keyword arguments with back-compatible
+    defaults so existing callers keep the original fixed-staff behaviour.
     """
     if is_holiday:
         if not in_time or not out_time or out_time <= in_time:
             return 0.0
         minutes = (out_time - in_time).total_seconds() / 60.0
     else:
-        if not out_time or not shift_end or out_time <= shift_end:
-            return 0.0
-        minutes = (out_time - shift_end).total_seconds() / 60.0
+        minutes = 0.0
+        if out_time and shift_end and out_time > shift_end:
+            minutes += (out_time - shift_end).total_seconds() / 60.0
+        if profile == "day" and in_time and shift_start and in_time < shift_start:
+            minutes += (shift_start - in_time).total_seconds() / 60.0
 
     if minutes < OT_MIN_MINUTES:
         return 0.0
@@ -256,6 +296,15 @@ def _get_shift_assignment(employee, work_date):
     • Use raw SQL so we can express the NULL end_date condition correctly
       in a single query instead of fetching and checking in Python.
     • Exclude cancelled records (docstatus=2) only.
+
+    Ordering (matters for the day/target team)
+    ──────────────────────────────────────────
+    Staff can hold a long-range assignment AND a single-day override for the
+    same date — the day team is rostered per date onto Target shifts. The
+    NARROWEST range wins, so a one-day override always beats a year-long
+    default; previously this worked only by accident, because a single-day row
+    happens to have a later start_date. `modified DESC` makes ties
+    deterministic, and Inactive assignments are excluded.
     """
     try:
         result = frappe.db.sql(
@@ -265,8 +314,11 @@ def _get_shift_assignment(employee, work_date):
             WHERE  employee   = %(employee)s
               AND  start_date <= %(work_date)s
               AND  docstatus  != 2
+              AND  IFNULL(status, 'Active') = 'Active'
               AND  (end_date IS NULL OR end_date >= %(work_date)s)
-            ORDER BY start_date DESC
+            ORDER BY DATEDIFF(IFNULL(end_date, '2999-12-31'), start_date) ASC,
+                     start_date DESC,
+                     modified DESC
             LIMIT 1
             """,
             {'employee': employee, 'work_date': work_date},
@@ -383,14 +435,18 @@ def _process_with_shift(employee, work_date, shift_type_name):
         if out_time and out_time < (shift_end - timedelta(minutes=early_grace)):
             early_exit = True
 
-    # ── Overtime: fixed (FT-) staff only ──
-    # normal day  -> hours past scheduled shift end
-    # holiday     -> the WHOLE day worked (see _overtime_hours)
+    # ── Overtime ──
+    # fixed staff -> hours past scheduled shift end   (unchanged)
+    # day team    -> before shift start AND after shift end
+    # holiday     -> the WHOLE day worked, either profile (see _overtime_hours)
+    # Boundaries come from the shift rostered for THIS date, so a day-team
+    # member on Target on Monday and Normal on Tuesday is measured against
+    # 15:00 and 17:00 respectively.
     overtime_type   = None
     overtime_hours  = 0.0
     std_working_hrs = None
-    if status == 'Present' and (out_time or single_punch) \
-            and _is_fixed_ot_employee(employee, work_date):
+    profile = _pay_profile(employee, work_date)
+    if status == 'Present' and (out_time or single_punch) and profile:
         # no scheduled hours exist on a holiday
         std_working_hrs = 0.0 if is_holiday else round(
             (shift_end - shift_start).total_seconds() / 3600.0, 2)
@@ -398,13 +454,16 @@ def _process_with_shift(employee, work_date, shift_type_name):
         if single_punch:
             # With no out-punch we credit the scheduled shift, so on a HOLIDAY
             # (where the whole day is overtime) that shift is the overtime. On
-            # a normal day it yields nothing, because staying past shift end is
-            # exactly what we cannot evidence.
+            # a normal day it yields nothing, because working beyond the shift
+            # is exactly what we cannot evidence.
             overtime_hours = _round_to_half(
                 (shift_end - shift_start).total_seconds() / 3600.0
             ) if is_holiday else 0.0
         else:
-            overtime_hours = _overtime_hours(in_time, out_time, shift_end, is_holiday)
+            overtime_hours = _overtime_hours(
+                in_time, out_time, shift_end, is_holiday,
+                shift_start=shift_start, profile=profile,
+            )
 
         if overtime_hours > 0:
             overtime_type = OT_TYPE_NAME
@@ -446,7 +505,7 @@ def _process_without_shift(employee, work_date):
     overtime_hours  = 0.0
     std_working_hrs = None
     if out_time and _is_holiday_for(employee, work_date) \
-            and _is_fixed_ot_employee(employee, work_date):
+            and _pay_profile(employee, work_date):
         std_working_hrs = 0.0
         overtime_hours  = _overtime_hours(in_time, out_time, None, True)
         if overtime_hours > 0:
