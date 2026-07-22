@@ -12,7 +12,7 @@ testable and the template stays readable.
 """
 
 import frappe
-from frappe.utils import flt, formatdate, getdate
+from frappe.utils import add_days, flt, formatdate, getdate
 
 
 def _is_holiday(employee, date):
@@ -24,6 +24,65 @@ def _is_holiday(employee, date):
         ))
     except Exception:
         return False
+
+
+def _holiday_set(employee, start_date, end_date):
+    """All holiday dates in the range, as a set of date objects."""
+    try:
+        from hrms.utils.holiday_list import get_holiday_dates_between_range
+        return {
+            getdate(d) for d in get_holiday_dates_between_range(
+                employee, start_date, end_date, raise_exception_for_holiday_list=False
+            ) or []
+        }
+    except Exception:
+        return set()
+
+
+def _fmt_day(date):
+    """'26 Feb (Thu)' — the exact day, which is what people check first."""
+    d = getdate(date)
+    return f"{formatdate(d, 'dd MMM')} ({formatdate(d, 'EEE')})"
+
+
+def _unmarked_dates(doc):
+    """Working days in the period with NO Attendance record at all.
+
+    Payroll charges these as absent (Payroll Settings:
+    consider_unmarked_attendance_as = "Absent") but there is no document to
+    point at, so the exact dates have to be derived: every day in the period,
+    minus holidays, minus days that do have attendance, minus any day outside
+    the employment window.
+    """
+    holidays = _holiday_set(doc.employee, doc.start_date, doc.end_date)
+    marked = {
+        getdate(d) for d in frappe.get_all(
+            "Attendance",
+            filters={
+                "employee":        doc.employee,
+                "docstatus":       ["!=", 2],
+                "attendance_date": ["between", [doc.start_date, doc.end_date]],
+            },
+            pluck="attendance_date",
+        )
+    }
+
+    joining, relieving = frappe.db.get_value(
+        "Employee", doc.employee, ["date_of_joining", "relieving_date"]
+    ) or (None, None)
+
+    out = []
+    day = getdate(doc.start_date)
+    last = getdate(doc.end_date)
+    while day <= last:
+        outside_employment = (
+            (joining and day < getdate(joining))
+            or (relieving and day > getdate(relieving))
+        )
+        if day not in holidays and day not in marked and not outside_employment:
+            out.append(day)
+        day = add_days(day, 1)
+    return out
 
 
 def _overtime_breakdown(doc):
@@ -68,6 +127,7 @@ def _overtime_breakdown(doc):
                 normal_h += hrs
             details.append({
                 "date":       formatdate(d.date, "dd MMM"),
+                "day":        formatdate(d.date, "EEE"),
                 "hours":      hrs,
                 "is_holiday": holiday,
             })
@@ -132,13 +192,25 @@ def _absence_breakdown(doc):
         else:
             continue
         accounted += weight
-        dates.append({"date": formatdate(a.attendance_date, "dd MMM"), "label": label})
+        dates.append({
+            "date":  _fmt_day(a.attendance_date),
+            "label": label,
+            "sort":  getdate(a.attendance_date),
+        })
 
     # Days with NO attendance record at all are still charged as absent
     # (Payroll Settings: consider_unmarked_attendance_as = "Absent"), so they
-    # can never appear in the list above. Report them explicitly rather than
-    # leaving a deduction that looks unsupported.
+    # never appear above. Derive the exact dates so every charged day is named.
     unmarked = round(unpaid - accounted, 2)
+    if unmarked > 0:
+        for d in _unmarked_dates(doc):
+            dates.append({
+                "date":  _fmt_day(d),
+                "label": "No attendance",
+                "sort":  d,
+            })
+
+    dates.sort(key=lambda x: x["sort"])
 
     return {
         "amount":       flt(row.amount),
