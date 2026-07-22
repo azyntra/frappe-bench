@@ -246,6 +246,79 @@ def _paid_leave_summary(doc):
     return out or None
 
 
+def _leave_days_detail(doc):
+    """Every non-worked day in the period, dated, with the leave type applied.
+
+    One unified list so an employee can see exactly which dates were charged
+    to Casual / Annual / LWP, and which were not covered by leave at all.
+    Leave Applications are expanded date by date (they may span days) and
+    clipped to the payroll period.
+    """
+    holidays = _holiday_set(doc.employee, doc.start_date, doc.end_date)
+    period_start, period_end = getdate(doc.start_date), getdate(doc.end_date)
+    entries, seen = [], set()
+
+    for la in frappe.get_all(
+        "Leave Application",
+        filters={
+            "employee":  doc.employee,
+            "docstatus": 1,
+            "status":    "Approved",
+            "from_date": ["<=", doc.end_date],
+            "to_date":   [">=", doc.start_date],
+        },
+        fields=["leave_type", "from_date", "to_date", "half_day", "half_day_date"],
+        order_by="from_date asc",
+    ):
+        is_lwp = bool(frappe.db.get_value("Leave Type", la.leave_type, "is_lwp"))
+        include_holiday = bool(frappe.db.get_value("Leave Type", la.leave_type, "include_holiday"))
+
+        day = max(getdate(la.from_date), period_start)
+        stop = min(getdate(la.to_date), period_end)
+        while day <= stop:
+            # a holiday inside a leave range is not consumed unless the type says so
+            if day in holidays and not include_holiday:
+                day = add_days(day, 1)
+                continue
+            half = bool(la.half_day) and la.half_day_date and getdate(la.half_day_date) == day
+            key = (day, la.leave_type)
+            if key not in seen:
+                seen.add(key)
+                entries.append({
+                    "sort":  day,
+                    "date":  _fmt_day(day),
+                    "type":  la.leave_type,
+                    "days":  0.5 if half else 1.0,
+                    "paid":  not is_lwp,
+                })
+            day = add_days(day, 1)
+
+    # Absent days that no leave covered at all
+    for a in frappe.get_all(
+        "Attendance",
+        filters={
+            "employee":        doc.employee,
+            "docstatus":       1,
+            "status":          "Absent",
+            "attendance_date": ["between", [doc.start_date, doc.end_date]],
+        },
+        fields=["attendance_date"],
+    ):
+        d = getdate(a.attendance_date)
+        if not any(e["sort"] == d for e in entries):
+            entries.append({"sort": d, "date": _fmt_day(d), "type": "Absent (no leave)",
+                            "days": 1.0, "paid": False})
+
+    # working days with no attendance record at all
+    for d in _unmarked_dates(doc):
+        if not any(e["sort"] == d for e in entries):
+            entries.append({"sort": d, "date": _fmt_day(d), "type": "No attendance",
+                            "days": 1.0, "paid": False})
+
+    entries.sort(key=lambda e: e["sort"])
+    return entries or None
+
+
 def get_slip_breakdown(doc):
     """Entry point used by the Salary Slip print format."""
     try:
@@ -253,6 +326,7 @@ def get_slip_breakdown(doc):
             "overtime":   _overtime_breakdown(doc),
             "absence":    _absence_breakdown(doc),
             "paid_leave": _paid_leave_summary(doc),
+            "leave_days": _leave_days_detail(doc),
         }
     except Exception:
         # a print format must never hard-fail
@@ -260,4 +334,4 @@ def get_slip_breakdown(doc):
             message=frappe.get_traceback(),
             title=f"Salary slip breakdown failed — {getattr(doc, 'name', '?')}",
         )
-        return {"overtime": None, "absence": None, "paid_leave": None}
+        return {"overtime": None, "absence": None, "paid_leave": None, "leave_days": None}

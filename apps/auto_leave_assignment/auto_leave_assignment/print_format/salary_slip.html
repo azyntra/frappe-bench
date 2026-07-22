@@ -227,28 +227,43 @@
     </tr>
   </table>
 
-  {% if bd.absence.dates %}
-  {% set acols = 3 %}
-  {% set an = bd.absence.dates | length %}
-  {% set arows = (an + acols - 1) // acols %}
+  {% endif %}
+
+  {% if bd.leave_days %}
+  <!-- ─────── Which days were taken as leave ─────── -->
+  <table class="p0 w" cellpadding="0" cellspacing="0" style="margin-bottom: 3px;">
+    <tr>
+      <td class="sec">LEAVE &amp; ABSENCE DAYS</td>
+      <td style="text-align: right; font-size: 9px; color: #666;">
+        {% if bd.paid_leave %}{% for lt, days in bd.paid_leave.items() %}{{ lt }} {{ days | round(1) }}d{% if not loop.last %} &middot; {% endif %}{% endfor %} paid{% endif %}
+      </td>
+    </tr>
+  </table>
+  {% set lcols = 3 %}
+  {% set ln = bd.leave_days | length %}
+  {% set lrows = (ln + lcols - 1) // lcols %}
   <table class="grid w" cellpadding="0" cellspacing="0"
-         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 5px;">
+         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 4px;">
     <thead>
-      <tr style="background: #fdf3f3; color: #666;">
-        {% for i in range(acols) %}
-        <th colspan="2" style="text-align: left; font-weight: 600;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">Unpaid day</th>
+      <tr style="background: #f4f7f4; color: #666;">
+        {% for i in range(lcols) %}
+        <th style="text-align: left; font-weight: 600;">Date</th>
+        <th style="text-align: left; font-weight: 600;">Applied as</th>
+        <th style="text-align: right; font-weight: 600;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">Days</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for r in range(arows) %}
+      {% for r in range(lrows) %}
       <tr>
-        {% for c in range(acols) %}
-          {% set idx = r * acols + c %}
-          {% if idx < an %}{% set d = bd.absence.dates[idx] %}
+        {% for c in range(lcols) %}
+          {% set idx = r * lcols + c %}
+          {% if idx < ln %}{% set d = bd.leave_days[idx] %}
             <td style="border-top: 1px solid #eee;">{{ d.date }}</td>
-            <td style="border-top: 1px solid #eee; color: #888;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">{{ d.label }}</td>
+            <td style="border-top: 1px solid #eee;{% if not d.paid %}color:#b00020;{% else %}color:{{ GREEN }};{% endif %}">{{ d.type }}</td>
+            <td style="border-top: 1px solid #eee; text-align: right;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">{{ "%.1f" | format(d.days) }}</td>
           {% else %}
+            <td style="border-top: 1px solid #eee;"></td>
             <td style="border-top: 1px solid #eee;"></td>
             <td style="border-top: 1px solid #eee;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}"></td>
           {% endif %}
@@ -257,14 +272,9 @@
       {% endfor %}
     </tbody>
   </table>
-  {% endif %}
-  {% endif %}
-
-  {% if bd.paid_leave %}
-  <div style="font-size: 9px; color: #555; margin-bottom: 4px;">
-    <b>Paid leave used:</b>
-    {% for lt, days in bd.paid_leave.items() %}{{ lt }} {{ days | round(1) }} day(s){% if not loop.last %} &middot; {% endif %}{% endfor %}
-    &mdash; these days did not reduce your pay.
+  <div style="font-size: 8.5px; color: #777; margin-bottom: 4px;">
+    <span style="color: {{ GREEN }};">Green</span> = paid from your leave balance (no deduction) &middot;
+    <span style="color: #b00020;">Red</span> = unpaid, included in the deduction above.
   </div>
   {% endif %}
   {% endif %}
