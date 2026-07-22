@@ -336,6 +336,20 @@ def _process_with_shift(employee, work_date, shift_type_name):
     if shift_end < shift_start:
         shift_end += timedelta(days=1)
 
+    # ── Single punch: clocked IN but never OUT ──────────────────────────
+    # Without an out-time the day computes to 0 hours, drops under the shift's
+    # absent threshold and is marked Absent/Half Day — which then silently
+    # consumes the employee's leave balance and eventually pays them nothing,
+    # even though the punch proves they were on site. Credit the scheduled
+    # shift instead.
+    #
+    # out_time is deliberately left NULL rather than back-filled with the shift
+    # end: inventing a punch that never happened would misrepresent the record.
+    # working_hours carries the credited time instead.
+    single_punch = bool(in_time and not out_time)
+    if single_punch:
+        mins = (shift_end - shift_start).total_seconds() / 60
+
     # A holiday has no scheduled shift, so shift thresholds and late/early
     # rules must not be applied to it. Anyone with punches on a holiday came
     # in to work — mark them Present so the whole day can be paid as overtime.
@@ -348,7 +362,7 @@ def _process_with_shift(employee, work_date, shift_type_name):
     absent_hrs    = (shift.working_hours_threshold_for_absent     or 0)
     actual_hrs    = mins / 60.0
 
-    if is_holiday:
+    if is_holiday or single_punch:
         status = 'Present'
     elif absent_hrs and actual_hrs < absent_hrs:
         status = 'Absent'
@@ -375,11 +389,23 @@ def _process_with_shift(employee, work_date, shift_type_name):
     overtime_type   = None
     overtime_hours  = 0.0
     std_working_hrs = None
-    if status == 'Present' and out_time and _is_fixed_ot_employee(employee, work_date):
+    if status == 'Present' and (out_time or single_punch) \
+            and _is_fixed_ot_employee(employee, work_date):
         # no scheduled hours exist on a holiday
         std_working_hrs = 0.0 if is_holiday else round(
             (shift_end - shift_start).total_seconds() / 3600.0, 2)
-        overtime_hours = _overtime_hours(in_time, out_time, shift_end, is_holiday)
+
+        if single_punch:
+            # With no out-punch we credit the scheduled shift, so on a HOLIDAY
+            # (where the whole day is overtime) that shift is the overtime. On
+            # a normal day it yields nothing, because staying past shift end is
+            # exactly what we cannot evidence.
+            overtime_hours = _round_to_half(
+                (shift_end - shift_start).total_seconds() / 3600.0
+            ) if is_holiday else 0.0
+        else:
+            overtime_hours = _overtime_hours(in_time, out_time, shift_end, is_holiday)
+
         if overtime_hours > 0:
             overtime_type = OT_TYPE_NAME
 
