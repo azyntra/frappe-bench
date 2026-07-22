@@ -34,7 +34,8 @@ from datetime import datetime, timedelta
 from hrms.hr.page.import_attendance.import_attendance import (
     OT_TYPE_NAME,
     _is_fixed_ot_employee,
-    _overtime_after_shift_end,
+    _is_holiday_for,
+    _overtime_hours,
     _get_shift_assignment,
     _get_shift_details,
     _td_seconds,
@@ -89,31 +90,37 @@ def backfill_overtime(from_date, to_date, dry_run=True):
             stats["eligible"] += 1
 
             out_time = _to_dt(rec.out_time)
+            in_time  = _to_dt(rec.in_time)
             if not out_time:
                 stats["no_out"] += 1
                 continue
 
+            # On a holiday the whole day counts, so no shift is required.
+            is_holiday = _is_holiday_for(rec.employee, str(rec.attendance_date))
+
+            shift_start = shift_end = None
             shift_name = rec.shift or _get_shift_assignment(rec.employee, str(rec.attendance_date))
-            if not shift_name:
+            if shift_name:
+                shift = _get_shift_details(shift_name)
+                if shift:
+                    shift_start, shift_end = _shift_bounds(shift, rec.attendance_date)
+
+            if not shift_end and not is_holiday:
                 stats["no_shift"] += 1
                 continue
 
-            shift = _get_shift_details(shift_name)
-            if not shift:
-                stats["no_shift"] += 1
-                continue
-
-            shift_start, shift_end = _shift_bounds(shift, rec.attendance_date)
-            ot_hours = _overtime_after_shift_end(out_time, shift_end)
+            ot_hours = _overtime_hours(in_time, out_time, shift_end, is_holiday)
 
             if ot_hours <= 0:
                 stats["zero_ot"] += 1
                 continue
 
-            std_hours = round((shift_end - shift_start).total_seconds() / 3600.0, 2)
+            std_hours = 0.0 if is_holiday else round(
+                (shift_end - shift_start).total_seconds() / 3600.0, 2)
 
-            print(f"  {rec.attendance_date}  {rec.employee:<14} shift={shift_name:<16} "
-                  f"out={out_time.strftime('%H:%M')}  end={shift_end.strftime('%H:%M')}  OT={ot_hours}h")
+            print(f"  {rec.attendance_date}  {rec.employee:<14} "
+                  f"{'HOLIDAY' if is_holiday else 'shift=' + str(shift_name):<16} "
+                  f"out={out_time.strftime('%H:%M')}  OT={ot_hours}h")
 
             if not dry_run:
                 frappe.db.set_value(

@@ -43,12 +43,44 @@ def _round_to_half(hours):
     return math.floor(hours * 2 + 0.5) / 2.0
 
 
-def _overtime_after_shift_end(out_time, shift_end):
-    """Hours worked past scheduled shift end, rounded to nearest 0.5.
-    Late-outs shorter than OT_MIN_MINUTES are ignored (return 0)."""
-    if not out_time or not shift_end or out_time <= shift_end:
-        return 0.0
-    minutes = (out_time - shift_end).total_seconds() / 60.0
+def _is_holiday_for(employee, work_date):
+    """True if the date is a holiday (Sunday / Poya / public) for this employee.
+
+    Resolved through the Holiday List Assignment doctype, the same way Leave
+    Application does it — NOT via the legacy Employee.holiday_list /
+    Company.default_holiday_list fields, which are empty on this site.
+    """
+    try:
+        from hrms.utils.holiday_list import get_holiday_dates_between_range
+        return bool(get_holiday_dates_between_range(
+            employee, work_date, work_date, raise_exception_for_holiday_list=False
+        ))
+    except Exception:
+        return False
+
+
+def _overtime_hours(in_time, out_time, shift_end, is_holiday):
+    """Overtime hours for one day, rounded to nearest 0.5.
+
+    On a HOLIDAY the entire day worked is overtime: the monthly salary covers
+    only non-holiday working days (Payroll Settings has
+    include_holidays_in_total_working_days = 0), so a Sunday/Poya shift is not
+    paid for at all otherwise. Measuring it from shift end would return 0 for a
+    normal 08:00-17:00 Sunday, i.e. a full extra day worked for free.
+
+    On a normal working day only the time past the scheduled shift end counts.
+
+    Late-outs / short stints below OT_MIN_MINUTES are ignored either way.
+    """
+    if is_holiday:
+        if not in_time or not out_time or out_time <= in_time:
+            return 0.0
+        minutes = (out_time - in_time).total_seconds() / 60.0
+    else:
+        if not out_time or not shift_end or out_time <= shift_end:
+            return 0.0
+        minutes = (out_time - shift_end).total_seconds() / 60.0
+
     if minutes < OT_MIN_MINUTES:
         return 0.0
     ot = _round_to_half(minutes / 60.0)
@@ -303,12 +335,21 @@ def _process_with_shift(employee, work_date, shift_type_name):
     if shift_end < shift_start:
         shift_end += timedelta(days=1)
 
+    # A holiday has no scheduled shift, so shift thresholds and late/early
+    # rules must not be applied to it. Anyone with punches on a holiday came
+    # in to work — mark them Present so the whole day can be paid as overtime.
+    # Without this, a short Sunday would be marked Absent/Half Day and would
+    # then be skipped by the overtime block below.
+    is_holiday = _is_holiday_for(employee, work_date)
+
     # ── Determine status ─────────────────────────────────────
     half_day_hrs  = (shift.working_hours_threshold_for_half_day  or 0)
     absent_hrs    = (shift.working_hours_threshold_for_absent     or 0)
     actual_hrs    = mins / 60.0
 
-    if absent_hrs and actual_hrs < absent_hrs:
+    if is_holiday:
+        status = 'Present'
+    elif absent_hrs and actual_hrs < absent_hrs:
         status = 'Absent'
     elif half_day_hrs and actual_hrs < half_day_hrs:
         status = 'Half Day'
@@ -321,18 +362,23 @@ def _process_with_shift(employee, work_date, shift_type_name):
     late_grace   = int(shift.late_entry_grace_period  or 0)
     early_grace  = int(shift.early_exit_grace_period   or 0)
 
-    if in_time and in_time > (shift_start + timedelta(minutes=late_grace)):
-        late_entry = True
-    if out_time and out_time < (shift_end - timedelta(minutes=early_grace)):
-        early_exit = True
+    if not is_holiday:
+        if in_time and in_time > (shift_start + timedelta(minutes=late_grace)):
+            late_entry = True
+        if out_time and out_time < (shift_end - timedelta(minutes=early_grace)):
+            early_exit = True
 
-    # ── Overtime: fixed (FT-) staff only, time worked past shift end ──
+    # ── Overtime: fixed (FT-) staff only ──
+    # normal day  -> hours past scheduled shift end
+    # holiday     -> the WHOLE day worked (see _overtime_hours)
     overtime_type   = None
     overtime_hours  = 0.0
     std_working_hrs = None
     if status == 'Present' and out_time and _is_fixed_ot_employee(employee, work_date):
-        std_working_hrs = round((shift_end - shift_start).total_seconds() / 3600.0, 2)
-        overtime_hours  = _overtime_after_shift_end(out_time, shift_end)
+        # no scheduled hours exist on a holiday
+        std_working_hrs = 0.0 if is_holiday else round(
+            (shift_end - shift_start).total_seconds() / 3600.0, 2)
+        overtime_hours = _overtime_hours(in_time, out_time, shift_end, is_holiday)
         if overtime_hours > 0:
             overtime_type = OT_TYPE_NAME
 
@@ -366,10 +412,26 @@ def _process_without_shift(employee, work_date):
     # Simple rule: if there's at least one punch → Present
     status = 'Present'
 
+    # Holiday overtime does not need a shift — the whole day worked counts.
+    # (Non-holiday OT is impossible here: with no shift there is no scheduled
+    # end time to measure "past shift end" against.)
+    overtime_type   = None
+    overtime_hours  = 0.0
+    std_working_hrs = None
+    if out_time and _is_holiday_for(employee, work_date) \
+            and _is_fixed_ot_employee(employee, work_date):
+        std_working_hrs = 0.0
+        overtime_hours  = _overtime_hours(in_time, out_time, None, True)
+        if overtime_hours > 0:
+            overtime_type = OT_TYPE_NAME
+
     return _upsert_attendance(
         employee, work_date, status,
         in_time, out_time,
-        None, round(hrs, 2)
+        None, round(hrs, 2),
+        overtime_type=overtime_type,
+        actual_overtime_duration=overtime_hours,
+        standard_working_hours=std_working_hrs,
     )
 
 
