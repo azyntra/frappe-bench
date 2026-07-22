@@ -37,6 +37,15 @@ fixtures = [
 ]
 
 # ------------------------------------------------------------------
+# Jinja — exposes get_slip_breakdown() to the Salary Slip print format
+# ------------------------------------------------------------------
+jinja = {
+    "methods": [
+        "auto_leave_assignment.api.print_helpers.get_slip_breakdown",
+    ],
+}
+
+# ------------------------------------------------------------------
 # Permissions
 # ------------------------------------------------------------------
 has_permission = {
