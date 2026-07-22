@@ -1,4 +1,4 @@
-<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; font-size: 11px; line-height: 1.35;">
+<div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; line-height: 1.3;">
 
   {% set emp = frappe.get_doc("Employee", doc.employee) %}
   {% set website_settings = frappe.get_doc("Website Settings", "Website Settings") %}
@@ -7,54 +7,49 @@
   {% set RULE  = "#d8d8d8" %}
 
   <!-- ══════════════ HEADER ══════════════ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 10px;">
+  <table class="p0 w" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
     <tr valign="middle">
-      <td width="70">
+      <td width="66">
         {% if website_settings.banner_image %}
-          <img src="{{ website_settings.banner_image }}" style="max-height: 52px; max-width: 68px;"/>
+          <img src="{{ website_settings.banner_image }}" style="max-height: 48px; max-width: 62px;"/>
         {% elif website_settings.top_bar_img %}
-          <img src="{{ website_settings.top_bar_img }}" style="max-height: 52px; max-width: 68px;"/>
+          <img src="{{ website_settings.top_bar_img }}" style="max-height: 48px; max-width: 62px;"/>
         {% endif %}
       </td>
       <td>
-        <div style="font-size: 15px; font-weight: 700; color: {{ GREEN }}; letter-spacing: .3px;">{{ doc.company }}</div>
-        <div style="font-size: 10px; color: #666;">{{ frappe.db.get_value("Company", doc.company, "phone_no") or "" }}</div>
+        <div style="font-size: 14px; font-weight: 700; color: {{ GREEN }};">{{ doc.company }}</div>
       </td>
       <td style="text-align: right;">
-        <div style="font-size: 13px; font-weight: 700; letter-spacing: 2.5px; color: {{ GREEN }};">SALARY SLIP</div>
-        <div style="font-size: 11px; margin-top: 2px;">{{ frappe.utils.formatdate(doc.start_date, "MMMM yyyy") }}</div>
-        <div style="font-size: 9px; color: #888;">{{ frappe.utils.formatdate(doc.start_date, "dd MMM") }} &ndash; {{ frappe.utils.formatdate(doc.end_date, "dd MMM yyyy") }}</div>
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 2px; color: {{ GREEN }};">SALARY SLIP</div>
+        <div style="font-size: 10px;">{{ frappe.utils.formatdate(doc.start_date, "MMMM yyyy") }}</div>
+        <div style="font-size: 8.5px; color: #888;">{{ frappe.utils.formatdate(doc.start_date, "dd MMM") }} &ndash; {{ frappe.utils.formatdate(doc.end_date, "dd MMM yyyy") }}</div>
       </td>
     </tr>
   </table>
-  <div style="height: 2px; background: {{ GREEN }}; margin-bottom: 9px;"></div>
+  <div style="height: 2px; background: {{ GREEN }}; margin-bottom: 7px;"></div>
 
   <!-- ══════════════ EMPLOYEE ══════════════ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 9px;">
+  <table class="p0 w" cellpadding="0" cellspacing="0" style="margin-bottom: 7px;">
     <tr valign="top">
       <td width="50%">
-        <div style="color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: .6px;">Employee</div>
-        <div style="font-size: 12px; font-weight: 700;">{{ doc.employee_name }}</div>
+        <div class="lbl">Employee</div>
+        <div style="font-size: 11.5px; font-weight: 700;">{{ doc.employee_name }}</div>
         <div style="color: #555;">{{ doc.employee }}{% if doc.designation %} &middot; {{ doc.designation }}{% endif %}</div>
       </td>
-      <td width="25%">
-        <div style="color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: .6px;">Date of Joining</div>
+      <td width="28%">
+        <div class="lbl">Date of Joining</div>
         <div>{{ frappe.utils.formatdate(emp.date_of_joining, "dd MMM yyyy") }}</div>
-        {% if doc.department %}
-          <div style="color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: .6px; margin-top: 3px;">Department</div>
-          <div>{{ doc.department }}</div>
-        {% endif %}
       </td>
-      <td width="25%" style="text-align: right;">
-        <div style="color: #888; font-size: 9px; text-transform: uppercase; letter-spacing: .6px;">Currency</div>
-        <div>{{ doc.currency }}</div>
+      <td width="22%" style="text-align: right;">
+        {% if doc.department %}<div class="lbl">Department</div><div>{{ doc.department }}</div>{% endif %}
+        <div class="lbl">Currency</div><div>{{ doc.currency }}</div>
       </td>
     </tr>
   </table>
 
   <!-- ══════════════ ATTENDANCE SUMMARY ══════════════ -->
-  <table width="100%" cellpadding="0" cellspacing="0"
-         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 10px;">
+  <table class="data w" cellpadding="0" cellspacing="0"
+         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 8px;">
     <tr>
       {% set cells = [
         ("Total Working Days", doc.total_working_days),
@@ -63,10 +58,9 @@
         ("Absent Days",        doc.absent_days)
       ] %}
       {% for label, value in cells %}
-      <td width="25%" style="padding: 6px 8px; text-align: center;
-                 {% if not loop.last %}border-right: 1px solid {{ RULE }};{% endif %}">
-        <div style="font-size: 15px; font-weight: 700; color: {{ GREEN }};">{{ value | round(1) }}</div>
-        <div style="font-size: 9px; color: #777; text-transform: uppercase; letter-spacing: .5px;">{{ label }}</div>
+      <td width="25%" style="text-align: center;{% if not loop.last %}border-right: 1px solid {{ RULE }};{% endif %}">
+        <div style="font-size: 14px; font-weight: 700; color: {{ GREEN }};">{{ value | round(1) }}</div>
+        <div class="lbl">{{ label }}</div>
       </td>
       {% endfor %}
     </tr>
@@ -78,88 +72,81 @@
   {% set e_len = earnings | length %}
   {% set d_len = deductions | length %}
   {% set max_rows = e_len if e_len > d_len else d_len %}
-  <table width="100%" cellpadding="0" cellspacing="0"
-         style="border-collapse: collapse; margin-bottom: 9px;">
+  <table class="data w" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin-bottom: 7px;">
     <thead>
       <tr>
-        <th colspan="2" style="background: {{ GREEN }}; color: #fff; text-align: left; padding: 5px 8px;
-                   font-size: 10px; letter-spacing: 1px; border-right: 2px solid #fff;">EARNINGS</th>
-        <th colspan="2" style="background: {{ GREEN }}; color: #fff; text-align: left; padding: 5px 8px;
-                   font-size: 10px; letter-spacing: 1px;">DEDUCTIONS</th>
+        <th colspan="2" class="hd" style="border-right: 2px solid #fff;">EARNINGS</th>
+        <th colspan="2" class="hd">DEDUCTIONS</th>
       </tr>
     </thead>
     <tbody>
       {% for i in range(max_rows) %}
       <tr>
-        <td style="padding: 4px 8px; border-bottom: 1px solid #eee;">{{ earnings[i].salary_component if i < e_len else '' }}</td>
-        <td width="17%" style="padding: 4px 8px; border-bottom: 1px solid #eee; text-align: right; border-right: 2px solid #fff;">
+        <td style="border-bottom: 1px solid #eee;">{{ earnings[i].salary_component if i < e_len else '' }}</td>
+        <td width="17%" style="border-bottom: 1px solid #eee; text-align: right; border-right: 2px solid #fff;">
           {% if i < e_len %}{{ "{:,.2f}".format(earnings[i].amount) }}{% endif %}
         </td>
-        <td style="padding: 4px 8px; border-bottom: 1px solid #eee;">{{ deductions[i].salary_component if i < d_len else '' }}</td>
-        <td width="17%" style="padding: 4px 8px; border-bottom: 1px solid #eee; text-align: right;">
+        <td style="border-bottom: 1px solid #eee;">{{ deductions[i].salary_component if i < d_len else '' }}</td>
+        <td width="17%" style="border-bottom: 1px solid #eee; text-align: right;">
           {% if i < d_len %}{{ "{:,.2f}".format(deductions[i].amount) }}{% endif %}
         </td>
       </tr>
       {% endfor %}
       <tr style="background: #f4f7f4; font-weight: 700;">
-        <td style="padding: 5px 8px;">Gross Pay</td>
-        <td style="padding: 5px 8px; text-align: right; border-right: 2px solid #fff;">{{ "{:,.2f}".format(doc.gross_pay) }}</td>
-        <td style="padding: 5px 8px;">Total Deductions</td>
-        <td style="padding: 5px 8px; text-align: right;">{{ "{:,.2f}".format(doc.total_deduction) }}</td>
+        <td>Gross Pay</td>
+        <td style="text-align: right; border-right: 2px solid #fff;">{{ "{:,.2f}".format(doc.gross_pay) }}</td>
+        <td>Total Deductions</td>
+        <td style="text-align: right;">{{ "{:,.2f}".format(doc.total_deduction) }}</td>
       </tr>
     </tbody>
   </table>
 
   <!-- ══════════════ NET PAY ══════════════ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 4px;">
+  <table class="netpay w" cellpadding="0" cellspacing="0" style="margin-bottom: 3px;">
     <tr style="background: {{ GREEN }}; color: #fff;">
-      <td style="padding: 8px 10px; font-size: 11px; letter-spacing: 1px;">NET PAY</td>
-      <td style="padding: 8px 10px; text-align: right; font-size: 16px; font-weight: 700;">
+      <td style="font-size: 10.5px; letter-spacing: 1px;">NET PAY</td>
+      <td style="text-align: right; font-size: 15px; font-weight: 700;">
         {{ doc.currency }} {{ "{:,.2f}".format(doc.net_pay) }}
       </td>
     </tr>
   </table>
-  <div style="font-size: 10px; color: #555; margin-bottom: 10px;">
-    <i>{{ doc.total_in_words }}</i>
-  </div>
+  <div style="font-size: 9.5px; color: #555; margin-bottom: 8px;"><i>{{ doc.total_in_words }}</i></div>
 
   {% if bd and (bd.overtime or bd.absence) %}
   <!-- ══════════════ CALCULATION BREAKDOWN ══════════════ -->
-  <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: {{ GREEN }};
-              border-bottom: 1px solid {{ GREEN }}; padding-bottom: 3px; margin-bottom: 7px;">
+  <div style="font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px; color: {{ GREEN }};
+              border-bottom: 1px solid {{ GREEN }}; padding-bottom: 2px; margin-bottom: 6px;">
     CALCULATION BREAKDOWN
   </div>
 
   {% if bd.overtime %}
-  <!-- ─────── Overtime ─────── -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 8px;">
+  <table class="p0 w" cellpadding="0" cellspacing="0" style="margin-bottom: 3px;">
     <tr>
-      <td style="font-size: 10px; font-weight: 700; letter-spacing: .8px; color: #333;">OVERTIME</td>
-      <td style="text-align: right; font-size: 11px; font-weight: 700; color: {{ GREEN }};">
-        {{ "{:,.2f}".format(bd.overtime.amount) }}
+      <td class="sec">OVERTIME</td>
+      <td style="text-align: right; font-size: 10.5px; font-weight: 700; color: {{ GREEN }};">
+        + {{ "{:,.2f}".format(bd.overtime.amount) }}
       </td>
     </tr>
   </table>
-  <table width="100%" cellpadding="0" cellspacing="0"
-         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 8px;">
+  <table class="box w" cellpadding="0" cellspacing="0"
+         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 5px;">
     <tr>
-      <td width="55%" style="padding: 5px 8px; vertical-align: top; border-right: 1px solid {{ RULE }};">
+      <td width="60%" style="border-right: 1px solid {{ RULE }};">
         {% if bd.overtime.normal_hours %}
-        <div style="padding: 1px 0;">Working days &mdash; worked past shift end
+        <div>Working days &mdash; worked past shift end
           <span style="float: right; font-weight: 600;">{{ "%.1f" | format(bd.overtime.normal_hours) }} hrs</span></div>
         {% endif %}
         {% if bd.overtime.holiday_hours %}
-        <div style="padding: 1px 0;">Sunday / Poya &mdash; full day counted
+        <div>Sunday / Poya holiday &mdash; full day counted
           <span style="float: right; font-weight: 600;">{{ "%.1f" | format(bd.overtime.holiday_hours) }} hrs</span></div>
         {% endif %}
-        <div style="border-top: 1px solid {{ RULE }}; margin-top: 3px; padding-top: 3px; font-weight: 700;">
-          Total overtime
-          <span style="float: right;">{{ "%.1f" | format(bd.overtime.total_hours) }} hrs</span>
+        <div style="border-top: 1px solid {{ RULE }}; margin-top: 2px; padding-top: 2px; font-weight: 700;">
+          Total overtime <span style="float: right;">{{ "%.1f" | format(bd.overtime.total_hours) }} hrs</span>
         </div>
       </td>
-      <td width="45%" style="padding: 5px 8px; vertical-align: top; text-align: right;">
-        <div style="color: #666;">{{ "%.1f" | format(bd.overtime.total_hours) }} hrs &times; {{ doc.currency }} {{ "%.2f" | format(bd.overtime.rate) }} / hr</div>
-        <div style="font-size: 13px; font-weight: 700; color: {{ GREEN }}; margin-top: 3px;">
+      <td width="40%" style="text-align: right;">
+        <div style="color: #666;">{{ "%.1f" | format(bd.overtime.total_hours) }} hrs &times; {{ "%.2f" | format(bd.overtime.rate) }}/hr</div>
+        <div style="font-size: 12px; font-weight: 700; color: {{ GREEN }};">
           {{ doc.currency }} {{ "{:,.2f}".format(bd.overtime.amount) }}
         </div>
       </td>
@@ -167,38 +154,33 @@
   </table>
 
   {% if bd.overtime.days %}
-  <!-- day-by-day grid: 4 pairs per row keeps ~20 entries on 5 compact rows -->
-  <table width="100%" cellpadding="0" cellspacing="0"
-         style="border: 1px solid {{ RULE }}; border-collapse: collapse; font-size: 9.5px; margin-bottom: 4px;">
+  {% set cols = 5 %}
+  {% set n = bd.overtime.days | length %}
+  {% set rows = (n + cols - 1) // cols %}
+  <table class="grid w" cellpadding="0" cellspacing="0"
+         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 3px;">
     <thead>
-      <tr style="background: #f4f7f4; color: #555;">
-        {% for i in range(4) %}
-        <th style="padding: 3px 6px; text-align: left; font-weight: 600; border-right: 1px solid {{ RULE }};">Date</th>
-        <th style="padding: 3px 6px; text-align: right; font-weight: 600;
-                   {% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">Hrs</th>
+      <tr style="background: #f4f7f4; color: #666;">
+        {% for i in range(cols) %}
+        <th style="text-align: left; font-weight: 600;">Date</th>
+        <th style="text-align: right; font-weight: 600;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">Hrs</th>
         {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% set cols = 4 %}
-      {% set rows = ((bd.overtime.days | length) + cols - 1) // cols %}
       {% for r in range(rows) %}
       <tr>
         {% for c in range(cols) %}
           {% set idx = r * cols + c %}
-          {% if idx < (bd.overtime.days | length) %}
-            {% set d = bd.overtime.days[idx] %}
-            <td style="padding: 3px 6px; border-top: 1px solid #eee; border-right: 1px solid {{ RULE }};
-                       {% if d.is_holiday %}color: #b26a00; font-weight: 600;{% endif %}">
-              {{ d.date }} <span style="color: #999;">{{ d.day }}</span>{% if d.is_holiday %}*{% endif %}
+          {% if idx < n %}{% set d = bd.overtime.days[idx] %}
+            <td style="border-top: 1px solid #eee;{% if d.is_holiday %}color:#b26a00;font-weight:600;{% endif %}">
+              {{ d.date }} <span style="color:#aaa;">{{ d.day }}</span>{% if d.is_holiday %}*{% endif %}
             </td>
-            <td style="padding: 3px 6px; border-top: 1px solid #eee; text-align: right;
-                       {% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}
-                       {% if d.is_holiday %}color: #b26a00; font-weight: 600;{% endif %}">
+            <td style="border-top: 1px solid #eee; text-align: right;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}{% if d.is_holiday %}color:#b26a00;font-weight:600;{% endif %}">
               {{ "%.1f" | format(d.hours) }}
             </td>
           {% else %}
-            <td style="border-top: 1px solid #eee; border-right: 1px solid {{ RULE }};"></td>
+            <td style="border-top: 1px solid #eee;"></td>
             <td style="border-top: 1px solid #eee;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}"></td>
           {% endif %}
         {% endfor %}
@@ -207,7 +189,7 @@
     </tbody>
   </table>
   {% if bd.overtime.holiday_hours %}
-  <div style="font-size: 9px; color: #b26a00; margin-bottom: 8px;">
+  <div style="font-size: 8.5px; color: #b26a00; margin-bottom: 6px;">
     * Sunday / Poya holiday &mdash; the entire day worked is paid as overtime.
   </div>
   {% endif %}
@@ -215,32 +197,30 @@
   {% endif %}
 
   {% if bd.absence %}
-  <!-- ─────── Absent & LWP ─────── -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 3px;">
+  <table class="p0 w" cellpadding="0" cellspacing="0" style="margin-bottom: 3px;">
     <tr>
-      <td style="font-size: 10px; font-weight: 700; letter-spacing: .8px; color: #333;">ABSENT &amp; LEAVE WITHOUT PAY</td>
-      <td style="text-align: right; font-size: 11px; font-weight: 700; color: #b00020;">
+      <td class="sec">ABSENT &amp; LEAVE WITHOUT PAY</td>
+      <td style="text-align: right; font-size: 10.5px; font-weight: 700; color: #b00020;">
         &minus; {{ "{:,.2f}".format(bd.absence.amount) }}
       </td>
     </tr>
   </table>
-  <table width="100%" cellpadding="0" cellspacing="0"
-         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 4px;">
+  <table class="box w" cellpadding="0" cellspacing="0"
+         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 5px;">
     <tr>
-      <td width="55%" style="padding: 5px 8px; vertical-align: top; border-right: 1px solid {{ RULE }};">
-        <div style="padding: 1px 0;">Monthly gross <span style="color:#888;">(excluding overtime)</span>
+      <td width="60%" style="border-right: 1px solid {{ RULE }};">
+        <div>Monthly gross <span style="color:#888;">(excluding overtime)</span>
           <span style="float: right;">{{ "{:,.2f}".format(bd.absence.fixed_gross) }}</span></div>
-        <div style="padding: 1px 0;">&divide; Working days in period
+        <div>&divide; Working days in period
           <span style="float: right;">{{ bd.absence.working_days | round(1) }}</span></div>
-        <div style="padding: 1px 0; border-top: 1px solid {{ RULE }}; margin-top: 3px; padding-top: 3px;">
-          = Rate per day <span style="float: right; font-weight: 600;">{{ "{:,.2f}".format(bd.absence.daily_rate) }}</span></div>
-        <div style="padding: 1px 0;">&times; Unpaid days
-          <span style="color:#888;">(Absent {{ bd.absence.absent_days | round(1) }} + LWP {{ bd.absence.lwp_days | round(1) }})</span>
+        <div style="border-top: 1px solid {{ RULE }}; margin-top: 2px; padding-top: 2px;">= Rate per day
+          <span style="float: right; font-weight: 600;">{{ "{:,.2f}".format(bd.absence.daily_rate) }}</span></div>
+        <div>&times; Unpaid days <span style="color:#888;">(Absent {{ bd.absence.absent_days | round(1) }} + LWP {{ bd.absence.lwp_days | round(1) }})</span>
           <span style="float: right; font-weight: 600;">{{ bd.absence.unpaid_days | round(1) }}</span></div>
       </td>
-      <td width="45%" style="padding: 5px 8px; vertical-align: top; text-align: right;">
+      <td width="40%" style="text-align: right;">
         <div style="color: #666;">{{ "{:,.2f}".format(bd.absence.daily_rate) }} &times; {{ bd.absence.unpaid_days | round(1) }} day(s)</div>
-        <div style="font-size: 13px; font-weight: 700; color: #b00020; margin-top: 3px;">
+        <div style="font-size: 12px; font-weight: 700; color: #b00020;">
           &minus; {{ doc.currency }} {{ "{:,.2f}".format(bd.absence.amount) }}
         </div>
       </td>
@@ -248,18 +228,31 @@
   </table>
 
   {% if bd.absence.dates %}
-  <table width="100%" cellpadding="0" cellspacing="0"
-         style="border: 1px solid {{ RULE }}; border-collapse: collapse; font-size: 9.5px; margin-bottom: 4px;">
+  {% set acols = 3 %}
+  {% set an = bd.absence.dates | length %}
+  {% set arows = (an + acols - 1) // acols %}
+  <table class="grid w" cellpadding="0" cellspacing="0"
+         style="border: 1px solid {{ RULE }}; border-collapse: collapse; margin-bottom: 5px;">
     <thead>
-      <tr style="background: #fdf3f3; color: #555;">
-        <th style="padding: 3px 8px; text-align: left; font-weight: 600;" colspan="2">Unpaid days in this period</th>
+      <tr style="background: #fdf3f3; color: #666;">
+        {% for i in range(acols) %}
+        <th colspan="2" style="text-align: left; font-weight: 600;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">Unpaid day</th>
+        {% endfor %}
       </tr>
     </thead>
     <tbody>
-      {% for d in bd.absence.dates %}
+      {% for r in range(arows) %}
       <tr>
-        <td style="padding: 3px 8px; border-top: 1px solid #eee;">{{ d.date }}</td>
-        <td style="padding: 3px 8px; border-top: 1px solid #eee; text-align: right; color: #777;">{{ d.label }}</td>
+        {% for c in range(acols) %}
+          {% set idx = r * acols + c %}
+          {% if idx < an %}{% set d = bd.absence.dates[idx] %}
+            <td style="border-top: 1px solid #eee;">{{ d.date }}</td>
+            <td style="border-top: 1px solid #eee; color: #888;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}">{{ d.label }}</td>
+          {% else %}
+            <td style="border-top: 1px solid #eee;"></td>
+            <td style="border-top: 1px solid #eee;{% if not loop.last %}border-right: 2px solid {{ RULE }};{% endif %}"></td>
+          {% endif %}
+        {% endfor %}
       </tr>
       {% endfor %}
     </tbody>
@@ -268,7 +261,7 @@
   {% endif %}
 
   {% if bd.paid_leave %}
-  <div style="font-size: 9.5px; color: #555; margin-bottom: 6px;">
+  <div style="font-size: 9px; color: #555; margin-bottom: 4px;">
     <b>Paid leave used:</b>
     {% for lt, days in bd.paid_leave.items() %}{{ lt }} {{ days | round(1) }} day(s){% if not loop.last %} &middot; {% endif %}{% endfor %}
     &mdash; these days did not reduce your pay.
@@ -277,20 +270,18 @@
   {% endif %}
 
   <!-- ══════════════ SIGNATURES ══════════════ -->
-  <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 22px;">
+  <table class="p0 w" cellpadding="0" cellspacing="0" style="margin-top: 18px;">
     <tr>
-      <td width="45%" style="border-top: 1px solid #999; padding-top: 3px; font-size: 10px;">
+      <td width="45%" style="border-top: 1px solid #999; padding-top: 2px; font-size: 9.5px;">
         <b>Employee Signature</b><br/><span style="color: #777;">{{ doc.employee_name }}</span>
       </td>
       <td width="10%"></td>
-      <td width="45%" style="border-top: 1px solid #999; padding-top: 3px; font-size: 10px; text-align: right;">
+      <td width="45%" style="border-top: 1px solid #999; padding-top: 2px; font-size: 9.5px; text-align: right;">
         <b>Authorised Signatory</b><br/><span style="color: #777;">{{ doc.company }}</span>
       </td>
     </tr>
   </table>
-
-  <div style="font-size: 8.5px; color: #999; text-align: center; margin-top: 10px;">
+  <div style="font-size: 8px; color: #999; text-align: center; margin-top: 7px;">
     System generated salary slip &mdash; no physical signature required.
-    Generated {{ frappe.utils.formatdate(frappe.utils.nowdate(), "dd MMM yyyy") }}
   </div>
 </div>

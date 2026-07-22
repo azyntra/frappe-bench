@@ -1,0 +1,45 @@
+/* The active print style ("Redesign") forces
+       .print-format td, .print-format th { padding: 10px !important; }
+   This layout is table-based, so that added ~800px of pure padding and pushed
+   the slip onto a 3rd page. Reset it here (this CSS loads after the style) and
+   control spacing per table class instead. All rules need !important to win. */
+
+.print-format { font-size: 10px; }
+
+.print-format td,
+.print-format th            { padding: 3px 6px !important; vertical-align: top; }
+
+/* pure layout tables — no cell padding at all */
+.print-format table.p0 td,
+.print-format table.p0 th   { padding: 0 !important; }
+
+/* bordered content boxes */
+.print-format table.box td  { padding: 5px 8px !important; }
+
+/* dense data grids (overtime days, unpaid days) */
+.print-format table.grid td,
+.print-format table.grid th { padding: 2px 5px !important; font-size: 9px; }
+
+/* earnings/deductions + attendance summary */
+.print-format table.data td { padding: 4px 8px !important; }
+.print-format table.data th.hd {
+    padding: 4px 8px !important;
+    background: #1b5e20; color: #fff; text-align: left;
+    font-size: 9.5px; letter-spacing: 1px; font-weight: 600;
+}
+
+/* net pay band */
+.print-format table.netpay td { padding: 7px 10px !important; }
+
+.print-format table.w       { width: 100%; }
+
+.print-format .lbl {
+    color: #888; font-size: 8px; text-transform: uppercase; letter-spacing: .5px;
+}
+.print-format .sec {
+    font-size: 9.5px; font-weight: 700; letter-spacing: .8px; color: #333;
+}
+
+/* keep each breakdown block intact if it ever does spill */
+.print-format table.box,
+.print-format table.grid    { page-break-inside: avoid; }
