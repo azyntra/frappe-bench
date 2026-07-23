@@ -72,32 +72,115 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
         }
 
         /* ═══════════════════════════════════════════════════════
-           SUB-HEADER
+           GREETING CARD  (replaces old hrd-sub)
            ═══════════════════════════════════════════════════════ */
-        .hrd-sub {
-            display: flex; align-items: center;
+        .hrd-greeting {
+            display: flex;
+            align-items: center;
             justify-content: space-between;
-            margin-bottom: 24px; flex-wrap: wrap; gap: 8px;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 22px 24px;
+            margin-bottom: 20px;
+            background: var(--card);
+            border: 1px solid var(--bd);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+            animation: hfd .35s ease both;
         }
-        .hrd-sub-left { display: flex; align-items: center; gap: 10px; }
+        /* top accent bar — gradient from primary → success */
+        .hrd-greeting::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+            border-radius: var(--radius) var(--radius) 0 0;
+        }
+        /* subtle background glow */
+        .hrd-greeting::after {
+            content: '';
+            position: absolute;
+            top: -60px; left: -40px;
+            width: 260px; height: 180px;
+            background: radial-gradient(ellipse at top left,
+                rgba(59,130,246,.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* Left — greeting text */
+        .hrd-greeting-left { position: relative; z-index: 1; }
+        .hrd-greeting-emoji {
+            font-size: 28px;
+            line-height: 1;
+            margin-bottom: 6px;
+            display: block;
+        }
+        .hrd-greeting-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--tx);
+            letter-spacing: -.6px;
+            margin: 0 0 5px;
+            line-height: 1.15;
+        }
+        .hrd-greeting-text span {
+            background: linear-gradient(90deg, var(--primary), #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hrd-greeting-caption {
+            font-size: 13px;
+            color: var(--tx2);
+            font-weight: 500;
+            margin: 0;
+            letter-spacing: .1px;
+        }
+
+        /* Right — company info */
+        .hrd-greeting-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            position: relative; z-index: 1;
+        }
+        .hrd-company-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--ibg);
+            border: 1px solid var(--bd);
+            border-radius: var(--radius-s);
+            padding: 8px 14px;
+        }
         .hrd-company-dot {
-            width: 9px; height: 9px; border-radius: 50%;
+            width: 8px; height: 8px; border-radius: 50%;
             background: var(--success); flex-shrink: 0;
-            box-shadow: 0 0 0 3px rgba(34,197,94,.15);
+            box-shadow: 0 0 0 3px rgba(34,197,94,.18);
             animation: hrd-pulse 2s ease-in-out infinite;
         }
         @keyframes hrd-pulse {
-            0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,.15); }
-            50% { box-shadow: 0 0 0 6px rgba(34,197,94,.08); }
+            0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,.18); }
+            50%       { box-shadow: 0 0 0 6px rgba(34,197,94,.07); }
         }
-        .hrd-sub p {
-            font-size: 13px; color: var(--tx2); margin: 0;
-            font-weight: 500; letter-spacing: .1px;
+        .hrd-company-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--tx);
+            letter-spacing: .3px;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
-        .hrd-date {
-            font-size: 12px; color: var(--tx3);
+        .hrd-greeting-date {
+            font-size: 11px;
+            color: var(--tx3);
             font-family: 'JetBrains Mono', monospace;
-            white-space: nowrap; letter-spacing: .2px;
+            letter-spacing: .2px;
+            white-space: nowrap;
         }
 
         /* ═══════════════════════════════════════════════════════
@@ -449,12 +532,12 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
         @keyframes hfu { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes hpop { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .hrd-sub { animation: hfd .35s ease both; }
-        .hkpi { animation: hfd .35s .05s ease both; }
-        .hmain { animation: hfu .4s .1s ease both; }
-        .g2 { animation: hfu .4s .18s ease both; }
-        .rpt-section { animation: hfu .4s .24s ease both; }
-        .hpop { animation: hpop .25s ease both; }
+        .hrd-greeting { animation: hfd .3s ease both; }
+        .hkpi  { animation: hfd .35s .06s ease both; }
+        .hmain { animation: hfu .4s .12s ease both; }
+        .g2    { animation: hfu .4s .20s ease both; }
+        .rpt-section { animation: hfu .4s .26s ease both; }
+        .hpop  { animation: hpop .25s ease both; }
 
         /* ═══════════════════════════════════════════════════════
            SCROLLBAR
@@ -467,8 +550,13 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
            DARK MODE ENHANCEMENTS
            ═══════════════════════════════════════════════════════ */
         html[data-theme="dark"] .kpi,
-        html[data-theme="dark"] .sc {
+        html[data-theme="dark"] .sc,
+        html[data-theme="dark"] .hrd-greeting {
             border-color: rgba(255,255,255,.06);
+        }
+        html[data-theme="dark"] .hrd-company-badge {
+            border-color: rgba(255,255,255,.08);
+            background: rgba(255,255,255,.04);
         }
         html[data-theme="dark"] .kpi:hover,
         html[data-theme="dark"] .sc:hover {
@@ -491,6 +579,11 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
             background: rgba(255,255,255,.08);
             box-shadow: 0 1px 3px rgba(0,0,0,.2);
         }
+        html[data-theme="dark"] .hrd-greeting-text span {
+            background: linear-gradient(90deg, #60a5fa, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
 
         /* body override for dark */
         [data-theme="dark"] .hrd {
@@ -503,13 +596,27 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
     $(wrapper).find('.page-content').html(`
     <div class="hrd">
 
-        <!-- Sub-header -->
-        <div class="hrd-sub">
-            <div class="hrd-sub-left">
-                <div class="hrd-company-dot"></div>
-                <p>CHAN RICH FRUITS (PVT) LTD &nbsp;·&nbsp; Real-time HR overview</p>
+        <!-- ═══ GREETING CARD ═══ -->
+        <div class="hrd-greeting">
+            <!-- Left: greeting + caption -->
+            <div class="hrd-greeting-left">
+                <span class="hrd-greeting-emoji" id="hrd-emoji">👋</span>
+                <h1 class="hrd-greeting-text" id="hrd-greeting-text">
+                    Good morning, <span id="hrd-username">—</span>!
+                </h1>
+                <p class="hrd-greeting-caption" id="hrd-greeting-caption">
+                    Welcome to HR Operations.
+                </p>
             </div>
-            <div class="hrd-date" id="hrd-date">—</div>
+
+            <!-- Right: company badge + date -->
+            <div class="hrd-greeting-right">
+                <div class="hrd-company-badge">
+                    <div class="hrd-company-dot"></div>
+                    <span class="hrd-company-name">Chan Rich Fruits (PVT) Ltd</span>
+                </div>
+                <div class="hrd-greeting-date" id="hrd-date">—</div>
+            </div>
         </div>
 
         <!-- ═══ KPI STRIP ═══ -->
@@ -804,7 +911,69 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
         if (panelEl) panelEl.classList.add('on');
     };
 
-    // ── Clock ─────────────────────────────────────────────────
+    // ── Greeting Logic ────────────────────────────────────────
+    function applyGreeting(firstName) {
+        const hour = new Date().getHours();
+
+        const config = {
+            dawn:      { g: 'Good Morning',   e: '🌅', c: 'Early bird! Here\'s your HR overview for the day.' },
+            morning:   { g: 'Good Morning',   e: '☀️',  c: 'Hope you have a productive and fulfilling day ahead!' },
+            afternoon: { g: 'Good Afternoon', e: '🌤️', c: 'The team is counting on you — keep up the great work!' },
+            evening:   { g: 'Good Evening',   e: '🌆', c: 'Wrapping up the day? You\'ve done great work today.' },
+            night:     { g: 'Good Night',     e: '🌙', c: 'Working late? Don\'t forget to take a break.' },
+        };
+
+        let key;
+        if      (hour >= 5  && hour < 8 ) key = 'dawn';
+        else if (hour >= 8  && hour < 12) key = 'morning';
+        else if (hour >= 12 && hour < 17) key = 'afternoon';
+        else if (hour >= 17 && hour < 21) key = 'evening';
+        else                              key = 'night';
+
+        const { g, e, c } = config[key];
+
+        const emojiEl   = document.getElementById('hrd-emoji');
+        const greetEl   = document.getElementById('hrd-greeting-text');
+        const userEl    = document.getElementById('hrd-username');
+        const captionEl = document.getElementById('hrd-greeting-caption');
+
+        if (emojiEl)   emojiEl.textContent  = e;
+        if (greetEl)   greetEl.childNodes[0].textContent = g + ', ';
+        if (userEl)    userEl.textContent    = firstName + '!';
+        if (captionEl) captionEl.textContent = c;
+    }
+
+    function setGreeting() {
+        // Try frappe.boot.user_info first (Frappe v14/v15 standard location)
+        const currentUser = frappe.session && frappe.session.user;
+        const userInfo    = frappe.boot && frappe.boot.user_info && currentUser
+                            ? frappe.boot.user_info[currentUser]
+                            : null;
+        const bootName    = userInfo && userInfo.full_name ? userInfo.full_name : null;
+
+        if (bootName) {
+            // Got it from boot data — no API call needed
+            applyGreeting(bootName.split(' ')[0]);
+        } else {
+            // Fallback: fetch full_name directly from the User doctype
+            frappe.call({
+                method: 'frappe.client.get_value',
+                args: {
+                    doctype: 'User',
+                    filters: { name: currentUser },
+                    fieldname: 'full_name'
+                },
+                callback: function(r) {
+                    const name = (r.message && r.message.full_name)
+                        ? r.message.full_name.split(' ')[0]
+                        : (currentUser ? currentUser.split('@')[0] : 'there');
+                    applyGreeting(name);
+                }
+            });
+        }
+    }
+
+    // ── Clock + Date ──────────────────────────────────────────
     function tick() {
         const n = new Date();
         const t = n.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -831,7 +1000,7 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
         function update(now) {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+            const eased = 1 - Math.pow(1 - progress, 3);
             el.textContent = Math.round(num * eased);
             if (progress < 1) requestAnimationFrame(update);
         }
@@ -1064,6 +1233,7 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
 
     // ── Global Refresh ────────────────────────────────────────
     window.hrdRefresh = wrapper._hrdRefresh = function() {
+        setGreeting();
         loadKPIs();
         loadMonthStats();
         loadCheckins();
@@ -1074,6 +1244,7 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
     };
 
     // ── Init ──────────────────────────────────────────────────
+    setGreeting();   // greeting card first
     loadKPIs();
     loadMonthStats();
     loadCheckins();
@@ -1088,4 +1259,3 @@ frappe.pages['hr-dashboard'].on_page_hide = function(wrapper) {
         wrapper._hrd_clock_interval = null;
     }
 };
-
