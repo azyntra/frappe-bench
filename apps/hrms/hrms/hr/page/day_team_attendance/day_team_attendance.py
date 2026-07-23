@@ -217,6 +217,21 @@ def get_day_punches(employee, work_date):
     }
 
 
+def _unlink_checkins(fieldname, docname):
+    """Null Employee Checkin links before cancelling the target doc.
+
+    Checkins inserted while a Shift Assignment / Attendance already existed
+    get linked to it by HRMS fetch_shift, and Frappe's cancel link-check then
+    refuses the cancel ('Cannot cancel ... as it is linked to Employee
+    Checkin'). Same treatment as day_team_planner._replace_day.
+    """
+    if frappe.db.has_column("Employee Checkin", fieldname):
+        frappe.db.sql(
+            f"UPDATE `tabEmployee Checkin` SET `{fieldname}` = NULL WHERE `{fieldname}` = %s",
+            docname,
+        )
+
+
 def _expected_ot(emp, ds, checkins, final_shift, is_hol):
     """OT the punch data implies against final_shift, or None if it cannot be
     compared cheaply (single punch: credited-shift logic; no shift resolved)."""
@@ -349,12 +364,14 @@ def reprocess_range(from_date, to_date, dry_run=1):
             try:
                 frappe.db.savepoint("dta_cell")
                 if assignment_action == "replace-auto":
+                    _unlink_checkins("shift_assignment", sa.name)
                     old = frappe.get_doc("Shift Assignment", sa.name)
                     if old.docstatus == 1:
                         old.cancel()
                     frappe.delete_doc("Shift Assignment", old.name)
                 # create-auto happens inside _process_single via the importer hook
                 if attendance_action in ("recreate",) and att and att.docstatus == 1:
+                    _unlink_checkins("attendance", att.name)
                     att_doc = frappe.get_doc("Attendance", att.name)
                     att_doc.flags.skip_auto_leave = True
                     att_doc.cancel()
