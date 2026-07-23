@@ -40,7 +40,7 @@ frappe.pages['day-shift-assignment'].on_page_load = function(wrapper) {
         .dsa-stat .sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mu)}
 
         /* Shift summary cards */
-        .dsa-shift-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:13px}
+        .dsa-shift-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:9px;margin-bottom:13px}
         @media(max-width:540px){.dsa-shift-row{grid-template-columns:1fr}}
         .dsa-scard{border-radius:11px;padding:11px 13px;border:1.5px solid transparent;cursor:pointer;
             transition:all .2s;position:relative;overflow:hidden;user-select:none}
@@ -184,6 +184,7 @@ frappe.pages['day-shift-assignment'].on_page_load = function(wrapper) {
         { name:'Target-Shift(6am-2.30pm)', label:'6:00 AM – 2:30 PM', short:'6am–2:30', icon:'🌅', color:'#d97706', bg:'rgba(217,119,6,.1)',  bd:'rgba(217,119,6,.3)'  },
         { name:'Target-Shift(8am-3pm)',    label:'8:00 AM – 3:00 PM', short:'8am–3:00', icon:'☀️',  color:'#2563eb', bg:'rgba(37,99,235,.1)',  bd:'rgba(37,99,235,.3)'  },
         { name:'Target-Shift(6am-3pm)',    label:'6:00 AM – 3:00 PM', short:'6am–3:00', icon:'🌿', color:'#059669', bg:'rgba(5,150,105,.1)',  bd:'rgba(5,150,105,.3)'  },
+        { name:'Day-Shift(8am-5pm)',       label:'8:00 AM – 5:00 PM', short:'8am–5:00', icon:'🌆', color:'#7c3aed', bg:'rgba(124,58,237,.1)', bd:'rgba(124,58,237,.3)' },
     ];
     const SMAP     = {};  SHIFTS.forEach(s => SMAP[s.name] = s);
     const AVC      = ['#2563eb','#059669','#d97706','#7c3aed','#0891b2','#e11d48','#0d9488','#ea580c'];
@@ -605,72 +606,40 @@ frappe.pages['day-shift-assignment'].on_page_load = function(wrapper) {
 
         let ok = 0, err = 0;
 
-        for (let i = 0; i < changed.length; i++) {
-            const emp      = changed[i];
-            const newShift = assignments[emp.name] || null;
-
-            // Update progress bar
-            if (prog) prog.style.width = Math.round(((i+1)/changed.length)*100) + '%';
-            if (info) info.textContent = `Saving ${i+1} of ${changed.length}...`;
-
-            try {
-                // ── Step 1: Find ALL existing assignments for this employee
-                //           that overlap this date (including long-running ones)
-                const existing = await frappe.call({
-                    method: 'frappe.client.get_list',
-                    args: {
-                        doctype: 'Shift Assignment',
-                        filters: [
-                            ['employee',   '=', emp.name],
-                            ['start_date', '<=', selDate],
-                            ['end_date',   '>=', selDate],
-                            ['docstatus',  '=', 1]
-                        ],
-                        fields: ['name', 'shift_type', 'start_date', 'end_date'],
-                        limit_page_length: 20
-                    }
-                });
-
-                // ── Step 2: Cancel each overlapping assignment
-                for (const rec of (existing.message || [])) {
-                    try {
-                        await frappe.call({
-                            method: 'frappe.client.cancel',
-                            args: { doctype: 'Shift Assignment', name: rec.name }
-                        });
-                    } catch(ce) {
-                        // Already cancelled or permission issue — continue
-                        console.warn('Cancel skipped:', rec.name);
-                    }
+        // One server call replaces the old per-employee cancel/insert/submit
+        // loop. The endpoint also refuses to touch long-range (multi-day)
+        // assignments instead of silently cancelling them.
+        if (info) info.textContent = `Saving ${changed.length} assignment${changed.length!==1?'s':''}...`;
+        if (prog) prog.style.width = '40%';
+        try {
+            const r = await frappe.call({
+                method: 'hrms.hr.page.day_team_planner.day_team_planner.bulk_assign',
+                args: {
+                    changes: JSON.stringify(changed.map(emp => ({
+                        employee:   emp.name,
+                        date:       selDate,
+                        shift_type: assignments[emp.name] || null
+                    })))
                 }
-
-                // ── Step 3: Create new single-day assignment if shift selected
-                if (newShift) {
-                    const ins = await frappe.call({
-                        method: 'frappe.client.insert',
-                        args: {
-                            doc: {
-                                doctype:    'Shift Assignment',
-                                employee:   emp.name,
-                                company:    COMPANY,
-                                shift_type: newShift,
-                                start_date: selDate,
-                                end_date:   selDate,
-                                docstatus:  0
-                            }
-                        }
-                    });
-                    if (ins.message) {
-                        await frappe.call({
-                            method: 'frappe.client.submit',
-                            args: { doc: ins.message }
-                        });
-                    }
-                }
-                ok++;
-            } catch(e) {
-                console.error('Error saving shift for', emp.employee_name, e);
-                err++;
+            });
+            const failed = (r.message && r.message.failed) || [];
+            ok  = (r.message && r.message.saved) || 0;
+            err = failed.length;
+            // roll the in-memory state back for failed rows
+            for (const f of failed) {
+                console.error('Error saving shift for', f.employee, f.error);
+                if (savedState[f.employee]) assignments[f.employee] = savedState[f.employee];
+                else delete assignments[f.employee];
+            }
+            if (failed.length) {
+                frappe.show_alert({ message: `${failed[0].employee}: ${failed[0].error}`, indicator: 'red' });
+            }
+        } catch(e) {
+            console.error('Bulk save failed', e);
+            err = changed.length;
+            for (const emp of changed) {
+                if (savedState[emp.name]) assignments[emp.name] = savedState[emp.name];
+                else delete assignments[emp.name];
             }
         }
 

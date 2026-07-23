@@ -682,13 +682,14 @@ frappe.pages['day-team-planner'].on_page_load = function(wrapper) {
 
         return Promise.all([
             frappe.call({ method:'frappe.client.get_list', args:{ doctype:'Shift Type', fields:['name','start_time','end_time'], limit_page_length:100, order_by:'name asc' }}),
-            frappe.call({ method:'frappe.client.get_list', args:{ doctype:'Employee', filters:{ status:'Active', department:DEPT }, fields:['name','employee_name','designation'], limit_page_length:300, order_by:'employee_name asc' }}),
+            frappe.call({ method:'frappe.client.get_list', args:{ doctype:'Employee', filters:{ status:'Active', department:DEPT }, fields:['name','employee_name','designation','custom_sunday_worker'], limit_page_length:300, order_by:'employee_name asc' }}),
             frappe.call({ method:'frappe.client.get_list', args:{ doctype:'Holiday List', fields:['name','from_date','to_date'], limit_page_length:20, order_by:'modified desc' }}),
             frappe.call({ method:'frappe.client.get_list', args:{ doctype:'Shift Assignment', filters:[['start_date','between',[monthStart,monthEnd]],['docstatus','=',1]], fields:['name','employee','shift_type','start_date'], limit_page_length:5000 }})
         ]).then(async ([stRes, empRes, hlRes, saRes]) => {
             const pal = currentPalette();
             const rawShifts = stRes.message || [];
-            const targetShifts = rawShifts.filter(s => s.name.toLowerCase().includes('target'));
+            // day-team shifts only: the three Target-Shift(...) plus Day-Shift(8am-5pm)
+            const targetShifts = rawShifts.filter(s => /^(target-shift|day-shift)/i.test(s.name));
             const useShifts = targetShifts.length > 0 ? targetShifts : rawShifts;
             SHIFTS = useShifts.map((s, i) => {
                 const p = pal[i % pal.length];
@@ -701,6 +702,7 @@ frappe.pages['day-team-planner'].on_page_load = function(wrapper) {
             SMAP = {}; SHIFTS.forEach(s => SMAP[s.name] = s);
 
             employees = empRes.message || []; filteredEmps = [...employees];
+            sundayWorkers = new Set(employees.filter(e => e.custom_sunday_worker).map(e => e.name));
             employees.forEach(e => { plan[e.name] = {}; });
             const validNames = new Set(SHIFTS.map(s => s.name));
             (saRes.message || []).forEach(a => { if (validNames.has(a.shift_type) && plan[a.employee] !== undefined) plan[a.employee][a.start_date] = a.shift_type; });
@@ -917,22 +919,7 @@ frappe.pages['day-team-planner'].on_page_load = function(wrapper) {
         if(openCtx){ openCtx.setAttribute('style','display:none'); openCtx.classList.remove('open'); openCtx=null; }
         const isRemove=shiftName==='__REMOVE__', newShift=isRemove?null:shiftName, oldShift=plan[empId]?.[ds]||null;
         if(newShift===oldShift) return;
-        if(!plan[empId]) plan[empId]={};
-        if(newShift) plan[empId][ds]=newShift; else delete plan[empId][ds];
-        const key=empId+'|'+ds; savingSet.add(key); showSavingCell(empId,ds);
-        try {
-            await cancelAndDelete(empId,ds);
-            if(newShift){ const ins=await frappe.call({ method:'frappe.client.insert', args:{ doc:{ doctype:'Shift Assignment', employee:empId, company:COMPANY, shift_type:newShift, start_date:ds, end_date:ds, docstatus:0 }}}); if(ins.message) await frappe.call({ method:'frappe.client.submit', args:{ doc:ins.message }}); }
-            if(!savedPlan[empId]) savedPlan[empId]={};
-            if(newShift) savedPlan[empId][ds]=newShift; else delete savedPlan[empId][ds];
-            savingSet.delete(key); flashCell(empId,ds);
-            const empName=employees.find(e=>e.name===empId)?.employee_name||empId;
-            toast(newShift?`✓ ${SMAP[newShift]?.fullName||newShift} → ${empName}`:`Shift removed for ${empName}`);
-        } catch(err) {
-            if(oldShift) plan[empId][ds]=oldShift; else delete plan[empId][ds];
-            savingSet.delete(key); refreshCell(empId,ds);
-            frappe.show_alert({ message:`Save failed: ${err.message||err}`, indicator:'red' });
-        }
+        await bulkSave([{empId,ds,shiftName:newShift}]);
     };
 
     // ─── Fill / clear ─────────────────────────────────────────────────────────
@@ -982,33 +969,63 @@ frappe.pages['day-team-planner'].on_page_load = function(wrapper) {
     };
 
     // ─── Bulk save ───────────────────────────────────────────────────────────
+    // One server call per chunk (see day_team_planner.py::bulk_assign) instead
+    // of 3-4 client round-trips per cell — a month-fill drops from ~1,500
+    // requests to 2-3.
+    const BULK_METHOD='hrms.hr.page.day_team_planner.day_team_planner.bulk_assign';
+    const BULK_CHUNK=200;
     async function bulkSave(cells) {
         const prog=document.getElementById('dtp-prog');
         cells.forEach(({empId,ds,shiftName})=>{ if(!plan[empId]) plan[empId]={}; if(shiftName) plan[empId][ds]=shiftName; else delete plan[empId][ds]; savingSet.add(empId+'|'+ds); showSavingCell(empId,ds); });
         if(prog){ prog.style.display='block'; prog.style.width='0%'; }
         toast(`⏳ Saving ${cells.length} change${cells.length!==1?'s':''}…`);
-        let done=0, errs=0;
-        for(const {empId,ds,shiftName} of cells){
-            done++; if(prog) prog.style.width=Math.round(done/cells.length*100)+'%';
-            const key=empId+'|'+ds;
+        let done=0, errs=0, firstErr=null; const savedCells=[];
+        for(let i=0;i<cells.length;i+=BULK_CHUNK){
+            const chunk=cells.slice(i,i+BULK_CHUNK);
+            let failed=chunk.map(c=>({employee:c.empId,date:c.ds,error:'request failed'}));
             try {
-                await cancelAndDelete(empId,ds);
-                if(shiftName){ const ins=await frappe.call({ method:'frappe.client.insert', args:{ doc:{ doctype:'Shift Assignment', employee:empId, company:COMPANY, shift_type:shiftName, start_date:ds, end_date:ds, docstatus:0 }}}); if(ins.message) await frappe.call({ method:'frappe.client.submit', args:{ doc:ins.message }}); }
-                if(!savedPlan[empId]) savedPlan[empId]={}; if(shiftName) savedPlan[empId][ds]=shiftName; else delete savedPlan[empId][ds];
-                savingSet.delete(key); flashCell(empId,ds);
-            } catch(e){ errs++; const prev=savedPlan[empId]?.[ds]||null; if(prev) plan[empId][ds]=prev; else delete plan[empId][ds]; savingSet.delete(key); refreshCell(empId,ds); }
+                const r=await frappe.call({ method:BULK_METHOD, args:{ changes:JSON.stringify(chunk.map(c=>({employee:c.empId,date:c.ds,shift_type:c.shiftName||null}))) }});
+                failed=(r.message&&r.message.failed)||[];
+            } catch(e){ firstErr=firstErr||(e.message||String(e)); }
+            const failedKeys=new Set(failed.map(f=>f.employee+'|'+f.date));
+            for(const {empId,ds,shiftName} of chunk){
+                const key=empId+'|'+ds; done++;
+                if(failedKeys.has(key)){
+                    errs++; const prev=savedPlan[empId]?.[ds]||null;
+                    if(prev) plan[empId][ds]=prev; else delete plan[empId][ds];
+                    savingSet.delete(key); refreshCell(empId,ds);
+                } else {
+                    if(!savedPlan[empId]) savedPlan[empId]={};
+                    if(shiftName) savedPlan[empId][ds]=shiftName; else delete savedPlan[empId][ds];
+                    savingSet.delete(key); savedCells.push({empId,ds});
+                }
+            }
+            if(failed.length&&!firstErr) firstErr=failed[0].error;
+            if(prog) prog.style.width=Math.round(done/cells.length*100)+'%';
         }
         if(prog){ prog.style.width='100%'; setTimeout(()=>{ prog.style.display='none'; prog.style.width='0%'; },600); }
-       
-        toast(errs>0?`⚠ ${done-errs} saved, ${errs} failed`:`✓ ${done} change${done!==1?'s':''} saved`);
+        renderGrid(); // refresh the per-column count badges
+        savedCells.forEach(({empId,ds})=>flashCell(empId,ds));
+        if(errs>0){ toast(`⚠ ${done-errs} saved, ${errs} failed`); if(firstErr) frappe.show_alert({ message:`Save failed: ${firstErr}`, indicator:'red' }); }
+        else toast(`✓ ${done} change${done!==1?'s':''} saved`);
     }
 
-    // ─── Sunday toggle ───────────────────────────────────────────────────────
+    // ─── Sunday toggle (persisted on Employee.custom_sunday_worker) ──────────
     window.dtpToggleSunday = function(empId) {
-        if(sundayWorkers.has(empId)) sundayWorkers.delete(empId); else sundayWorkers.add(empId);
+        const enabling=!sundayWorkers.has(empId);
+        if(enabling) sundayWorkers.add(empId); else sundayWorkers.delete(empId);
         renderGrid();
         const emp=employees.find(e=>e.name===empId);
-        toast(sundayWorkers.has(empId)?`☀ ${emp?.employee_name} marked as Sunday worker`:`${emp?.employee_name} removed from Sunday workers`);
+        toast(enabling?`☀ ${emp?.employee_name} marked as Sunday worker`:`${emp?.employee_name} removed from Sunday workers`);
+        frappe.call({
+            method:'hrms.hr.page.day_team_planner.day_team_planner.set_sunday_worker',
+            args:{ employee:empId, enabled:enabling?1:0 }
+        }).then(()=>{ if(emp) emp.custom_sunday_worker=enabling?1:0; })
+          .catch(()=>{ // revert on failure
+            if(enabling) sundayWorkers.delete(empId); else sundayWorkers.add(empId);
+            renderGrid();
+            frappe.show_alert({ message:'Could not save Sunday-worker flag', indicator:'red' });
+        });
     };
 
     // ─── Export CSV ──────────────────────────────────────────────────────────
@@ -1021,19 +1038,6 @@ frappe.pages['day-team-planner'].on_page_load = function(wrapper) {
         a.href=url; a.download=`day_team_shifts_${curYear}_${String(curMonth+1).padStart(2,'0')}.csv`; a.click(); URL.revokeObjectURL(url);
         toast('📋 CSV exported');
     };
-
-    // ─── Cancel + delete overlapping assignments ─────────────────────────────
-    async function cancelAndDelete(empId, ds) {
-        const res=await frappe.call({ method:'frappe.client.get_list', args:{ doctype:'Shift Assignment', filters:[['employee','=',empId],['start_date','<=',ds],['end_date','>=',ds],['docstatus','in',['0','1']]], fields:['name','docstatus'], limit_page_length:20 }});
-        for(const rec of (res.message||[])){
-            try {
-                const ckins=await frappe.call({ method:'frappe.client.get_list', args:{ doctype:'Employee Checkin', filters:[['employee','=',empId],['time','like',ds+'%']], fields:['name'], limit_page_length:50 }});
-                for(const ck of (ckins.message||[])) await frappe.call({ method:'frappe.db.set_value', args:{ doctype:'Employee Checkin', name:ck.name, fieldname:{ shift_assignment:'', shift_type:'' }}}).catch(()=>{});
-            } catch(e) {}
-            if(String(rec.docstatus)==='1') try { await frappe.call({ method:'frappe.client.cancel', args:{ doctype:'Shift Assignment', name:rec.name }}); } catch(e) {}
-            try { await frappe.call({ method:'frappe.client.delete', args:{ doctype:'Shift Assignment', name:rec.name }}); } catch(e) {}
-        }
-    }
 
     // ─── Toast ───────────────────────────────────────────────────────────────
     function toast(msg) {
