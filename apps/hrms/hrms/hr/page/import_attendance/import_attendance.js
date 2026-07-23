@@ -30,7 +30,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
             --hov: var(--fg-hover-color,#f1f5f9);
         }
         .att-root *{box-sizing:border-box}
-        .att-root{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);min-height:100vh;padding:20px 16px 72px;color:var(--tx);-webkit-font-smoothing:antialiased}
+        .att-root{font-family:'DM Sans',-apple-system,sans-serif;background:var(--bg);min-height:100vh;padding:20px 16px 104px;color:var(--tx);-webkit-font-smoothing:antialiased}
         .att-wrap{max-width:1040px;margin:0 auto}
 
         /* ── Header ── */
@@ -116,11 +116,6 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
 
         /* ── Run panel ── */
         .arun{animation:afu .4s .12s ease both}
-        .run-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--ab),var(--ap));color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;box-shadow:0 8px 22px rgba(37,99,235,.28);display:flex;align-items:center;justify-content:center;gap:9px;letter-spacing:.2px}
-        .run-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 12px 28px rgba(37,99,235,.36)}
-        .run-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
-        .run-btn.done{background:linear-gradient(135deg,var(--ag),#047857);box-shadow:0 8px 22px rgba(5,150,105,.28)}
-        .run-hint{text-align:center;font-size:11.5px;color:var(--mu);margin-top:9px}
 
         /* ── Pipeline ── */
         .pipe{display:none;margin-top:16px} .pipe.vis{display:block}
@@ -189,6 +184,24 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         .done-stat{background:var(--card);border:1px solid var(--bd2);border-radius:10px;padding:11px;text-align:center}
         .done-stat .n{font-size:21px;font-weight:700;font-family:'DM Mono',monospace;color:var(--tx);letter-spacing:-.4px}
         .done-stat .l{font-size:10px;color:var(--mu);margin-top:3px;font-weight:600}
+
+        /* ── Sticky action bar ── */
+        .sbar{position:fixed;left:0;right:0;bottom:0;z-index:900;background:var(--card);border-top:1px solid var(--bd);box-shadow:0 -8px 28px rgba(16,24,40,.12);transform:translateY(130%);transition:transform .38s cubic-bezier(.4,0,.2,1)}
+        .sbar.vis{transform:translateY(0)}
+        .sbar-prog{height:3px;background:var(--bd2)}
+        .sbar-fill{height:3px;width:0%;background:linear-gradient(90deg,var(--ab),var(--ap));transition:width .35s ease}
+        .sbar.done .sbar-fill{background:var(--ag)}
+        .sbar-inner{max-width:1040px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px}
+        .sbar-info{display:flex;align-items:center;gap:12px;min-width:0}
+        .sbar-ic{width:40px;height:40px;min-width:40px;border-radius:12px;background:var(--ab8);color:var(--ab);display:flex;align-items:center;justify-content:center;font-size:19px}
+        .sbar.done .sbar-ic{background:var(--ag8);color:var(--ag)}
+        .sbar-title{font-size:14px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+        .sbar-sub{font-size:11.5px;color:var(--mu);margin-top:2px;font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .bar-run{display:inline-flex;align-items:center;gap:8px;padding:13px 28px;background:linear-gradient(135deg,var(--ab),var(--ap));color:#fff;border:none;border-radius:12px;font-size:14.5px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 6px 18px rgba(37,99,235,.3);white-space:nowrap;flex-shrink:0}
+        .bar-run:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 11px 24px rgba(37,99,235,.4)}
+        .bar-run:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+        .bar-run.done{background:linear-gradient(135deg,var(--ag),#047857);box-shadow:0 6px 18px rgba(5,150,105,.3)}
+        @media(max-width:560px){.sbar-ic{display:none}.bar-run{padding:12px 18px;font-size:13.5px}.sbar-inner{padding:11px 14px}}
 
         @keyframes afd{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
         @keyframes afu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -278,11 +291,6 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         <!-- Run panel -->
         <div class="arun" id="att-run-panel" style="display:none">
             <div class="ac">
-                <button class="run-btn" id="att-run" disabled>
-                    <span class="run-ico">▶</span><span class="run-lbl">Run Import &amp; Mark Attendance</span>
-                </button>
-                <div class="run-hint">One click runs all four steps automatically, in order.</div>
-
                 <!-- Pipeline -->
                 <div class="pipe" id="att-pipe">
                     <div class="pipe-head">
@@ -361,6 +369,23 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Sticky action bar (always visible once a CSV is loaded) -->
+    <div class="sbar" id="att-bar">
+        <div class="sbar-prog"><div class="sbar-fill" id="att-bar-fill"></div></div>
+        <div class="sbar-inner">
+            <div class="sbar-info">
+                <div class="sbar-ic" id="att-bar-ic">📋</div>
+                <div style="min-width:0">
+                    <div class="sbar-title" id="att-bar-title">Ready to process</div>
+                    <div class="sbar-sub" id="att-bar-sub">Upload a CSV to begin</div>
+                </div>
+            </div>
+            <button class="bar-run" id="att-run" data-state="ready">
+                <span class="run-ico">▶</span><span class="run-lbl">Run Import</span>
+            </button>
+        </div>
     </div></div>
     `);
 
@@ -406,7 +431,14 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
             else                     node.textContent = id;
         }
     }
-    function stageProgress(id, pct) { const el = $id(`stg${id}-fill`); if (el) el.style.width = pct + '%'; }
+    function stageProgress(id, pct) {
+        const el = $id(`stg${id}-fill`); if (el) el.style.width = pct + '%';
+        if (running) {
+            const overall = Math.round(((id - 1) * 100 + pct) / 4);
+            barFill(overall);
+            barSub(`Step ${id} of 4 · ${overall}%`);
+        }
+    }
     function stageChips(id, chips) {
         const el = $id(`stg${id}-chips`); if (!el) return;
         el.innerHTML = chips
@@ -415,6 +447,37 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
             .join('');
     }
     function pipeStep(n) { const el = $id('att-pipe-step'); if (el) el.textContent = `Step ${n} / 4`; }
+
+    // Sticky action bar
+    function showBarEl(on) { $id('att-bar').classList.toggle('vis', !!on); }
+    function hideBar() { const b = $id('att-bar'); b.classList.remove('vis', 'done'); }
+    function barTitle(t) { $id('att-bar-title').textContent = t; }
+    function barSub(t) { $id('att-bar-sub').textContent = t; }
+    function barFill(pct) { $id('att-bar-fill').style.width = Math.max(0, Math.min(100, pct)) + '%'; }
+    function setBarReady(nPunch, nMatched) {
+        $id('att-bar').classList.remove('done');
+        $id('att-bar-ic').textContent = '📋';
+        barTitle('Ready to process');
+        barSub(`${Number(nPunch).toLocaleString()} check-ins · ${nMatched} matched`);
+        barFill(0);
+        const rb = $id('att-run');
+        rb.disabled = nPunch === 0;
+        rb.classList.remove('done'); rb.dataset.state = 'ready';
+        rb.querySelector('.run-ico').textContent = '▶';
+        rb.querySelector('.run-lbl').textContent = 'Run Import';
+        showBarEl(true);
+    }
+    function setBarDone(elapsed, summary, hasErr) {
+        $id('att-bar').classList.add('done');
+        $id('att-bar-ic').textContent = hasErr ? '⚠️' : '✓';
+        barTitle(hasErr ? 'Completed with warnings' : 'Import complete');
+        barSub(`${elapsed}s · ${summary}`);
+        barFill(100);
+        const rb = $id('att-run');
+        rb.disabled = false; rb.classList.add('done'); rb.dataset.state = 'done';
+        rb.querySelector('.run-ico').textContent = '↺';
+        rb.querySelector('.run-lbl').textContent = 'New Import';
+    }
 
     // Elapsed timer
     function startTimer() {
@@ -471,12 +534,13 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         show('att-summary', false); show('att-summary-empty', true);
         setNum('sC', '—', 'b'); setNum('sE', '—'); setNum('sM', '—', 'g'); setNum('sS', '—', 'a');
 
-        // Run panel
+        // Run panel + sticky bar
         show('att-run-panel', false);
+        hideBar();
         const rb = $id('att-run');
-        rb.disabled = true; rb.classList.remove('done');
+        rb.disabled = true; rb.classList.remove('done'); rb.dataset.state = 'ready';
         rb.querySelector('.run-ico').textContent = '▶';
-        rb.querySelector('.run-lbl').textContent = 'Run Import & Mark Attendance';
+        rb.querySelector('.run-lbl').textContent = 'Run Import';
         $id('att-pipe').classList.remove('vis');
         $id('att-logwrap').classList.remove('vis');
         $id('att-log').innerHTML = '';
@@ -504,6 +568,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         // clear any prior run state but keep the new file
         vis('att-prev', false);
         show('att-run-panel', false);
+        hideBar();
         $id('att-done').classList.remove('vis');
         $id('att-pipe').classList.remove('vis');
         $id('att-logwrap').classList.remove('vis');
@@ -663,8 +728,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         } else { vis('att-noshift-note', false); }
 
         vis('att-prev', true);
-        show('att-run-panel', true);
-        $id('att-run').disabled = checkins.length === 0;
+        setBarReady(checkins.length, matched);
         $id('att-new-btn').classList.add('vis');
         curTab = 'all'; curSearch = '';
         document.querySelectorAll('.atab').forEach(t => t.classList.remove('on'));
@@ -787,22 +851,31 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         $id('att-new-btn').classList.remove('vis');
         $id('att-done').classList.remove('vis');
         const rb = $id('att-run');
-        rb.disabled = true;
+        rb.disabled = true; rb.classList.remove('done'); rb.dataset.state = 'running';
         rb.querySelector('.run-ico').innerHTML = '<span class="spin"></span>';
         rb.querySelector('.run-lbl').textContent = 'Running…';
+
+        // Bar → processing mode
+        $id('att-bar').classList.remove('done');
+        $id('att-bar-ic').textContent = '⚙️';
+        barTitle('Processing…'); barSub('Step 1 of 4 · 0%'); barFill(0);
+
+        // Reveal the pipeline and bring it into view
+        show('att-run-panel', true);
         $id('att-pipe').classList.add('vis');
         $id('att-logwrap').classList.add('vis');
         $id('att-log').innerHTML = '';
+        setTimeout(() => $id('att-run-panel').scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
         startTimer();
 
         // Stage 1 — check-ins
-        pipeStep(1);
+        pipeStep(1); barTitle('Importing check-ins');
         logHead('▸ STAGE 1 — Import Check-ins');
         const s1 = await runCheckinImport();
         stageState(1, s1.errs ? 'error' : 'done', s1.errs ? `Done · ${s1.errs} errors` : 'Done');
 
         // Stage 2 — attendance
-        pipeStep(2);
+        pipeStep(2); barTitle('Marking attendance');
         logHead('▸ STAGE 2 — Mark Attendance');
         const s2 = await runAttendance();
         stageState(2, s2.errors ? 'error' : 'done', s2.errors ? `Done · ${s2.errors} errors` : 'Done');
@@ -813,7 +886,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         const matchedEmps = [...new Set(empDates.map(e => e.employee))];
 
         // Stage 3 — fill absent
-        pipeStep(3);
+        pipeStep(3); barTitle('Filling absent days');
         let s3 = { created: 0 };
         if (touched) {
             logHead('▸ STAGE 3 — Fill Absent Days');
@@ -822,11 +895,12 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         } else {
             stageState(3, 'skip', 'Skipped');
             stageChips(3, [{ label: 'no new attendance', val: '—' }]);
+            if (running) barFill(75);
             log('ldup', 'Stage 3 → skipped (no new attendance to reconcile)');
         }
 
         // Stage 4 — auto leave
-        pipeStep(4);
+        pipeStep(4); barTitle('Assigning leave');
         let s4 = { assigned: 0 };
         if (touched) {
             logHead('▸ STAGE 4 — Auto Leave Assignment');
@@ -835,6 +909,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         } else {
             stageState(4, 'skip', 'Skipped');
             stageChips(4, [{ label: 'no new attendance', val: '—' }]);
+            if (running) barFill(100);
             log('ldup', 'Stage 4 → skipped (no new attendance to process)');
         }
 
@@ -846,10 +921,9 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         const totalErr = s1.errs + s2.errors + (s3.errors || 0) + (s4.errors || 0);
         logHead(`✓ PIPELINE COMPLETE — ${elapsed}s` + (totalErr ? ` · ${totalErr} error(s)` : ''));
 
-        rb.disabled = false;
-        rb.classList.add('done');
-        rb.querySelector('.run-ico').textContent = '✓';
-        rb.querySelector('.run-lbl').textContent = 'Completed — Run Again';
+        setBarDone(elapsed,
+            `${s2.created + s2.updated} attendance · ${s4.assigned || 0} leave`,
+            totalErr > 0);
 
         $id('d-checkins').textContent = s1.done;
         $id('d-attendance').textContent = (s2.created + s2.updated);
@@ -870,11 +944,10 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
 
     // ── Run button (one click, single confirm) ───────────────────────────────
     $id('att-run').addEventListener('click', function() {
-        if (running || !checkins.length) { if (!running) resetPage(); return; }
-        // if it was already completed, allow a re-run
-        this.classList.remove('done');
-        this.querySelector('.run-ico').textContent = '▶';
-        this.querySelector('.run-lbl').textContent = 'Run Import & Mark Attendance';
+        if (running) return;
+        // Completed run → the button becomes "New Import"
+        if (this.dataset.state === 'done') { resetPage(); return; }
+        if (!checkins.length) return;
 
         frappe.confirm(
             `<div style="font-size:13px;line-height:1.7">
