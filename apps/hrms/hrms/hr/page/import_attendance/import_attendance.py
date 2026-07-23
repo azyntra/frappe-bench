@@ -22,6 +22,83 @@ FIXED_STRUCTURE_PREFIX = "FT-"
 DAY_STRUCTURE_PREFIX   = "Day Team"
 _pay_profile_cache = {}
 
+# ─────────────────────────────────────────────────────────────
+#  DAY-TEAM SHIFT AUTO-CLASSIFICATION
+# ─────────────────────────────────────────────────────────────
+#  The day team splits per day into two shifts, and the punch pattern tells
+#  them apart: target-team members clock out around 15:00 (and punch AGAIN
+#  later if they stay for OT), normal day members work through to 17:00.
+#  So a punch inside TARGET_OUT_WINDOW marks the day as a Target day.
+#
+#  A manual roster entry (the planner pages) always wins — inference only
+#  runs when no Shift Assignment resolves for the date. Auto-created rows
+#  carry custom_auto_assigned=1 so they are distinguishable and replaceable;
+#  manual rows are never touched by automation.
+#
+#  Client-confirmed: auto-assignment only ever uses the two 8AM shifts.
+#  Before-08:00 time is OT by rule, so the legacy 6am Target shifts are
+#  deliberately NOT inferred — they remain manual-roster-only.
+TARGET_OUT_WINDOW = ("14:30", "16:00")   # punch in here ⇒ Target day
+AUTO_TARGET_SHIFT = "Target-Shift(8am-3pm)"
+AUTO_NORMAL_SHIFT = "Day-Shift(8am-5pm)"
+
+
+def _infer_day_shift(checkins):
+    """Classify one day-team day from its punches.
+
+    Any punch whose time-of-day falls inside TARGET_OUT_WINDOW is read as the
+    target team's ~15:00 out-punch ⇒ Target-Shift(8am-3pm); otherwise the
+    normal Day-Shift(8am-5pm). Intermediate punches matter: someone who
+    punched 15:01 and again 18:00 is Target with OT, not a normal day member
+    — which is why this looks at every punch, not just first-in/last-out.
+    """
+    lo, hi = TARGET_OUT_WINDOW
+    for c in checkins:
+        t = _to_dt(c.time)
+        if t is None:
+            continue
+        hhmm = t.strftime("%H:%M")
+        if lo <= hhmm <= hi:
+            return AUTO_TARGET_SHIFT
+    return AUTO_NORMAL_SHIFT
+
+
+def _auto_assign_day_shift(employee, work_date):
+    """Infer and roster the shift for one unrostered day-team day.
+
+    Returns the shift name (assignment created) or None (nothing to do).
+    Skips holidays: attendance/OT on a holiday needs no shift (the whole
+    worked day is OT via _process_without_shift), and skipping keeps the
+    roster free of noise rows.
+    """
+    checkins = _get_checkins(employee, work_date)
+    if not checkins:
+        return None
+    if _is_holiday_for(employee, work_date):
+        return None
+
+    shift = _infer_day_shift(checkins)
+    try:
+        doc = frappe.get_doc({
+            "doctype":    "Shift Assignment",
+            "employee":   employee,
+            "company":    _get_company(employee),
+            "shift_type": shift,
+            "start_date": work_date,
+            "end_date":   work_date,
+            "status":     "Active",
+            "custom_auto_assigned": 1,
+        })
+        doc.insert(ignore_permissions=True)
+        doc.submit()
+        return shift
+    except Exception:
+        frappe.log_error(
+            message=frappe.get_traceback(),
+            title=f"Day-team auto shift failed — {employee} on {work_date}",
+        )
+        return None
+
 
 def clear_pay_profile_cache():
     """Drop memoised profiles — needed after salary structures change, since
@@ -274,6 +351,13 @@ def _process_single(employee, work_date):
     """
     # ── 1. Try shift-aware ERPNext path ──────────────────────
     shift_assignment = _get_shift_assignment(employee, work_date)
+
+    # ── 1b. Day team with no roster entry: infer the shift from the punch
+    #        pattern and create the assignment, so the day flows through the
+    #        normal shift-aware path (status thresholds + OT stamping).
+    #        Manual roster always wins — this only runs when nothing resolves.
+    if not shift_assignment and _pay_profile(employee, work_date) == "day":
+        shift_assignment = _auto_assign_day_shift(employee, work_date)
 
     if shift_assignment:
         return _process_with_shift(employee, work_date, shift_assignment)
