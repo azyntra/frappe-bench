@@ -38,7 +38,11 @@ _pay_profile_cache = {}
 #  Client-confirmed: auto-assignment only ever uses the two 8AM shifts.
 #  Before-08:00 time is OT by rule, so the legacy 6am Target shifts are
 #  deliberately NOT inferred — they remain manual-roster-only.
-TARGET_OUT_WINDOW = ("14:30", "16:00")   # punch in here ⇒ Target day
+#
+#  Window starts at 14:00, not 14:30: the punch data shows target members
+#  routinely clock out 14:02–14:20 (client approved 2026-07-23 after seeing
+#  Feb–Mar samples where ~half the target out-punches fell before 14:30).
+TARGET_OUT_WINDOW = ("14:00", "16:00")   # punch in here ⇒ Target day
 AUTO_TARGET_SHIFT = "Target-Shift(8am-3pm)"
 AUTO_NORMAL_SHIFT = "Day-Shift(8am-5pm)"
 
