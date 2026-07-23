@@ -555,11 +555,11 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
                     <h2>Quick Actions</h2>
                 </div>
 
-                <a class="qa-featured" href="/desk/day-team-planner">
-                    <div class="qa-i">📅</div>
+                <a class="qa-featured" href="/desk/day-team-attendance">
+                    <div class="qa-i">📊</div>
                     <div class="qa-t">
-                        <h4>Day Team Shift Planner</h4>
-                        <p>Plan & assign daily shifts · Day Team</p>
+                        <h4>Day Team Attendance & OT</h4>
+                        <p>Target/Normal days, OT & cost · Day Team</p>
                     </div>
                     <span class="qa-featured-badge">Day Team</span>
                     <span class="qa-arr">›</span>
