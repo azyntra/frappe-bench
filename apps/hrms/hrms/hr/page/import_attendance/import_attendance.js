@@ -604,9 +604,25 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         const edList    = [];
         for (const e of Object.values(byKey)) {
             e.times.sort();
-            result.push({ employee: e.empId, log_type: 'IN',  time: e.times[0] });
-            if (e.times.length > 1)
-                result.push({ employee: e.empId, log_type: 'OUT', time: e.times[e.times.length - 1] });
+            // Keep EVERY punch, not just first/last. The day-team auto-
+            // classifier reads the ~3PM out-punch to tell a Target day from a
+            // Normal day — collapsing to first/last erased exactly that punch
+            // on OT days (in 07:50, out 15:01, OT punch 18:00 arrived as just
+            // 07:50 + 18:00). First punch = IN, every later punch = OUT; the
+            // server takes first IN / last OUT for attendance, so in/out and
+            // working hours are unchanged. Device double-taps (same tap
+            // logged twice within 60s) are dropped.
+            const kept = [];
+            let prevMs = null;
+            for (const ts of e.times) {
+                const ms = new Date(ts.replace(' ', 'T')).getTime();
+                if (prevMs !== null && (ms - prevMs) < 60 * 1000) continue;
+                kept.push(ts);
+                prevMs = ms;
+            }
+            kept.forEach((ts, i) => {
+                result.push({ employee: e.empId, log_type: i === 0 ? 'IN' : 'OUT', time: ts });
+            });
             // collect unique employee+date pairs for attendance processing
             const d   = e.times[0].split(' ')[0];
             const key = e.empId + '|' + d;
