@@ -18,6 +18,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, cint, flt, getdate
 
+from hrms.hr.page.day_team_planner.day_team_planner import _release_checkin_shift
 from hrms.hr.page.import_attendance.import_attendance import (
     AUTO_NORMAL_SHIFT,
     AUTO_TARGET_SHIFT,
@@ -217,21 +218,6 @@ def get_day_punches(employee, work_date):
     }
 
 
-def _unlink_checkins(fieldname, docname):
-    """Null Employee Checkin links before cancelling the target doc.
-
-    Checkins inserted while a Shift Assignment / Attendance already existed
-    get linked to it by HRMS fetch_shift, and Frappe's cancel link-check then
-    refuses the cancel ('Cannot cancel ... as it is linked to Employee
-    Checkin'). Same treatment as day_team_planner._replace_day.
-    """
-    if frappe.db.has_column("Employee Checkin", fieldname):
-        frappe.db.sql(
-            f"UPDATE `tabEmployee Checkin` SET `{fieldname}` = NULL WHERE `{fieldname}` = %s",
-            docname,
-        )
-
-
 def _expected_ot(emp, ds, checkins, final_shift, is_hol):
     """OT the punch data implies against final_shift, or None if it cannot be
     compared cheaply (single punch: credited-shift logic; no shift resolved)."""
@@ -363,18 +349,25 @@ def reprocess_range(from_date, to_date, dry_run=1):
 
             try:
                 frappe.db.savepoint("dta_cell")
+                # attendance FIRST — Shift Assignment.on_cancel refuses while
+                # any attendance row (even cancelled) still carries the shift
+                if attendance_action == "recreate" and att and att.docstatus == 1:
+                    att_doc = frappe.get_doc("Attendance", att.name)
+                    att_doc.flags.skip_auto_leave = True
+                    att_doc.cancel()          # on_cancel unlinks its checkins
+                    frappe.db.set_value("Attendance", att.name, "shift", None)
                 if assignment_action == "replace-auto":
-                    _unlink_checkins("shift_assignment", sa.name)
+                    _release_checkin_shift(emp, ds, sa.shift_type)
+                    frappe.db.sql(
+                        """UPDATE `tabAttendance` SET shift = NULL
+                           WHERE employee = %s AND attendance_date = %s AND docstatus = 2 AND shift = %s""",
+                        (emp, ds, sa.shift_type),
+                    )
                     old = frappe.get_doc("Shift Assignment", sa.name)
                     if old.docstatus == 1:
                         old.cancel()
                     frappe.delete_doc("Shift Assignment", old.name)
                 # create-auto happens inside _process_single via the importer hook
-                if attendance_action in ("recreate",) and att and att.docstatus == 1:
-                    _unlink_checkins("attendance", att.name)
-                    att_doc = frappe.get_doc("Attendance", att.name)
-                    att_doc.flags.skip_auto_leave = True
-                    att_doc.cancel()
                 _process_single(emp, ds)
                 actions[-1]["result"] = "done"
             except Exception as e:

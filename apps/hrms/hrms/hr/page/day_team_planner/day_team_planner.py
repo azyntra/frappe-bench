@@ -59,7 +59,26 @@ def bulk_assign(changes):
     return results
 
 
+def _release_checkin_shift(employee, work_date, shift_type):
+    """HRMS Shift Assignment.on_cancel refuses to cancel while an Employee
+    Checkin that day still carries the shift (fetch_shift stamps it at insert
+    time). Null it so the roster change can proceed — the re-stamp that
+    follows recomputes everything the field fed."""
+    frappe.db.sql(
+        """UPDATE `tabEmployee Checkin` SET shift = NULL
+           WHERE employee = %s AND shift = %s AND DATE(time) = %s""",
+        (employee, shift_type, work_date),
+    )
+
+
 def _replace_day(emp, ds, shift):
+    # a paid day must stay exactly as paid
+    if frappe.db.exists(
+        "Salary Slip",
+        {"employee": emp, "docstatus": 1, "start_date": ("<=", ds), "end_date": (">=", ds)},
+    ):
+        frappe.throw(_("{0} is covered by a submitted Salary Slip — cannot change the roster.").format(ds))
+
     overlapping = frappe.db.sql(
         """
         SELECT name, docstatus, start_date, end_date, shift_type
@@ -81,14 +100,39 @@ def _replace_day(emp, ds, shift):
                 )
             )
 
+    # If the day was already imported, its Attendance references the old
+    # shift; Shift Assignment.on_cancel blocks while ANY attendance (even a
+    # cancelled one) or checkin carries the shift. Cancel the attendance,
+    # release the references, and re-stamp the day at the end so status/OT
+    # are recomputed against the new roster.
+    removed_shifts = {rec.shift_type for rec in overlapping}
+    had_attendance = False
+    if removed_shifts:
+        att = frappe.db.get_value(
+            "Attendance",
+            {"employee": emp, "attendance_date": ds, "docstatus": ("!=", 2),
+             "shift": ("in", list(removed_shifts))},
+            ["name", "docstatus"],
+            as_dict=True,
+        )
+        if att:
+            had_attendance = True
+            att_doc = frappe.get_doc("Attendance", att.name)
+            att_doc.flags.skip_auto_leave = True
+            if att_doc.docstatus == 1:
+                att_doc.cancel()          # on_cancel unlinks its checkins
+                frappe.db.set_value("Attendance", att.name, "shift", None)
+            else:
+                frappe.delete_doc("Attendance", att.name, force=1)
+
     for rec in overlapping:
-        # Employee Checkin can hold a link to the assignment; clear it or the
-        # delete below fails the link check
-        if frappe.db.has_column("Employee Checkin", "shift_assignment"):
-            frappe.db.sql(
-                "UPDATE `tabEmployee Checkin` SET shift_assignment = NULL WHERE shift_assignment = %s",
-                rec.name,
-            )
+        _release_checkin_shift(emp, ds, rec.shift_type)
+        # cancelled attendance rows from earlier replacements block too
+        frappe.db.sql(
+            """UPDATE `tabAttendance` SET shift = NULL
+               WHERE employee = %s AND attendance_date = %s AND docstatus = 2 AND shift = %s""",
+            (emp, ds, rec.shift_type),
+        )
         doc = frappe.get_doc("Shift Assignment", rec.name)
         if doc.docstatus == 1:
             doc.cancel()
@@ -108,6 +152,12 @@ def _replace_day(emp, ds, shift):
         )
         doc.insert()
         doc.submit()
+
+    if had_attendance:
+        # re-stamp the day against the new roster (or, with no shift left,
+        # the importer's no-shift/auto-classification path)
+        from hrms.hr.page.import_attendance.import_attendance import _process_single
+        _process_single(emp, ds)
 
 
 @frappe.whitelist()
