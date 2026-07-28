@@ -602,6 +602,36 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         });
     }
 
+    // Normalise a device timestamp to "YYYY-MM-DD HH:MM:SS".
+    // Fingerprint exports arrive in two formats:
+    //   • ISO      "2026-06-22 08:02:59"      (JULY-style export)
+    //   • DD/MM/YYYY "21/05/2026 7:44"         (JUNE-style export, no seconds)
+    // Frappe's Employee Checkin.time is a datetime column and only accepts the
+    // ISO form, so a DD/MM/YYYY punch was rejected on insert — every row of the
+    // June sheet errored. Convert both to ISO up front. Returns null if the
+    // value can't be parsed (row is then skipped rather than corrupting data).
+    function normalizeTs(raw) {
+        const s = (raw || '').trim().replace(/\r$/, '');
+        if (!s) return null;
+        const sp = s.indexOf(' ');
+        const datePart = sp === -1 ? s : s.slice(0, sp);
+        const timePart = sp === -1 ? '0:0:0' : s.slice(sp + 1).trim();
+        let y, mo, d;
+        if (datePart.indexOf('/') !== -1) {          // DD/MM/YYYY
+            const p = datePart.split('/'); if (p.length !== 3) return null;
+            d = p[0]; mo = p[1]; y = p[2];
+        } else if (datePart.indexOf('-') !== -1) {   // YYYY-MM-DD
+            const p = datePart.split('-'); if (p.length !== 3) return null;
+            y = p[0]; mo = p[1]; d = p[2];
+        } else { return null; }
+        const t = timePart.split(':');
+        const parts = [y, mo, d, t[0] || '0', t[1] || '0', t[2] || '0'];
+        if (parts.some(v => v === undefined || v === '' || isNaN(parseInt(v, 10)))) return null;
+        const pad = (v, n) => String(parseInt(v, 10)).padStart(n, '0');
+        return `${pad(parts[0], 4)}-${pad(parts[1], 2)}-${pad(parts[2], 2)} ` +
+               `${pad(parts[3], 2)}:${pad(parts[4], 2)}:${pad(parts[5], 2)}`;
+    }
+
     function parseCSV(text) {
         empInfo = {};
         text.trim().split('\n').slice(1).forEach(line => {
@@ -609,7 +639,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
             if (cols.length < 4) return;
             const pid = cols[0].trim().replace(/^'/, '');
             const name = cols[1].trim();
-            const time = cols[3].trim();
+            const time = normalizeTs(cols[3]);   // → "YYYY-MM-DD HH:MM:SS" or null
             if (!pid || !time) return;
             if (!empInfo[pid]) empInfo[pid] = { name, times: [] };
             empInfo[pid].times.push(time);
