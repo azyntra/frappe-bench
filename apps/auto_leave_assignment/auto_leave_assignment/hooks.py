@@ -13,7 +13,12 @@ doc_events = {
     "Attendance": {
         "on_submit": "auto_leave_assignment.events.attendance_events.on_attendance_submit",
         "on_cancel": "auto_leave_assignment.events.attendance_events.on_attendance_cancel",
-    }
+    },
+    "Salary Slip": {
+        # Records gross BEFORE overtime / Sunday pay. Purely additive: it never
+        # changes gross_pay or net_pay, so overtime is still paid in full.
+        "validate": "auto_leave_assignment.events.salary_slip_events.set_gross_before_ot",
+    },
 }
 
 # ------------------------------------------------------------------

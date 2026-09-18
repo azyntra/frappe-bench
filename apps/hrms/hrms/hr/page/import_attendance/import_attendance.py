@@ -165,8 +165,24 @@ def _is_holiday_for(employee, work_date):
         return False
 
 
+def _is_sunday(work_date):
+    """True when the date is an actual Sunday.
+
+    Sundays are no longer overtime (client rule, 2026-09-18): a Sunday worked
+    is paid as ONE DAY — gross/25 for monthly staff, the daily rate for the day
+    team — through the "Sunday Pay" component. Every OTHER holiday (Poya) keeps
+    the original whole-day-overtime treatment.
+    """
+    d = work_date
+    if isinstance(d, str):
+        d = datetime.strptime(d[:10], "%Y-%m-%d")
+    if isinstance(d, datetime):
+        d = d.date()
+    return d.weekday() == 6
+
+
 def _overtime_hours(in_time, out_time, shift_end, is_holiday,
-                    shift_start=None, profile="fixed"):
+                    shift_start=None, profile="fixed", is_sunday=False):
     """Overtime hours for one day, rounded to nearest 0.5.
 
     HOLIDAY (either profile) — the whole day worked is overtime. The monthly
@@ -192,6 +208,10 @@ def _overtime_hours(in_time, out_time, shift_end, is_holiday,
     `shift_start` and `profile` are keyword arguments with back-compatible
     defaults so existing callers keep the original fixed-staff behaviour.
     """
+    if is_sunday:
+        # Sunday is paid as a whole day via "Sunday Pay", never as overtime.
+        return 0.0
+
     if is_holiday:
         if not in_time or not out_time or out_time <= in_time:
             return 0.0
@@ -496,6 +516,7 @@ def _process_with_shift(employee, work_date, shift_type_name):
     # Without this, a short Sunday would be marked Absent/Half Day and would
     # then be skipped by the overtime block below.
     is_holiday = _is_holiday_for(employee, work_date)
+    is_sunday  = _is_sunday(work_date)
 
     # ── Determine status ─────────────────────────────────────
     half_day_hrs  = (shift.working_hours_threshold_for_half_day  or 0)
@@ -546,11 +567,12 @@ def _process_with_shift(employee, work_date, shift_type_name):
             # is exactly what we cannot evidence.
             overtime_hours = _round_to_half(
                 (shift_end - shift_start).total_seconds() / 3600.0
-            ) if is_holiday else 0.0
+            ) if (is_holiday and not is_sunday) else 0.0
         else:
             overtime_hours = _overtime_hours(
                 in_time, out_time, shift_end, is_holiday,
                 shift_start=shift_start, profile=profile,
+                is_sunday=is_sunday,
             )
 
         if overtime_hours > 0:
@@ -595,7 +617,8 @@ def _process_without_shift(employee, work_date):
     if out_time and _is_holiday_for(employee, work_date) \
             and _pay_profile(employee, work_date):
         std_working_hrs = 0.0
-        overtime_hours  = _overtime_hours(in_time, out_time, None, True)
+        overtime_hours  = _overtime_hours(in_time, out_time, None, True,
+                                          is_sunday=_is_sunday(work_date))
         if overtime_hours > 0:
             overtime_type = OT_TYPE_NAME
 
