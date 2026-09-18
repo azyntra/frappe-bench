@@ -67,9 +67,9 @@
   </table>
 
   <!-- ══════════════ EARNINGS / DEDUCTIONS ══════════════ -->
-  {# Overtime and Sunday Pay sit AFTER gross: gross is the monthly package alone,
-     which is also the basis for Sunday pay (gross/25) and the no-pay deduction. #}
-  {% set extra_names = ['Overtime', 'Sunday Pay'] %}
+  {# Overtime alone sits AFTER gross. A Sunday worked is an ordinary day's pay,
+     so "Sunday Pay" stays inside gross with the rest of the package. #}
+  {% set extra_names = ['Overtime'] %}
   {% set earnings = doc.earnings | rejectattr('salary_component', 'in', extra_names) | list %}
   {% set extras = doc.earnings | selectattr('salary_component', 'in', extra_names) | list %}
   {% set deductions = doc.deductions %}

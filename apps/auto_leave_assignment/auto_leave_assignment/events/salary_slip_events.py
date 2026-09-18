@@ -1,11 +1,13 @@
 import frappe
 from frappe.utils import flt, rounded
 
-# Extra pay that sits ON TOP of the monthly package. The client reports
-# "Gross Salary" BEFORE overtime, and that same figure is the basis for both
-# Sunday pay (gross / 25) and the no-pay deduction (gross / working days), so
-# `gross_pay` must hold the package alone.
-EXTRA_PAY_COMPONENTS = ("Overtime", "Sunday Pay")
+# Overtime is the ONLY pay that sits after gross. A Sunday worked is an ordinary
+# day's pay, not overtime, so "Sunday Pay" stays inside gross_pay.
+#
+# Note the no-pay deduction is deliberately NOT affected: its formula is built on
+# the fixed package components only, so working a Sunday never inflates the rate
+# an absent day is docked at.
+EXTRA_PAY_COMPONENTS = ("Overtime",)
 
 
 def set_gross_before_ot(doc, method=None):
@@ -14,11 +16,11 @@ def set_gross_before_ot(doc, method=None):
     Runs on validate, after the controller's own calculate_net_pay(), so
     doc.gross_pay/net_pay are already populated. ERPNext derives
     net_pay = gross_pay - (total_deduction + loans), so gross_pay at this point
-    still includes the extra pay. We move the extras out of gross_pay and leave
-    net_pay exactly as calculated — the employee is still paid the overtime, it
-    is just presented after gross instead of inside it.
+    still includes the overtime. We move it out of gross_pay and leave net_pay
+    exactly as calculated — the employee is still paid the overtime, it is just
+    presented after gross instead of inside it.
 
-    Marking the components `do_not_include_in_total` would NOT work:
+    Marking the component `do_not_include_in_total` would NOT work:
     get_component_totals() skips those rows outright, which would drop the
     overtime from net_pay as well and stop paying it.
     """
