@@ -1,23 +1,44 @@
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, rounded
 
-# Extra pay that sits ON TOP of the monthly package. These components must stay
-# inside `gross_pay`, because ERPNext derives net_pay from it
-# (net_pay = gross_pay - total_deduction); excluding them there would silently
-# stop paying them. The client reports "Gross Salary" BEFORE overtime, so that
-# figure is stored separately instead.
+# Extra pay that sits ON TOP of the monthly package. The client reports
+# "Gross Salary" BEFORE overtime, and that same figure is the basis for both
+# Sunday pay (gross / 25) and the no-pay deduction (gross / working days), so
+# `gross_pay` must hold the package alone.
 EXTRA_PAY_COMPONENTS = ("Overtime", "Sunday Pay")
 
 
 def set_gross_before_ot(doc, method=None):
-    """Populate custom_gross_before_ot = package earnings, excluding extra pay."""
-    if not doc.meta.has_field("custom_gross_before_ot"):
-        return
+    """Report gross pay BEFORE overtime, without changing what is paid.
 
-    total = 0.0
+    Runs on validate, after the controller's own calculate_net_pay(), so
+    doc.gross_pay/net_pay are already populated. ERPNext derives
+    net_pay = gross_pay - (total_deduction + loans), so gross_pay at this point
+    still includes the extra pay. We move the extras out of gross_pay and leave
+    net_pay exactly as calculated — the employee is still paid the overtime, it
+    is just presented after gross instead of inside it.
+
+    Marking the components `do_not_include_in_total` would NOT work:
+    get_component_totals() skips those rows outright, which would drop the
+    overtime from net_pay as well and stop paying it.
+    """
+    extra = 0.0
     for row in (doc.earnings or []):
         if row.salary_component in EXTRA_PAY_COMPONENTS:
-            continue
-        total += flt(row.amount)
+            extra += flt(row.amount)
 
-    doc.custom_gross_before_ot = flt(total, doc.precision("gross_pay"))
+    package = flt(doc.gross_pay) - extra
+    precision = doc.precision("gross_pay")
+
+    if doc.meta.has_field("custom_gross_before_ot"):
+        doc.custom_gross_before_ot = flt(package, precision)
+
+    if not extra:
+        return
+
+    # net_pay is deliberately left untouched; only the reported gross moves.
+    doc.gross_pay = flt(package, precision)
+    doc.base_gross_pay = flt(
+        flt(doc.gross_pay) * flt(doc.exchange_rate), doc.precision("base_gross_pay")
+    )
+    doc.rounded_total = rounded(doc.net_pay)

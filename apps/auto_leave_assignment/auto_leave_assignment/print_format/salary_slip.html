@@ -67,7 +67,11 @@
   </table>
 
   <!-- ══════════════ EARNINGS / DEDUCTIONS ══════════════ -->
-  {% set earnings = doc.earnings %}
+  {# Overtime and Sunday Pay sit AFTER gross: gross is the monthly package alone,
+     which is also the basis for Sunday pay (gross/25) and the no-pay deduction. #}
+  {% set extra_names = ['Overtime', 'Sunday Pay'] %}
+  {% set earnings = doc.earnings | rejectattr('salary_component', 'in', extra_names) | list %}
+  {% set extras = doc.earnings | selectattr('salary_component', 'in', extra_names) | list %}
   {% set deductions = doc.deductions %}
   {% set e_len = earnings | length %}
   {% set d_len = deductions | length %}
@@ -98,6 +102,16 @@
         <td>Total Deductions</td>
         <td style="text-align: right;">{{ "{:,.2f}".format(doc.total_deduction) }}</td>
       </tr>
+      {% for x in extras %}
+      <tr>
+        <td style="border-bottom: 1px solid #eee;">{{ x.salary_component }}</td>
+        <td style="border-bottom: 1px solid #eee; text-align: right; border-right: 2px solid #fff;">
+          + {{ "{:,.2f}".format(x.amount) }}
+        </td>
+        <td style="border-bottom: 1px solid #eee;"></td>
+        <td style="border-bottom: 1px solid #eee;"></td>
+      </tr>
+      {% endfor %}
     </tbody>
   </table>
 
@@ -137,7 +151,7 @@
           <span style="float: right; font-weight: 600;">{{ "%.1f" | format(bd.overtime.normal_hours) }} hrs</span></div>
         {% endif %}
         {% if bd.overtime.holiday_hours %}
-        <div>Sunday / Poya holiday &mdash; full day counted
+        <div>Poya / public holiday &mdash; full day counted
           <span style="float: right; font-weight: 600;">{{ "%.1f" | format(bd.overtime.holiday_hours) }} hrs</span></div>
         {% endif %}
         <div style="border-top: 1px solid {{ RULE }}; margin-top: 2px; padding-top: 2px; font-weight: 700;">
@@ -190,7 +204,8 @@
   </table>
   {% if bd.overtime.holiday_hours %}
   <div style="font-size: 8.5px; color: #b26a00; margin-bottom: 6px;">
-    * Sunday / Poya holiday &mdash; the entire day worked is paid as overtime.
+    * Poya / public holiday &mdash; the entire day worked is paid as overtime.
+    Sundays are not overtime &mdash; a Sunday worked is paid as one day.
   </div>
   {% endif %}
   {% endif %}
