@@ -696,6 +696,11 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
                         <div class="qa-t"><h4>New Leave Application</h4><p>Apply for employee leave</p></div>
                         <span class="qa-arr">›</span>
                     </a>
+                    <a class="qa" href="/app/employee-leave-manager">
+                        <div class="qa-i" style="background:var(--p-bg)">🗓️</div>
+                        <div class="qa-t"><h4>Employee Leave Manager</h4><p>Balances, missing leave & one-click apply</p></div>
+                        <span class="qa-arr">›</span>
+                    </a>
                     <a class="qa" href="/app/auto-leave-dashboard">
                         <div class="qa-i" style="background:var(--p-bg)">🤖</div>
                         <div class="qa-t"><h4>Auto Leave Dashboard</h4><p>Review & assign auto-leaves</p></div>

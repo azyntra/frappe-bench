@@ -17,6 +17,7 @@ def get_dashboard_summary(from_date=None, to_date=None):
     """
     Returns KPI summary counts for the dashboard header cards.
     """
+    frappe.only_for(["HR Manager", "HR User", "System Manager"])
     from_date = from_date or today()
     to_date   = to_date   or today()
 
@@ -67,6 +68,7 @@ def get_leave_log_list(from_date=None, to_date=None, status=None,
     """
     Returns paginated list of Auto Leave Log records for the dashboard table.
     """
+    frappe.only_for(["HR Manager", "HR User", "System Manager"])
     from_date = from_date or today()
     to_date   = to_date   or today()
     page      = int(page)
@@ -248,6 +250,7 @@ def _restore_attendance(attendance_name, original_status, original_half_day_stat
 @frappe.whitelist()
 def get_employees_for_filter():
     """Returns employee list for the dashboard filter dropdown."""
+    frappe.only_for(["HR Manager", "HR User", "System Manager"])
     return frappe.get_all(
         "Employee",
         filters={"status": "Active"},
