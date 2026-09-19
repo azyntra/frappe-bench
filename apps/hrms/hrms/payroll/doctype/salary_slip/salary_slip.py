@@ -51,7 +51,7 @@ from hrms.payroll.doctype.salary_slip.salary_slip_loan_utils import (
 	set_loan_repayment,
 )
 from hrms.payroll.utils import sanitize_expression
-from hrms.utils.holiday_list import get_holiday_dates_between
+from hrms.utils.holiday_list import get_holiday_dates_between_range
 
 # cache keys
 HOLIDAYS_BETWEEN_DATES = "holidays_between_dates"
@@ -659,12 +659,25 @@ class SalarySlip(TransactionBase):
 		return payment_days
 
 	def get_holidays_for_employee(self, start_date, end_date):
-		holiday_list = get_holiday_list_for_employee(self.employee)
-		key = f"{holiday_list}:{start_date}:{end_date}"
+		# Resolve the holiday list as of the PAYROLL PERIOD, not as of today.
+		#
+		# get_holiday_list_for_employee() defaults as_on to today, so a slip for a
+		# period covered by a different list than the one in force today silently
+		# found no holidays at all. Holiday lists here run one calendar year, so
+		# on 1 January every slip lost its Sundays: total_working_days went from
+		# 25 to 31, the daily rate dropped by a fifth and every salary was wrong,
+		# with nothing raised anywhere.
+		#
+		# get_holiday_dates_between_range() also handles a period that straddles
+		# two lists (the 21 Dec - 20 Jan cycle) by splitting it at the changeover,
+		# which a single-list lookup cannot do.
+		key = f"{self.employee}:{start_date}:{end_date}"
 		holiday_dates = frappe.cache().hget(HOLIDAYS_BETWEEN_DATES, key)
 
 		if not holiday_dates:
-			holiday_dates = get_holiday_dates_between(holiday_list, start_date, end_date)
+			holiday_dates = get_holiday_dates_between_range(
+				self.employee, start_date, end_date, raise_exception_for_holiday_list=False
+			)
 			frappe.cache().hset(HOLIDAYS_BETWEEN_DATES, key, holiday_dates)
 
 		return holiday_dates
