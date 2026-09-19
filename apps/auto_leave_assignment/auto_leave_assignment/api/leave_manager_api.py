@@ -1394,6 +1394,10 @@ def cancel_leave_application(leave_application):
         WHERE leave_application = %s AND status = 'Assigned'
     """, leave_application, as_dict=True):
         logged[str(r.attendance_date)] = r
+    # a logged date with no original status had NO attendance before the leave —
+    # update_attendance() created the row, so cancelling must remove it again
+    # rather than leave behind an absence that never happened
+    created_by_leave = {d for d, r in logged.items() if not r.original_attendance_status}
 
     try:
         doc = frappe.get_doc("Leave Application", leave_application)
@@ -1408,12 +1412,17 @@ def cancel_leave_application(leave_application):
         frappe.db.rollback()
         return {"ok": False, "message": _map_exception(e)["message"]}
 
-    restored = 0
+    restored = removed = 0
     for name, prev in before.items():
         now = frappe.db.get_value("Attendance", name, "docstatus")
         if cint(now) != 2:
             continue
-        log = logged.get(str(prev.attendance_date))
+        day = str(prev.attendance_date)
+        if day in created_by_leave:
+            frappe.delete_doc("Attendance", name, ignore_permissions=True, force=True)
+            removed += 1
+            continue
+        log = logged.get(day)
         # a day that had leave and no longer does is an absence
         status = (log.original_attendance_status if log and log.original_attendance_status
                   else "Absent")
@@ -1431,6 +1440,6 @@ def cancel_leave_application(leave_application):
     """, leave_application)
     frappe.db.commit()
 
-    return {"ok": True, "restored": restored,
+    return {"ok": True, "restored": restored, "removed": removed,
             "message": _("Leave cancelled.") + (
-                _(" {0} attendance day(s) restored.").format(restored) if restored else "")}
+                _(" {0} day(s) marked absent again.").format(restored) if restored else "")}
