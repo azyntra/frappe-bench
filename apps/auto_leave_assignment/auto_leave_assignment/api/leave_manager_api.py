@@ -76,6 +76,45 @@ def _ft_employee_names():
     return list(_eligible_ft_employees().keys())
 
 
+def _structure_timeline(employees):
+    """Every submitted SSA per employee, ascending by from_date.
+
+    Eligibility is DATE-DEPENDENT and the difference is not academic: EMP-00088
+    was on 'Day Team - Daily Rate' until 2026-06-21 and FT- afterwards, so their
+    absences before that date must not be offered for leave. Resolving the
+    timeline in memory keeps the worklist to one query instead of one per row.
+    """
+    if not employees:
+        return {}
+    rows = frappe.db.sql("""
+        SELECT   employee, salary_structure, from_date
+        FROM     `tabSalary Structure Assignment`
+        WHERE    docstatus = 1 AND employee IN %(emps)s
+        ORDER BY employee, from_date
+    """, {"emps": tuple(employees)}, as_dict=True)
+    tl = {}
+    for r in rows:
+        tl.setdefault(r.employee, []).append((getdate(r.from_date), r.salary_structure))
+    return tl
+
+
+def _ft_on(timeline, employee, date):
+    """Mirrors get_assigned_salary_structure(): the structure in force is the one
+    with the greatest from_date <= date, and None before the first assignment.
+
+    A date with no structure at all is NOT eligible — core._is_leave_eligible()
+    fails closed for the same reason, because an unknown pay model could mean
+    granting paid leave to someone paid per day worked.
+    """
+    best = None
+    for from_date, structure in timeline.get(employee, []):
+        if from_date <= date:
+            best = structure
+        else:
+            break
+    return bool(best and str(best).startswith("FT-"))
+
+
 def _payroll_state_for(from_date, to_date, employees=None):
     """Salary slips whose period OVERLAPS the range.
 
@@ -454,6 +493,12 @@ def get_missing_leave_worklist(from_date, to_date, employee=None, department=Non
                    AND a.attendance_date BETWEEN la.from_date AND la.to_date)
         ORDER BY a.attendance_date DESC, a.employee ASC
     """, {"emps": tuple(emps.keys()), "from": from_date, "to": to_date}, as_dict=True)
+
+    # Eligibility on the ATTENDANCE DATE, not today. Without this the list
+    # offers days the employee was on the day-team roster for, which then fail
+    # at apply time — a row you can click that always errors.
+    tl = _structure_timeline(list(emps.keys()))
+    rows = [r for r in rows if _ft_on(tl, r.employee, getdate(r.attendance_date))]
 
     # a day the engine already handled and whose application is still live
     rows = [r for r in rows if not core._already_logged(r.employee, r.attendance_date)]

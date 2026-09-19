@@ -353,7 +353,7 @@ frappe.pages['employee-leave-manager'].on_page_load = function (wrapper) {
         if (pay) {
             if (pay.state === 'paid') {
                 out.push(`<div class="elm-banner bad"><span class="tag bad">PAID</span>
-                    <span><b>${pay.submitted_count} salary slip(s) already submitted for this period.</b>
+                    <span><b>${pay.submitted_count} salary slip(s) already submitted for these employees.</b>
                     Applying or undoing leave here will <b>not</b> update them — the change is recorded and the
                     affected cycle appears under <b>Needs Rebuild</b>, where you can re-run payroll deliberately.</span></div>`);
             } else if (pay.state === 'draft') {
