@@ -529,6 +529,27 @@ def get_missing_leave_worklist(from_date, to_date, employee=None, department=Non
             except Exception:
                 preview = None
 
+        # What applying this row would actually achieve.
+        #
+        #   paid_leave  - the chain has paid leave available, so an unpaid day
+        #                 becomes a paid one. Real money.
+        #   lwp_only    - the chain can only reach Leave Without Pay. Payroll
+        #                 subtracts BOTH lwp and absent from payment_days
+        #                 (salary_slip.py:524-527), so moving Absent -> LWP
+        #                 changes the record and not the pay.
+        #   blocked_lwp - lwp_only inside an already-processed payroll period.
+        #                 validate_salary_processed_days() (leave_application.py:362)
+        #                 refuses LWP there, so applying can only ever fail.
+        has_paid = any(not c["is_lwp"] for c in (preview or []))
+        if preview is None:
+            effect = "unknown"
+        elif has_paid:
+            effect = "paid_leave"
+        elif is_locked:
+            effect = "blocked_lwp"
+        else:
+            effect = "lwp_only"
+
         out.append({
             "attendance": r.name, "employee": r.employee,
             "employee_name": meta.employee_name, "department": meta.department,
@@ -537,9 +558,13 @@ def get_missing_leave_worklist(from_date, to_date, employee=None, department=Non
             "plan_preview": preview, "is_holiday": is_holiday,
             "payroll_locked": is_locked,
             "payroll_slip": slip[0].name if slip else None,
+            "effect": effect,
         })
 
     return {"rows": out, "total": len(out), "locked": locked,
+            "actionable": sum(1 for r in out if r["effect"] in ("paid_leave", "lwp_only")),
+            "blocked": sum(1 for r in out if r["effect"] == "blocked_lwp"),
+            "pay_changing": sum(1 for r in out if r["effect"] == "paid_leave"),
             "preview_capped": len(out) > PREVIEW_CAP}
 
 

@@ -527,27 +527,46 @@ frappe.pages['employee-leave-manager'].on_page_load = function (wrapper) {
         const rows = filterRows(w.rows, 'employee_name');
         if (!rows.length) return state('🔍', 'No match', 'No employee matches that search.');
 
-        return `<div class="elm-scroll"><table class="elm-grid">
+        let note = '';
+        if (!w.pay_changing) {
+            note = `<div style="padding:10px 14px;font-size:12px;border-bottom:1px solid var(--bd);
+                     background:var(--amb-lt);color:var(--amb)">
+                <b>None of these days would change anyone's pay.</b>
+                Every one of them can only reach <b>Leave Without Pay</b>, because the employee has
+                no allocation left — and payroll deducts an unpaid leave day exactly like an absent day.
+                ${w.blocked ? `${w.blocked} of them are also inside an already-processed payroll period,
+                  where ERPNext refuses Leave Without Pay outright.` : ''}
+                To actually convert unpaid days into paid ones, give these employees an allocation on the
+                <b>No Allocation</b> tab first.</div>`;
+        }
+
+        return `${note}<div class="elm-scroll"><table class="elm-grid">
           <thead><tr>
             <th style="width:30px"><input type="checkbox" id="elm-selall"></th>
             <th>Employee</th><th>Date</th><th>Status</th>
-            <th>Will consume</th><th>Payroll</th><th>Action</th>
+            <th>Will consume</th><th>Effect</th><th>Action</th>
           </tr></thead><tbody>
           ${rows.map(r => {
             const d = frappe.datetime.str_to_obj(r.attendance_date);
             const wd = d ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getDay()] : '';
+            const blocked = r.effect === 'blocked_lwp';
+            const eff = {
+                paid_leave: ['ok', 'becomes paid', 'An unpaid day becomes a paid one.'],
+                lwp_only: ['warn', 'record only', 'Payroll deducts an unpaid leave day exactly like an absent day, so pay does not change.'],
+                blocked_lwp: ['bad', 'cannot apply', 'ERPNext refuses Leave Without Pay inside an already-processed payroll period.'],
+                unknown: ['mute', '—', ''],
+            }[r.effect || 'unknown'];
             return `<tr data-row="${esc(r.attendance)}">
-              <td><input type="checkbox" class="elm-sel" data-att="${esc(r.attendance)}"
-                   ${r.payroll_locked ? '' : ''}></td>
+              <td>${blocked ? '' : `<input type="checkbox" class="elm-sel" data-att="${esc(r.attendance)}">`}</td>
               <td class="elm-emp">${esc(r.employee_name)}<small>${esc(r.employee)}</small></td>
               <td class="mono">${esc(r.attendance_date)} <span style="color:var(--lt)">${wd}</span></td>
               <td><span class="elm-pill ${r.status === 'Absent' ? 'warn' : 'info'}">${esc(r.status)}</span></td>
               <td>${r.is_holiday ? '<span class="elm-pill mute">holiday</span>' : planChips(r.plan_preview)}</td>
-              <td>${r.payroll_locked
-                    ? `<span class="elm-pill bad" title="${esc(r.payroll_slip)}">paid</span>`
-                    : '<span class="elm-pill ok">open</span>'}</td>
+              <td><span class="elm-pill ${eff[0]}" title="${esc(eff[2])}">${esc(eff[1])}</span>
+                  ${r.payroll_locked ? `<span class="elm-pill bad" title="Salary slip ${esc(r.payroll_slip)}">paid period</span>` : ''}</td>
               <td><div class="elm-act">
-                <button class="elm-abtn pri" data-act="apply" data-att="${esc(r.attendance)}">Apply</button>
+                <button class="elm-abtn pri" data-act="apply" data-att="${esc(r.attendance)}"
+                    ${blocked ? 'disabled title="' + esc(eff[2]) + '"' : ''}>Apply</button>
                 <button class="elm-abtn" data-act="apply-as" data-att="${esc(r.attendance)}">Apply as ▾</button>
               </div></td>
             </tr>`;
