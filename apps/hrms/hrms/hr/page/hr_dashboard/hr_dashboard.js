@@ -678,6 +678,24 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
                         <div class="qa-t"><h4>Import Attendance</h4><p>Upload fingerprint CSV</p></div>
                         <span class="qa-arr">›</span>
                     </a>
+                    <a class="qa" href="/app/employee-leave-manager">
+                        <div class="qa-i" style="background:var(--w-bg)">🗓️</div>
+                        <div class="qa-t"><h4>Employee Leave</h4><p>Search staff, see balances, apply or cancel leave</p></div>
+                        <span class="qa-arr">›</span>
+                    </a>
+                    <a class="qa" href="/app/payroll-entry/new">
+                        <div class="qa-i" style="background:var(--s-bg)">💵</div>
+                        <div class="qa-t"><h4>New Payroll Entry</h4><p>Generate monthly salary slips</p></div>
+                        <span class="qa-arr">›</span>
+                    </a>
+                    <a class="qa" href="/app/employee/new">
+                        <div class="qa-i" style="background:var(--p-bg)">➕</div>
+                        <div class="qa-t"><h4>Add Employee</h4><p>Onboard a new employee</p></div>
+                        <span class="qa-arr">›</span>
+                    </a>
+
+                    <div class="qa-divider"></div>
+
                     <a class="qa" href="/app/attendance/new">
                         <div class="qa-i" style="background:var(--s-bg)">✏️</div>
                         <div class="qa-t"><h4>Manual Attendance</h4><p>Mark single attendance</p></div>
@@ -686,37 +704,6 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
                     <a class="qa" href="/app/shift-assignment/new">
                         <div class="qa-i" style="background:var(--w-bg)">🕐</div>
                         <div class="qa-t"><h4>Assign Shift</h4><p>Set employee shift type</p></div>
-                        <span class="qa-arr">›</span>
-                    </a>
-
-                    <div class="qa-divider"></div>
-
-                    <a class="qa" href="/app/leave-application/new">
-                        <div class="qa-i" style="background:var(--w-bg)">🌴</div>
-                        <div class="qa-t"><h4>New Leave Application</h4><p>Apply for employee leave</p></div>
-                        <span class="qa-arr">›</span>
-                    </a>
-                    <a class="qa" href="/app/employee-leave-manager">
-                        <div class="qa-i" style="background:var(--p-bg)">🗓️</div>
-                        <div class="qa-t"><h4>Employee Leave</h4><p>Search staff, see balances, apply or cancel leave</p></div>
-                        <span class="qa-arr">›</span>
-                    </a>
-                    <a class="qa" href="/app/auto-leave-dashboard">
-                        <div class="qa-i" style="background:var(--p-bg)">🤖</div>
-                        <div class="qa-t"><h4>Auto Leave Dashboard</h4><p>Review & assign auto-leaves</p></div>
-                        <span class="qa-arr">›</span>
-                    </a>
-                    <a class="qa" href="/app/payroll-entry/new">
-                        <div class="qa-i" style="background:var(--s-bg)">💵</div>
-                        <div class="qa-t"><h4>New Payroll Entry</h4><p>Generate monthly salary slips</p></div>
-                        <span class="qa-arr">›</span>
-                    </a>
-
-                    <div class="qa-divider"></div>
-
-                    <a class="qa" href="/app/employee/new">
-                        <div class="qa-i" style="background:var(--p-bg)">➕</div>
-                        <div class="qa-t"><h4>Add Employee</h4><p>Onboard a new employee</p></div>
                         <span class="qa-arr">›</span>
                     </a>
                     <a class="qa" href="/app/employee">
