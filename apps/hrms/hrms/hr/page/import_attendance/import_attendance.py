@@ -974,3 +974,169 @@ def debug_shift_assignment(employee, check_date=None):
         'shift_found':     shift_found,
         'all_assignments': all_rows,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════
+#  SUNDAY PAY
+# ═══════════════════════════════════════════════════════════════════
+#
+#  A Sunday worked is paid as ONE ORDINARY DAY, not as overtime (client rule,
+#  2026-09-18). _is_sunday() above already stops Sundays earning OT — but that
+#  only removes money. This is the half that puts it back, and it must run every
+#  month or Sunday work is silently unpaid.
+#
+#  Rate per Sunday:
+#     monthly (FT-) staff : package / 25   — package = the fixed earnings on
+#                           their salary structure, excluding Overtime and
+#                           Sunday Pay. Verified: ASANKA 106,000/25 = 4,240,
+#                           which is exactly what was paid for Jul–Aug.
+#     day team            : their daily rate, i.e. the base on the Salary
+#                           Structure Assignment (gross/25 would pay them ~444
+#                           instead of ~1,850).
+#
+#  Delivered as a submitted Additional Salary dated the cycle end, because the
+#  Salary Slip picks those up automatically. Re-running is safe: an existing
+#  unpaid Sunday Pay for the same employee+cycle is cancelled and rebuilt, so
+#  re-importing a month does not double-pay.
+
+SUNDAY_PAY_COMPONENT = "Sunday Pay"
+MONTHLY_DAYS_DIVISOR = 25
+
+
+def _payroll_cycles_between(from_date, to_date):
+    """The 21st->20th cycles that overlap a date range."""
+    from_date, to_date = getdate(from_date), getdate(to_date)
+    cycles, seen = [], set()
+    d = from_date
+    while d <= to_date:
+        if d.day >= 21:
+            start = date(d.year, d.month, 21)
+            end_m = d.month + 1 if d.month < 12 else 1
+            end_y = d.year if d.month < 12 else d.year + 1
+            end = date(end_y, end_m, 20)
+        else:
+            end = date(d.year, d.month, 20)
+            st_m = d.month - 1 if d.month > 1 else 12
+            st_y = d.year if d.month > 1 else d.year - 1
+            start = date(st_y, st_m, 21)
+        key = (start, end)
+        if key not in seen:
+            seen.add(key)
+            cycles.append(key)
+        d = add_days(end, 1)
+    return cycles
+
+
+def _sunday_rate(employee, on_date):
+    """(rate_per_sunday, pay_model) for one employee, or (0, reason)."""
+    from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignment import (
+        get_assigned_salary_structure,
+    )
+    structure = get_assigned_salary_structure(employee, on_date)
+    if not structure:
+        return 0.0, "no salary structure"
+
+    if not str(structure).startswith("FT-"):
+        # day team: the assignment's base IS the daily rate
+        base = flt(frappe.db.get_value(
+            "Salary Structure Assignment",
+            {"employee": employee, "docstatus": 1, "from_date": ["<=", on_date]},
+            "base", order_by="from_date desc"))
+        return base, "day team daily rate"
+
+    package = flt(frappe.db.sql("""
+        SELECT SUM(amount) s FROM `tabSalary Detail`
+        WHERE parenttype = 'Salary Structure' AND parent = %s AND parentfield = 'earnings'
+          AND salary_component NOT IN ('Overtime', %s)
+          AND IFNULL(amount_based_on_formula, 0) = 0
+    """, (structure, SUNDAY_PAY_COMPONENT), as_dict=True)[0].s)
+    return flt(package) / MONTHLY_DAYS_DIVISOR, "monthly package / %d" % MONTHLY_DAYS_DIVISOR
+
+
+@frappe.whitelist()
+def sync_sunday_pay(from_date, to_date, dry_run=0):
+    """Create or refresh Sunday Pay for every payroll cycle the import touched.
+
+    Employees whose salary slip for a cycle is already submitted are skipped —
+    an Additional Salary cannot change a slip that has already been paid, and
+    creating one would only mislead.
+    """
+    dry_run = cint(dry_run)
+    if not frappe.db.exists("Salary Component", SUNDAY_PAY_COMPONENT):
+        return {"ok": False, "error": "The '%s' salary component does not exist."
+                % SUNDAY_PAY_COMPONENT}
+
+    company = frappe.db.get_single_value("Global Defaults", "default_company") \
+        or frappe.db.get_value("Company", {}, "name")
+
+    created = skipped_paid = refreshed = 0
+    total_amount = 0.0
+    details, problems = [], []
+
+    for start, end in _payroll_cycles_between(from_date, to_date):
+        rows = frappe.db.sql("""
+            SELECT   employee,
+                     SUM(CASE WHEN status = 'Half Day' THEN 0.5 ELSE 1 END) AS days
+            FROM     `tabAttendance`
+            WHERE    docstatus = 1
+              AND    status IN ('Present', 'Half Day')
+              AND    DAYOFWEEK(attendance_date) = 1          -- 1 = Sunday
+              AND    attendance_date BETWEEN %s AND %s
+            GROUP BY employee
+        """, (start, end), as_dict=True)
+
+        for r in rows:
+            if frappe.db.exists("Salary Slip", {"employee": r.employee, "docstatus": 1,
+                                                "start_date": start, "end_date": end}):
+                skipped_paid += 1
+                continue
+
+            rate, model = _sunday_rate(r.employee, end)
+            if rate <= 0:
+                problems.append("%s: %s" % (r.employee, model))
+                continue
+
+            amount = flt(flt(r.days) * rate, 2)
+            existing = frappe.get_all("Additional Salary", filters={
+                "employee": r.employee, "salary_component": SUNDAY_PAY_COMPONENT,
+                "payroll_date": end, "docstatus": 1}, pluck="name")
+
+            if dry_run:
+                created += 1
+                total_amount += amount
+                details.append({"employee": r.employee, "cycle": str(end),
+                                "sundays": flt(r.days), "rate": rate, "amount": amount,
+                                "model": model, "replacing": existing})
+                continue
+
+            for name in existing:
+                doc = frappe.get_doc("Additional Salary", name)
+                doc.flags.ignore_permissions = True
+                doc.cancel()
+                refreshed += 1
+
+            doc = frappe.get_doc({
+                "doctype": "Additional Salary", "employee": r.employee,
+                "salary_component": SUNDAY_PAY_COMPONENT, "amount": amount,
+                "company": company, "payroll_date": end, "currency": "LKR",
+                "overwrite_salary_structure_amount": 0,
+                "ref_doctype": "Attendance",
+                "remark": "Sunday work %s..%s — %s Sunday(s) x %.2f (%s)"
+                          % (start, end, flt(r.days), rate, model),
+            })
+            doc.flags.ignore_permissions = True
+            doc.insert()
+            doc.submit()
+            created += 1
+            total_amount += amount
+            details.append({"employee": r.employee, "cycle": str(end),
+                            "sundays": flt(r.days), "amount": amount})
+
+    if not dry_run:
+        frappe.db.commit()
+
+    return {"ok": True, "created": created, "refreshed": refreshed,
+            "skipped_already_paid": skipped_paid, "total_amount": flt(total_amount, 2),
+            "cycles": [{"from": str(a), "to": str(b)}
+                       for a, b in _payroll_cycles_between(from_date, to_date)],
+            "problems": problems, "details": details, "dry_run": bool(dry_run)}

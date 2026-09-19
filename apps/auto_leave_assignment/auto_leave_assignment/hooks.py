@@ -27,7 +27,11 @@ doc_events = {
 scheduler_events = {
     "daily_long": [
         # Runs once daily — catches any attendance submitted during the day
-        "auto_leave_assignment.scheduled_tasks.auto_leave_task.process_absent_attendance"
+        "auto_leave_assignment.scheduled_tasks.auto_leave_task.process_absent_attendance",
+        # Creates next year's holiday list and leave entitlement before they are
+        # needed, and warns HR about anything that would quietly break payroll.
+        # Without this the system stops calculating salaries correctly on 1 Jan.
+        "auto_leave_assignment.scheduled_tasks.yearly_rollover.run_yearly_rollover",
     ]
 }
 

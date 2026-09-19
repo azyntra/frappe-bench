@@ -340,6 +340,16 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
                             <div class="stg-chips" id="stg4-chips"></div>
                         </div>
                     </div>
+
+                    <div class="stg wait" id="stg5">
+                        <div class="stg-rail"><div class="stg-node" id="stg5-node">5</div><div class="stg-line"></div></div>
+                        <div class="stg-body">
+                            <div class="stg-top"><div class="stg-title">Sunday Pay</div><div class="stg-state" id="stg5-state">Waiting</div></div>
+                            <div class="stg-sub">Pay each Sunday worked as one ordinary day</div>
+                            <div class="stg-bar"><div class="stg-fill" id="stg5-fill"></div></div>
+                            <div class="stg-chips" id="stg5-chips"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Log -->
@@ -434,9 +444,9 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
     function stageProgress(id, pct) {
         const el = $id(`stg${id}-fill`); if (el) el.style.width = pct + '%';
         if (running) {
-            const overall = Math.round(((id - 1) * 100 + pct) / 4);
+            const overall = Math.round(((id - 1) * 100 + pct) / 5);
             barFill(overall);
-            barSub(`Step ${id} of 4 · ${overall}%`);
+            barSub(`Step ${id} of 5 · ${overall}%`);
         }
     }
     function stageChips(id, chips) {
@@ -446,7 +456,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
             .map(c => `<span class="chip ${c.cls || ''}">${c.val} <em>${c.label}</em></span>`)
             .join('');
     }
-    function pipeStep(n) { const el = $id('att-pipe-step'); if (el) el.textContent = `Step ${n} / 4`; }
+    function pipeStep(n) { const el = $id('att-pipe-step'); if (el) el.textContent = `Step ${n} / 5`; }
 
     // Sticky action bar
     function showBarEl(on) { $id('att-bar').classList.toggle('vis', !!on); }
@@ -874,6 +884,42 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         }
     }
 
+    // Sundays are not overtime — a Sunday worked is paid as ONE ORDINARY DAY.
+    // The importer already stops Sundays earning OT, which only removes money;
+    // this is the half that puts it back. It must run every month or Sunday
+    // work is silently unpaid. Re-running is safe: an existing unpaid Sunday
+    // Pay for the same cycle is cancelled and rebuilt, never doubled.
+    async function runSundayPay(fromDate, toDate) {
+        stageState(5, 'run', 'Processing…');
+        stageProgress(5, 40);
+        try {
+            const res = await call('hrms.hr.page.import_attendance.import_attendance.sync_sunday_pay',
+                { from_date: fromDate, to_date: toDate });
+            const m = res || {};
+            stageProgress(5, 100);
+            if (m.ok === false) {
+                log('ler', `Stage 5 → ${m.error || 'could not create Sunday Pay'}`);
+                stageChips(5, [{ label: 'error', val: 1, cls: 'r' }]);
+                return { errors: 1 };
+            }
+            const amt = Math.round(m.total_amount || 0).toLocaleString();
+            log(m.problems && m.problems.length ? 'ldup' : 'lok',
+                `Stage 5 → ${m.created} Sunday payment(s), LKR ${amt}` +
+                (m.skipped_already_paid ? `, ${m.skipped_already_paid} skipped (salary already paid)` : ''));
+            (m.problems || []).slice(0, 5).forEach(x => log('ldup', `   · ${x}`));
+            stageChips(5, [
+                { label: 'paid', val: m.created || 0, cls: 'g' },
+                { label: 'LKR', val: amt, cls: '' },
+                { label: 'already paid', val: m.skipped_already_paid || 0, cls: m.skipped_already_paid ? 'a' : '' }
+            ]);
+            return m;
+        } catch (e) {
+            stageProgress(5, 100);
+            log('ler', `Stage 5 failed: ${(e && e.message) || 'server error'} — check Error Log`);
+            return { errors: 1 };
+        }
+    }
+
     // ── The pipeline (one click) ─────────────────────────────────────────────
     async function runPipeline() {
         running = true;
@@ -888,7 +934,7 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
         // Bar → processing mode
         $id('att-bar').classList.remove('done');
         $id('att-bar-ic').textContent = '⚙️';
-        barTitle('Processing…'); barSub('Step 1 of 4 · 0%'); barFill(0);
+        barTitle('Processing…'); barSub('Step 1 of 5 · 0%'); barFill(0);
 
         // Reveal the pipeline and bring it into view
         show('att-run-panel', true);
@@ -943,16 +989,30 @@ frappe.pages['import-attendance'].on_page_load = function(wrapper) {
             log('ldup', 'Stage 4 → skipped (no new attendance to process)');
         }
 
+        // Stage 5 — Sunday pay
+        pipeStep(5); barTitle('Paying Sundays worked');
+        let s5 = { created: 0 };
+        if (touched) {
+            logHead('▸ STAGE 5 — Sunday Pay');
+            s5 = await runSundayPay(fromDate, toDate);
+            stageState(5, s5.errors ? 'error' : 'done', s5.errors ? 'Done · 1 error' : 'Done');
+        } else {
+            stageState(5, 'skip', 'Skipped');
+            stageChips(5, [{ label: 'no new attendance', val: '—' }]);
+            if (running) barFill(100);
+            log('ldup', 'Stage 5 → skipped (no new attendance to pay for)');
+        }
+
         // Finish
         stopTimer();
         const elapsed = ((Date.now() - runStart) / 1000).toFixed(1);
         running = false;
 
-        const totalErr = s1.errs + s2.errors + (s3.errors || 0) + (s4.errors || 0);
+        const totalErr = s1.errs + s2.errors + (s3.errors || 0) + (s4.errors || 0) + (s5.errors || 0);
         logHead(`✓ PIPELINE COMPLETE — ${elapsed}s` + (totalErr ? ` · ${totalErr} error(s)` : ''));
 
         setBarDone(elapsed,
-            `${s2.created + s2.updated} attendance · ${s4.assigned || 0} leave`,
+            `${s2.created + s2.updated} attendance · ${s4.assigned || 0} leave · ${s5.created || 0} Sunday pay`,
             totalErr > 0);
 
         $id('d-checkins').textContent = s1.done;
