@@ -24,7 +24,17 @@ from contextlib import contextmanager
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, add_months, cint, flt, get_first_day, get_last_day, getdate, today
+from frappe.utils import (
+    add_days,
+    add_months,
+    cint,
+    date_diff,
+    flt,
+    get_first_day,
+    get_last_day,
+    getdate,
+    today,
+)
 
 from auto_leave_assignment import core
 
@@ -1002,3 +1012,425 @@ def create_leave_allocation(employee, leave_type, from_date, to_date, new_leaves
     return {"ok": True, "allocation": doc.name,
             "message": _("Allocated {0} day(s) of {1}.").format(
                 flt(new_leaves_allocated), leave_type)}
+
+
+# ─────────────────────────────────────────────
+#  Simple per-employee view (search -> open -> act)
+# ─────────────────────────────────────────────
+
+def _year_bounds(year=None):
+    y = cint(year) or getdate(today()).year
+    return getdate(f"{y}-01-01"), getdate(f"{y}-12-31"), y
+
+
+def _paid_periods(employee):
+    """Cycles already paid for this employee, so the UI can warn per date."""
+    return frappe.db.sql("""
+        SELECT name, start_date, end_date FROM `tabSalary Slip`
+        WHERE docstatus = 1 AND employee = %s ORDER BY start_date
+    """, employee, as_dict=True)
+
+
+def _balances_for(employee, on_date):
+    """Allocated / taken / pending / left per paid leave type, plus the
+    allocation each one hangs off so the UI can offer a Change button."""
+    lwp = set(frappe.get_all("Leave Type", filters={"is_lwp": 1}, pluck="name"))
+    out = []
+    for lt in [t for t in core._leave_chain() if t not in lwp]:
+        alloc = frappe.db.sql("""
+            SELECT name, total_leaves_allocated, new_leaves_allocated, from_date, to_date
+            FROM   `tabLeave Allocation`
+            WHERE  docstatus = 1 AND employee = %s AND leave_type = %s
+              AND  from_date <= %s AND to_date >= %s
+            ORDER BY from_date DESC LIMIT 1
+        """, (employee, lt, on_date, on_date), as_dict=True)
+        a = alloc[0] if alloc else None
+        taken = flt(frappe.db.sql("""
+            SELECT SUM(total_leave_days) d FROM `tabLeave Application`
+            WHERE docstatus = 1 AND status = 'Approved' AND employee = %s AND leave_type = %s
+              AND from_date >= %s AND to_date <= %s
+        """, (employee, lt, a.from_date if a else on_date, a.to_date if a else on_date),
+            as_dict=True)[0].d)
+        pending = flt(frappe.db.sql("""
+            SELECT SUM(total_leave_days) d FROM `tabLeave Application`
+            WHERE docstatus = 0 AND status = 'Open' AND employee = %s AND leave_type = %s
+        """, (employee, lt), as_dict=True)[0].d)
+        allocated = flt(a.total_leaves_allocated) if a else 0.0
+        out.append({
+            "leave_type": lt,
+            "allocated": allocated,
+            "taken": taken,
+            "pending": pending,
+            "left": max(allocated - taken - pending, 0) if a else 0.0,
+            "has_allocation": bool(a),
+            "allocation": a.name if a else None,
+            "allocation_from": str(a.from_date) if a else None,
+            "allocation_to": str(a.to_date) if a else None,
+            "max_allowed": flt(frappe.db.get_value("Leave Type", lt, "max_leaves_allowed")),
+        })
+    return out
+
+
+@frappe.whitelist()
+def search_employees(query="", limit=200):
+    """Employee directory for the search box, with a one-line balance summary."""
+    frappe.only_for(READ_ROLES)
+
+    emps = _eligible_ft_employees()
+    q = (query or "").strip().lower()
+    if q:
+        emps = {k: v for k, v in emps.items()
+                if q in k.lower() or q in (v.employee_name or "").lower()
+                or q in (v.department or "").lower()}
+
+    on_date = today()
+    names = list(emps.keys())[:cint(limit)]
+    if not names:
+        return {"employees": [], "total": 0}
+
+    lwp = set(frappe.get_all("Leave Type", filters={"is_lwp": 1}, pluck="name"))
+    types = [t for t in core._leave_chain() if t not in lwp]
+
+    alloc, taken = {}, {}
+    for r in frappe.db.sql("""
+        SELECT employee, leave_type, SUM(total_leaves_allocated) a
+        FROM `tabLeave Allocation`
+        WHERE docstatus = 1 AND employee IN %(e)s AND from_date <= %(d)s AND to_date >= %(d)s
+        GROUP BY employee, leave_type
+    """, {"e": tuple(names), "d": on_date}, as_dict=True):
+        alloc[(r.employee, r.leave_type)] = flt(r.a)
+    for r in frappe.db.sql("""
+        SELECT employee, leave_type, SUM(total_leave_days) d
+        FROM `tabLeave Application`
+        WHERE docstatus = 1 AND status = 'Approved' AND employee IN %(e)s
+          AND YEAR(from_date) = YEAR(%(d)s)
+        GROUP BY employee, leave_type
+    """, {"e": tuple(names), "d": on_date}, as_dict=True):
+        taken[(r.employee, r.leave_type)] = flt(r.d)
+
+    absent = {}
+    for r in frappe.db.sql("""
+        SELECT employee, COUNT(*) n FROM `tabAttendance`
+        WHERE docstatus = 1 AND status IN ('Absent','Half Day') AND employee IN %(e)s
+          AND YEAR(attendance_date) = YEAR(%(d)s)
+        GROUP BY employee
+    """, {"e": tuple(names), "d": on_date}, as_dict=True):
+        absent[r.employee] = cint(r.n)
+
+    out = []
+    for e in names:
+        meta = emps[e]
+        bal = []
+        missing_setup = False
+        for t in types:
+            a = alloc.get((e, t), 0.0)
+            if not a:
+                missing_setup = True
+            bal.append({"leave_type": t, "allocated": a,
+                        "left": max(a - taken.get((e, t), 0.0), 0)})
+        out.append({
+            "employee": e, "employee_name": meta.employee_name,
+            "department": meta.department, "balances": bal,
+            "absent_days": absent.get(e, 0), "needs_setup": missing_setup,
+        })
+    out.sort(key=lambda r: (not r["needs_setup"], r["employee_name"] or r["employee"]))
+    return {"employees": out, "total": len(out), "types": types}
+
+
+@frappe.whitelist()
+def get_employee_leave(employee, year=None):
+    """Everything the employee popup shows, in one call."""
+    frappe.only_for(READ_ROLES)
+    y_from, y_to, y = _year_bounds(year)
+
+    emp = frappe.db.get_value("Employee", employee,
+        ["name", "employee_name", "department", "date_of_joining", "status"], as_dict=True)
+    if not emp:
+        frappe.throw(_("Employee not found."))
+
+    eligible = core._is_leave_eligible(employee, y_to)
+    paid = _paid_periods(employee)
+
+    def is_paid(d):
+        d = getdate(d)
+        for p in paid:
+            if getdate(p.start_date) <= d <= getdate(p.end_date):
+                return p.name
+        return None
+
+    history = []
+    for r in frappe.db.sql("""
+        SELECT name, leave_type, from_date, to_date, total_leave_days, half_day,
+               status, docstatus, description
+        FROM   `tabLeave Application`
+        WHERE  employee = %s AND docstatus < 2 AND from_date >= %s AND from_date <= %s
+        ORDER BY from_date DESC
+    """, (employee, y_from, y_to), as_dict=True):
+        history.append({
+            "name": r.name, "leave_type": r.leave_type,
+            "from_date": str(r.from_date), "to_date": str(r.to_date),
+            "days": flt(r.total_leave_days), "half_day": cint(r.half_day),
+            "status": r.status, "submitted": cint(r.docstatus) == 1,
+            "is_unpaid": core._is_lwp_type(r.leave_type),
+            "auto": "Auto-assigned" in (r.description or ""),
+            "paid_period": is_paid(r.from_date),
+        })
+
+    absents = []
+    for r in frappe.db.sql("""
+        SELECT a.name, a.attendance_date, a.status
+        FROM   `tabAttendance` a
+        WHERE  a.docstatus = 1 AND a.employee = %s AND a.status IN ('Absent','Half Day')
+          AND  a.attendance_date BETWEEN %s AND %s
+          AND  NOT EXISTS (SELECT 1 FROM `tabLeave Application` la
+                 WHERE la.docstatus = 1 AND la.status = 'Approved' AND la.employee = a.employee
+                   AND a.attendance_date BETWEEN la.from_date AND la.to_date)
+        ORDER BY a.attendance_date DESC
+    """, (employee, y_from, y_to), as_dict=True):
+        absents.append({
+            "attendance": r.name, "date": str(r.attendance_date), "status": r.status,
+            "paid_period": is_paid(r.attendance_date),
+        })
+
+    return {
+        "employee": emp.name, "employee_name": emp.employee_name,
+        "department": emp.department,
+        "date_of_joining": str(emp.date_of_joining) if emp.date_of_joining else None,
+        "eligible": eligible, "year": y,
+        "balances": _balances_for(employee, y_to),
+        "history": history, "absents": absents,
+        "paid_periods": [{"name": p.name, "from_date": str(p.start_date),
+                          "to_date": str(p.end_date)} for p in paid],
+        "leave_types": [t["leave_type"] for t in _balances_for(employee, y_to)]
+                       + [core._lwp_type()],
+    }
+
+
+@frappe.whitelist()
+def set_allocation(employee, leave_type, days, from_date=None, to_date=None):
+    """Create or change an entitlement.
+
+    An existing submitted allocation can have new_leaves_allocated edited in
+    place (LeaveAllocation.on_update_after_submit posts the delta to the
+    ledger), which is far safer than cancel-and-recreate: cancelling an
+    allocation with leave already taken against it is refused outright.
+    """
+    frappe.only_for(WRITE_ROLES)
+    days = flt(days)
+    y_from, y_to, _y = _year_bounds(getdate(to_date).year if to_date else None)
+    from_date = getdate(from_date) if from_date else y_from
+    to_date = getdate(to_date) if to_date else y_to
+
+    if core._is_lwp_type(leave_type):
+        return {"ok": False, "message": _("Unpaid leave is not allocated — it has no limit.")}
+    cap = flt(frappe.db.get_value("Leave Type", leave_type, "max_leaves_allowed"))
+    if cap and days > cap:
+        return {"ok": False, "message": _("{0} allows at most {1} days per year.").format(leave_type, cap)}
+
+    existing = frappe.db.sql("""
+        SELECT name FROM `tabLeave Allocation`
+        WHERE docstatus = 1 AND employee = %s AND leave_type = %s
+          AND from_date <= %s AND to_date >= %s LIMIT 1
+    """, (employee, leave_type, to_date, from_date), as_dict=True)
+
+    try:
+        if existing:
+            doc = frappe.get_doc("Leave Allocation", existing[0].name)
+            taken = flt(frappe.db.sql("""
+                SELECT SUM(total_leave_days) d FROM `tabLeave Application`
+                WHERE docstatus = 1 AND status = 'Approved' AND employee = %s
+                  AND leave_type = %s AND from_date >= %s AND to_date <= %s
+            """, (employee, leave_type, doc.from_date, doc.to_date), as_dict=True)[0].d)
+            if days < taken:
+                return {"ok": False, "message": _(
+                    "{0} has already taken {1} day(s). You cannot set the entitlement below that."
+                ).format(frappe.db.get_value("Employee", employee, "employee_name"), taken)}
+            doc.flags.ignore_permissions = True
+            doc.new_leaves_allocated = days
+            doc.save()
+            frappe.db.commit()
+            return {"ok": True, "allocation": doc.name,
+                    "message": _("Entitlement updated to {0} day(s).").format(days)}
+
+        doc = frappe.get_doc({
+            "doctype": "Leave Allocation", "employee": employee, "leave_type": leave_type,
+            "from_date": from_date, "to_date": to_date,
+            "new_leaves_allocated": days, "carry_forward": 0,
+            "description": "Set from the Employee Leave page.",
+        })
+        doc.flags.ignore_permissions = True
+        doc.insert()
+        doc.submit()
+        frappe.db.commit()
+        return {"ok": True, "allocation": doc.name,
+                "message": _("Allocated {0} day(s) of {1}.").format(days, leave_type)}
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(message=frappe.get_traceback(),
+                         title=f"Leave allocation failed — {employee} {leave_type}")
+        return {"ok": False, "message": _map_exception(e)["message"]}
+
+
+@frappe.whitelist()
+def apply_leave_direct(employee, leave_type, from_date, to_date=None,
+                       half_day=0, reason=None):
+    """Apply leave for a date or range, whether or not attendance exists.
+
+    Submitting the Leave Application is what makes payroll see it: HRMS's
+    update_attendance() writes (or creates) the Attendance row for each date,
+    and payroll reads that row. We additionally log each date with its ORIGINAL
+    attendance status, because cancelling a Leave Application cancels those
+    Attendance rows outright (leave_application.py:351) and the original is the
+    only way to put them back.
+    """
+    frappe.only_for(WRITE_ROLES)
+    from_date = getdate(from_date)
+    to_date = getdate(to_date) if to_date else from_date
+    half_day = cint(half_day)
+
+    if to_date < from_date:
+        return {"ok": False, "message": _("The end date is before the start date.")}
+    if half_day and from_date != to_date:
+        return {"ok": False, "message": _("A half day applies to a single date.")}
+    if not frappe.db.exists("Leave Type", leave_type):
+        return {"ok": False, "message": _("Unknown leave type.")}
+    if not core._is_leave_eligible(employee, from_date):
+        return {"ok": False, "message": _(
+            "This employee is paid per day worked, so leave does not apply to them.")}
+
+    # capture what attendance looked like first — needed to undo cleanly
+    originals = {}
+    for r in frappe.db.sql("""
+        SELECT name, attendance_date, status, half_day_status FROM `tabAttendance`
+        WHERE docstatus = 1 AND employee = %s AND attendance_date BETWEEN %s AND %s
+    """, (employee, from_date, to_date), as_dict=True):
+        originals[str(r.attendance_date)] = r
+
+    paid = [p for p in _paid_periods(employee)
+            if getdate(p.start_date) <= to_date and getdate(p.end_date) >= from_date]
+
+    mark = core._suppress_begin()
+    sp = "elmd_" + str(abs(hash((employee, str(from_date), leave_type))))[:12]
+    frappe.db.savepoint(sp)
+    try:
+        la = frappe.get_doc({
+            "doctype": "Leave Application", "employee": employee,
+            "leave_type": leave_type, "from_date": from_date, "to_date": to_date,
+            "half_day": 1 if half_day else 0,
+            "half_day_date": from_date if half_day else None,
+            "status": "Approved", "posting_date": from_date,
+            "leave_approver": core._get_leave_approver(employee),
+            "description": ("Applied from the Employee Leave page."
+                            + (f" Reason: {reason}" if reason else "")),
+        })
+        la.flags.ignore_permissions = True
+        la.insert()
+        la.submit()
+
+        days = flt(la.total_leave_days)
+        for i in range(date_diff(to_date, from_date) + 1):
+            d = add_days(from_date, i)
+            orig = originals.get(str(d))
+            att = frappe.db.get_value(
+                "Attendance", {"employee": employee, "attendance_date": d, "docstatus": 1}, "name")
+            core._write_log(
+                employee=employee, attendance_date=d, status="Assigned",
+                leave_type=leave_type, leave_days=(0.5 if half_day else 1.0),
+                half_day=1 if half_day else 0, is_split=0, chunk_index=1,
+                split_group=core._split_group(employee, d),
+                source_attendance=att, leave_application=la.name,
+                original_attendance_status=(orig.status if orig else None),
+                original_half_day_status=(orig.half_day_status if orig else None),
+                remarks=("Applied manually from the Employee Leave page."
+                         + (f" Reason: {reason}" if reason else "")
+                         + (f" | [PAYROLL] inside an already-paid period ({paid[0].name})" if paid else "")),
+            )
+        frappe.db.commit()
+    except Exception as e:
+        frappe.db.rollback(save_point=sp)
+        mapped = _map_exception(e)
+        return {"ok": False, "code": mapped["code"], "message": mapped["message"]}
+    finally:
+        core._suppress_end(mark)
+
+    return {"ok": True, "leave_application": la.name, "days": days,
+            "leave_type": leave_type,
+            "paid_period": paid[0].name if paid else None,
+            "message": _("{0} day(s) of {1} applied.").format(days, leave_type)}
+
+
+@frappe.whitelist()
+def cancel_leave_application(leave_application):
+    """Cancel a leave and put the attendance back.
+
+    LeaveApplication.on_cancel -> cancel_attendance() sets every On Leave /
+    Half Day row in the range to docstatus=2 (leave_application.py:351-360).
+    Left alone that silently deletes the attendance record, so payroll would
+    then treat the day as unmarked -- which this site counts as Absent anyway,
+    but the row itself would be gone. We restore each row to what it was before
+    the leave was applied, using the Auto Leave Log original where we have one.
+    """
+    frappe.only_for(WRITE_ROLES)
+
+    la = frappe.db.get_value("Leave Application", leave_application,
+        ["name", "employee", "leave_type", "from_date", "to_date", "docstatus"], as_dict=True)
+    if not la:
+        return {"ok": False, "message": _("Leave application not found.")}
+    if cint(la.docstatus) == 2:
+        return {"ok": False, "message": _("This leave is already cancelled.")}
+
+    before = {}
+    for r in frappe.db.sql("""
+        SELECT name, attendance_date, status, half_day_status, docstatus
+        FROM `tabAttendance`
+        WHERE employee = %s AND attendance_date BETWEEN %s AND %s AND docstatus < 2
+    """, (la.employee, la.from_date, la.to_date), as_dict=True):
+        before[r.name] = r
+
+    logged = {}
+    for r in frappe.db.sql("""
+        SELECT attendance_date, original_attendance_status, original_half_day_status
+        FROM `tabAuto Leave Log`
+        WHERE leave_application = %s AND status = 'Assigned'
+    """, leave_application, as_dict=True):
+        logged[str(r.attendance_date)] = r
+
+    try:
+        doc = frappe.get_doc("Leave Application", leave_application)
+        doc.flags.ignore_permissions = True
+        if cint(doc.docstatus) == 0:
+            frappe.delete_doc("Leave Application", leave_application,
+                              ignore_permissions=True, force=True)
+        else:
+            doc.cancel()
+        frappe.db.commit()
+    except Exception as e:
+        frappe.db.rollback()
+        return {"ok": False, "message": _map_exception(e)["message"]}
+
+    restored = 0
+    for name, prev in before.items():
+        now = frappe.db.get_value("Attendance", name, "docstatus")
+        if cint(now) != 2:
+            continue
+        log = logged.get(str(prev.attendance_date))
+        # a day that had leave and no longer does is an absence
+        status = (log.original_attendance_status if log and log.original_attendance_status
+                  else "Absent")
+        half = (log.original_half_day_status if log else None)
+        frappe.db.set_value("Attendance", name, {
+            "docstatus": 1, "status": status, "half_day_status": half,
+            "modify_half_day_status": 0, "leave_type": None, "leave_application": None,
+        }, update_modified=False)
+        restored += 1
+
+    frappe.db.sql("""
+        UPDATE `tabAuto Leave Log` SET status = 'Cancelled',
+               remarks = CONCAT(IFNULL(remarks,''), ' | Cancelled from the Employee Leave page.')
+        WHERE leave_application = %s AND status = 'Assigned'
+    """, leave_application)
+    frappe.db.commit()
+
+    return {"ok": True, "restored": restored,
+            "message": _("Leave cancelled.") + (
+                _(" {0} attendance day(s) restored.").format(restored) if restored else "")}
