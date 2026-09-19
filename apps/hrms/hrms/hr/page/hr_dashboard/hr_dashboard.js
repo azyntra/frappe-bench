@@ -344,27 +344,6 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
         }
 
         /* ═══════════════════════════════════════════════════════
-           TODAY'S PULSE — Tabs
-           ═══════════════════════════════════════════════════════ */
-        .pulse-tabs {
-            display: flex; gap: 2px; margin-bottom: 14px;
-            background: var(--ibg); border-radius: var(--radius-s);
-            padding: 3px; border: 1px solid var(--bd);
-        }
-        .pulse-tab {
-            flex: 1; padding: 7px 12px; border-radius: 6px;
-            font-size: 12px; font-weight: 600; cursor: pointer;
-            border: none; color: var(--tx3); background: transparent;
-            font-family: 'Inter', sans-serif; transition: all .2s;
-            text-align: center;
-        }
-        .pulse-tab:hover { color: var(--tx2); }
-        .pulse-tab.on {
-            background: var(--card); color: var(--tx);
-            box-shadow: 0 1px 3px rgba(0,0,0,.08);
-        }
-        .pulse-panel { display: none; }
-        .pulse-panel.on { display: block; }
 
         /* ═══════════════════════════════════════════════════════
            DATA ROWS (checkins, leaves, birthdays)
@@ -405,39 +384,6 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
         @media(min-width:768px) { .g2 { grid-template-columns: repeat(2, 1fr); } }
 
         /* ═══════════════════════════════════════════════════════
-           THIS MONTH ATTENDANCE
-           ═══════════════════════════════════════════════════════ */
-        .att-row {
-            display: flex; justify-content: space-between;
-            align-items: center; gap: 4px;
-            background: var(--ibg); border: 1px solid var(--bd);
-            border-radius: var(--radius-s); padding: 14px 10px;
-        }
-        .att-stat { text-align: center; flex: 1; }
-        .att-stat .av {
-            font-size: 22px; font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .att-stat .al {
-            font-size: 10px; color: var(--tx3); font-weight: 600;
-            text-transform: uppercase; letter-spacing: .6px; margin-top: 4px;
-        }
-        .att-div { width: 1px; height: 32px; background: var(--bd); flex-shrink: 0; }
-
-        .rate-lbl {
-            display: flex; justify-content: space-between;
-            font-size: 12px; color: var(--tx3); margin: 12px 0 6px;
-            font-weight: 500;
-        }
-        .rate-track {
-            background: var(--bd); border-radius: 99px;
-            height: 6px; overflow: hidden;
-        }
-        .rate-fill {
-            height: 6px; border-radius: 99px; width: 0%;
-            transition: width 1.2s cubic-bezier(.22,1,.36,1);
-            background: linear-gradient(90deg, var(--success), #4ade80);
-        }
 
         /* ═══════════════════════════════════════════════════════
            SALARY SLIPS
@@ -563,21 +509,12 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
             border-color: rgba(255,255,255,.10);
         }
         html[data-theme="dark"] .dr,
-        html[data-theme="dark"] .slip-row,
-        html[data-theme="dark"] .att-row {
+        html[data-theme="dark"] .slip-row {
             border-color: rgba(255,255,255,.05);
         }
         html[data-theme="dark"] .qa-featured {
             background: linear-gradient(135deg, rgba(59,130,246,.10) 0%, rgba(59,130,246,.04) 100%);
             border-color: rgba(59,130,246,.20);
-        }
-        html[data-theme="dark"] .pulse-tabs {
-            border-color: rgba(255,255,255,.06);
-            background: rgba(255,255,255,.03);
-        }
-        html[data-theme="dark"] .pulse-tab.on {
-            background: rgba(255,255,255,.08);
-            box-shadow: 0 1px 3px rgba(0,0,0,.2);
         }
         html[data-theme="dark"] .hrd-greeting-text span {
             background: linear-gradient(90deg, #60a5fa, #818cf8);
@@ -823,56 +760,8 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
             </div>
         </div>
 
-        <!-- ═══ ROW 2: This Month · Today's Pulse · Salary Slips · Birthdays ═══ -->
+        <!-- ═══ ROW 2: Salary Slips · Birthdays ═══ -->
         <div class="g2">
-            <div class="sc">
-                <div class="sch">
-                    <h2>This Month</h2>
-                    <a class="sclink" href="/app/query-report/Monthly Attendance Sheet">View →</a>
-                </div>
-                <div class="att-row">
-                    <div class="att-stat"><div class="av" id="ms-p" style="color:var(--success)"><span class="sk">0</span></div><div class="al">Present</div></div>
-                    <div class="att-div"></div>
-                    <div class="att-stat"><div class="av" id="ms-a" style="color:var(--danger)"><span class="sk">0</span></div><div class="al">Absent</div></div>
-                    <div class="att-div"></div>
-                    <div class="att-stat"><div class="av" id="ms-h" style="color:var(--warning)"><span class="sk">0</span></div><div class="al">Half Day</div></div>
-                    <div class="att-div"></div>
-                    <div class="att-stat"><div class="av" id="ms-l" style="color:var(--primary)"><span class="sk">0</span></div><div class="al">Leave</div></div>
-                </div>
-                <div class="rate-lbl"><span>Attendance rate</span><span id="ms-rate">—</span></div>
-                <div class="rate-track"><div class="rate-fill" id="ms-bar"></div></div>
-            </div>
-
-            <!-- Today's Pulse -->
-            <div class="sc">
-                <div class="sch">
-                    <h2>Today's Pulse</h2>
-                </div>
-
-                <div class="pulse-tabs">
-                    <button class="pulse-tab on" data-pulse="checkins" onclick="hrdPulseTab('checkins')">
-                        Recent Checkins
-                    </button>
-                    <button class="pulse-tab" data-pulse="leaves" onclick="hrdPulseTab('leaves')">
-                        Pending Leaves
-                    </button>
-                </div>
-
-                <div class="pulse-panel on" id="pp-checkins">
-                    <div id="recent-ci" class="drow"><div class="empty">Loading...</div></div>
-                    <div style="margin-top:10px; text-align:center;">
-                        <a class="sclink" href="/app/employee-checkin">View All Checkins →</a>
-                    </div>
-                </div>
-
-                <div class="pulse-panel" id="pp-leaves">
-                    <div id="leave-list" class="drow"><div class="empty">Loading...</div></div>
-                    <div style="margin-top:10px; text-align:center;">
-                        <a class="sclink" href="/app/leave-application?status=Open">View All Leaves →</a>
-                    </div>
-                </div>
-            </div>
-
             <div class="sc">
                 <div class="sch">
                     <h2>Recent Salary Slips</h2>
@@ -893,15 +782,6 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
     </div>
     `);
 
-    // ── Pulse Tab Switcher ────────────────────────────────────
-    window.hrdPulseTab = function(tab) {
-        document.querySelectorAll('.pulse-tab').forEach(t => t.classList.remove('on'));
-        document.querySelectorAll('.pulse-panel').forEach(p => p.classList.remove('on'));
-        const tabEl = document.querySelector(`[data-pulse="${tab}"]`);
-        const panelEl = document.getElementById('pp-' + tab);
-        if (tabEl) tabEl.classList.add('on');
-        if (panelEl) panelEl.classList.add('on');
-    };
 
     // ── Greeting Logic ────────────────────────────────────────
     function applyGreeting(firstName) {
@@ -1047,69 +927,6 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
         });
     }
 
-    // ── Month Stats ───────────────────────────────────────────
-    async function loadMonthStats() {
-        const map = { Present: 'ms-p', Absent: 'ms-a', 'Half Day': 'ms-h', 'On Leave': 'ms-l' };
-        let p = 0, tot = 0;
-        for (const [status, elId] of Object.entries(map)) {
-            await new Promise(res => {
-                frappe.call({
-                    method: 'frappe.client.get_count',
-                    args: { doctype: 'Attendance', filters: { attendance_date: ['>=', mStart], status, docstatus: 1 } },
-                    callback: r => {
-                        const v = r.message || 0;
-                        setEl(elId, v);
-                        if (status === 'Present') p = v;
-                        if (status !== 'On Leave') tot += v;
-                        res();
-                    }
-                });
-            });
-        }
-        if (tot > 0) {
-            const rate = Math.round((p / tot) * 100);
-            setEl('ms-rate', rate + '%');
-            setTimeout(() => {
-                const b = document.getElementById('ms-bar');
-                if (b) b.style.width = rate + '%';
-            }, 500);
-        }
-    }
-
-    // ── Recent Checkins ───────────────────────────────────────
-    function loadCheckins() {
-        frappe.call({
-            method: 'frappe.client.get_list',
-            args: {
-                doctype: 'Employee Checkin',
-                fields: ['employee', 'employee_name', 'log_type', 'time'],
-                order_by: 'time desc',
-                limit_page_length: 6
-            },
-            callback: r => {
-                const box = document.getElementById('recent-ci');
-                if (!box) return;
-                if (!r.message?.length) {
-                    box.innerHTML = '<div class="empty">No recent checkins</div>';
-                    return;
-                }
-                box.innerHTML = r.message.map(c => {
-                    const isIn = c.log_type === 'IN';
-                    const col = isIn ? 'var(--success)' : 'var(--danger)';
-                    const bg = isIn ? 'var(--s-bg)' : 'var(--d-bg)';
-                    return `<div class="dr">
-                        <div class="dr-dot" style="background:${bg};color:${col};font-size:9px;font-weight:700">${c.log_type}</div>
-                        <div class="dr-main">
-                            <div class="dn">${c.employee_name || c.employee}</div>
-                            <div class="ds">${c.employee} · ${c.time?.substring(5, 10) || '—'}</div>
-                        </div>
-                        <div class="dr-val" style="color:${col}">${c.time?.substring(11, 16) || '—'}</div>
-                    </div>`;
-                }).join('');
-            }
-        });
-    }
-
     // ── Salary Slips ──────────────────────────────────────────
     function loadSlips() {
         frappe.call({
@@ -1139,41 +956,6 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
                             <div class="slip-meta">${s.start_date?.substring(0, 7) || '—'} ${st}</div>
                         </div>
                         <div class="slip-amt">${s.net_pay ? 'LKR ' + parseFloat(s.net_pay).toLocaleString() : '—'}</div>
-                    </div>`;
-                }).join('');
-            }
-        });
-    }
-
-    // ── Pending Leaves ────────────────────────────────────────
-    function loadLeaves() {
-        frappe.call({
-            method: 'frappe.client.get_list',
-            args: {
-                doctype: 'Leave Application',
-                fields: ['employee_name', 'leave_type', 'from_date', 'to_date'],
-                filters: { status: 'Open' },
-                order_by: 'from_date asc',
-                limit_page_length: 6
-            },
-            callback: r => {
-                const box = document.getElementById('leave-list');
-                if (!box) return;
-                if (!r.message?.length) {
-                    box.innerHTML = '<div class="empty">No pending leave applications 🎉</div>';
-                    return;
-                }
-                box.innerHTML = r.message.map(l => {
-                    const days = l.from_date && l.to_date
-                        ? Math.round((new Date(l.to_date) - new Date(l.from_date)) / 86400000) + 1
-                        : '?';
-                    return `<div class="dr">
-                        <div class="dr-dot" style="background:var(--w-bg);color:var(--warning)">🌴</div>
-                        <div class="dr-main">
-                            <div class="dn">${l.employee_name}</div>
-                            <div class="ds">${l.leave_type} · ${l.from_date}</div>
-                        </div>
-                        <div class="dr-val" style="color:var(--warning)">${days}d</div>
                     </div>`;
                 }).join('');
             }
@@ -1227,10 +1009,7 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
     window.hrdRefresh = wrapper._hrdRefresh = function() {
         setGreeting();
         loadKPIs();
-        loadMonthStats();
-        loadCheckins();
         loadSlips();
-        loadLeaves();
         loadBirthdays();
         frappe.show_alert({ message: 'Dashboard refreshed', indicator: 'green' });
     };
@@ -1238,10 +1017,7 @@ frappe.pages['hr-dashboard'].on_page_load = function(wrapper) {
     // ── Init ──────────────────────────────────────────────────
     setGreeting();   // greeting card first
     loadKPIs();
-    loadMonthStats();
-    loadCheckins();
     loadSlips();
-    loadLeaves();
     loadBirthdays();
 };
 
