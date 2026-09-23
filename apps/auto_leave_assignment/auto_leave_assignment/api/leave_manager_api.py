@@ -1472,3 +1472,107 @@ def cancel_leave_application(leave_application):
     return {"ok": True, "restored": restored, "removed": removed,
             "message": _("Leave cancelled.") + (
                 _(" {0} day(s) marked absent again.").format(restored) if restored else "")}
+
+
+# ─────────────────────────────────────────────
+#  Export
+# ─────────────────────────────────────────────
+
+@frappe.whitelist()
+def export_leave_summary(year=None):
+    """One row per monthly (FT-) employee for the leave CSV download.
+
+    The balance is computed exactly as the employee popup computes it
+    (_balances_for): allocation + adjustments - taken - pending, floored at 0,
+    and 0 when no allocation exists. Kept to a handful of grouped queries
+    rather than calling _balances_for per employee.
+    """
+    frappe.only_for(READ_ROLES)
+    y_from, y_to, y = _year_bounds(year)
+    emps = _eligible_ft_employees()
+    if not emps:
+        return {"year": y, "types": [], "rows": []}
+    names = tuple(emps.keys())
+    lwp_types = set(frappe.get_all("Leave Type", filters={"is_lwp": 1}, pluck="name"))
+    types = [t for t in core._leave_chain() if t not in lwp_types]
+    P = {"e": names, "f": y_from, "t": y_to}
+
+    def grouped(sql):
+        out = {}
+        for r in frappe.db.sql(sql, P, as_dict=True):
+            out[(r.employee, r.leave_type)] = flt(r.v)
+        return out
+
+    allocated = grouped("""
+        SELECT employee, leave_type, SUM(total_leaves_allocated) v FROM `tabLeave Allocation`
+        WHERE docstatus = 1 AND employee IN %(e)s AND from_date <= %(t)s AND to_date >= %(t)s
+        GROUP BY employee, leave_type""")
+    taken = grouped("""
+        SELECT employee, leave_type, SUM(total_leave_days) v FROM `tabLeave Application`
+        WHERE docstatus = 1 AND status = 'Approved' AND employee IN %(e)s
+          AND from_date >= %(f)s AND to_date <= %(t)s
+        GROUP BY employee, leave_type""")
+    pending = grouped("""
+        SELECT employee, leave_type, SUM(total_leave_days) v FROM `tabLeave Application`
+        WHERE docstatus = 0 AND status = 'Open' AND employee IN %(e)s
+        GROUP BY employee, leave_type""")
+    adjusted = grouped("""
+        SELECT employee, leave_type, SUM(leaves) v FROM `tabLeave Ledger Entry`
+        WHERE docstatus = 1 AND transaction_type = 'Leave Adjustment' AND employee IN %(e)s
+          AND from_date <= %(t)s AND to_date >= %(f)s
+        GROUP BY employee, leave_type""")
+
+    unpaid = {}
+    if lwp_types:
+        for r in frappe.db.sql("""
+            SELECT employee, SUM(total_leave_days) v FROM `tabLeave Application`
+            WHERE docstatus = 1 AND status = 'Approved' AND employee IN %(e)s
+              AND leave_type IN %(l)s AND from_date >= %(f)s AND to_date <= %(t)s
+            GROUP BY employee""", dict(P, l=tuple(lwp_types)), as_dict=True):
+            unpaid[r.employee] = flt(r.v)
+
+    absent_no_leave = {}
+    for r in frappe.db.sql("""
+        SELECT a.employee, SUM(CASE WHEN a.status = 'Half Day' THEN 0.5 ELSE 1 END) v
+        FROM `tabAttendance` a
+        WHERE a.docstatus = 1 AND a.status IN ('Absent', 'Half Day') AND a.employee IN %(e)s
+          AND a.attendance_date BETWEEN %(f)s AND %(t)s
+          AND NOT EXISTS (SELECT 1 FROM `tabLeave Application` la
+                WHERE la.docstatus = 1 AND la.status = 'Approved' AND la.employee = a.employee
+                  AND a.attendance_date BETWEEN la.from_date AND la.to_date)
+        GROUP BY a.employee""", P, as_dict=True):
+        absent_no_leave[r.employee] = flt(r.v)
+
+    info = {r.name: r for r in frappe.db.sql("""
+        SELECT name, custom_fingerprint_id fp, date_of_joining FROM tabEmployee
+        WHERE name IN %(e)s""", P, as_dict=True)}
+
+    rows = []
+    for e, meta in emps.items():
+        row = {
+            "employee": e,
+            "employee_name": meta.employee_name,
+            "department": meta.department or "",
+            "fingerprint_id": cint(info[e].fp) or "",
+            "date_of_joining": str(info[e].date_of_joining or ""),
+        }
+        total, has_any = 0.0, False
+        for t in types:
+            a = allocated.get((e, t), 0.0)
+            tk = taken.get((e, t), 0.0)
+            pd = pending.get((e, t), 0.0)
+            adj = adjusted.get((e, t), 0.0)
+            left = max(a + adj - tk - pd, 0) if a else 0.0
+            has_any = has_any or bool(a)
+            total += left
+            row[t] = {"entitlement": a, "taken": tk, "manual": -adj,
+                      "pending": pd, "outstanding": left}
+        row["total_outstanding"] = total
+        row["pending_total"] = sum(pending.get((e, t), 0.0) for t in types)
+        row["unpaid_days"] = unpaid.get(e, 0.0)
+        row["absent_no_leave"] = absent_no_leave.get(e, 0.0)
+        row["status"] = "OK" if has_any else "No leave set up"
+        rows.append(row)
+
+    rows.sort(key=lambda r: (r["employee_name"] or r["employee"]).upper())
+    return {"year": y, "as_of": str(getdate(today())), "types": types, "rows": rows}

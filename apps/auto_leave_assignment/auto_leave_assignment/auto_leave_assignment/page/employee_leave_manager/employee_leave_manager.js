@@ -59,6 +59,11 @@ frappe.pages['employee-leave-manager'].on_page_load = function (wrapper) {
         .elm-head { text-align:center; margin-bottom:18px; }
         .elm-head h1 { margin:0 0 5px; font-size:23px; font-weight:800; letter-spacing:-.3px; }
         .elm-head p { margin:0; font-size:14px; color:var(--mu); }
+        .elm-dl { margin-top:12px; border:1px solid var(--bd2); background:var(--card); color:var(--tx);
+            font-size:13px; font-weight:700; padding:8px 16px; border-radius:9px; cursor:pointer;
+            font-family:inherit; box-shadow:var(--sh); }
+        .elm-dl:hover { background:var(--hov); }
+        .elm-dl:disabled { opacity:.55; cursor:wait; }
 
         .elm-searchbox { position:relative; margin-bottom:14px; }
         .elm-searchbox input { width:100%; background:var(--card); border:2px solid var(--bd);
@@ -213,6 +218,7 @@ frappe.pages['employee-leave-manager'].on_page_load = function (wrapper) {
         <div class="elm-head">
           <h1>Employee Leave</h1>
           <p>Search for an employee, then click their name to see and change their leave.</p>
+          <button class="elm-dl" id="elm-dl">⭳ Download leave report (CSV)</button>
         </div>
         <div class="elm-searchbox">
           <span class="ic">🔍</span>
@@ -277,6 +283,52 @@ frappe.pages['employee-leave-manager'].on_page_load = function (wrapper) {
     }
 
     $root.on('input', '#elm-q', frappe.utils.debounce(renderList, 150));
+    $root.on('click', '#elm-dl', downloadReport);
+
+    // One row per monthly employee, straight from the server so the figures are
+    // the same ones the employee popup shows.
+    function downloadReport() {
+        const btn = document.getElementById('elm-dl');
+        btn.disabled = true; btn.textContent = 'Preparing…';
+        api('export_leave_summary', {}).then(r => {
+            const types = r.types || [];
+            const head = ['Employee ID', 'Employee Name', 'Department', 'Fingerprint ID', 'Date of Joining'];
+            types.forEach(tp => {
+                const n = nice(tp);
+                head.push(n + ' - Entitlement', n + ' - Taken', n + ' - Manual Deduction',
+                          n + ' - Pending Approval', n + ' - Outstanding');
+            });
+            head.push('Total Outstanding Leave', 'Unpaid Leave Days (' + r.year + ')',
+                      'Absent Days Without Leave (' + r.year + ')', 'Status');
+            const lines = [head];
+            (r.rows || []).forEach(x => {
+                const line = [x.employee, x.employee_name, x.department, x.fingerprint_id, x.date_of_joining];
+                types.forEach(tp => {
+                    const c = x[tp] || {};
+                    line.push(c.entitlement, c.taken, c.manual, c.pending, c.outstanding);
+                });
+                line.push(x.total_outstanding, x.unpaid_days, x.absent_no_leave, x.status);
+                lines.push(line);
+            });
+            const cell = v => {
+                if (v === null || v === undefined) return '';
+                if (typeof v === 'number') return String(Math.round(v * 100) / 100);
+                const s = String(v);
+                return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+            };
+            // BOM so Excel opens it as UTF-8
+            const csv = '﻿' + lines.map(l => l.map(cell).join(',')).join('\r\n');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            a.download = 'employee-leave-report-' + r.as_of + '.csv';
+            document.body.appendChild(a); a.click(); a.remove();
+            setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+            frappe.show_alert({ message: 'Leave report downloaded — ' + (r.rows || []).length + ' employees',
+                                indicator: 'green' });
+        }).catch(fail).then(() => {
+            btn.disabled = false; btn.textContent = '⭳ Download leave report (CSV)';
+        });
+    }
     $root.on('click', '.elm-row', function () { openEmployee($(this).data('emp')); });
 
     function load() {
