@@ -611,10 +611,11 @@ def get_attendance_coverage(from_date, to_date):
 
 @frappe.whitelist()
 def get_unallocated_employees(as_of_date=None):
-    """FT- staff with no leave allocation covering the date.
+    """FT- staff with NO paid leave allocation at all covering the date.
 
     Every absence these employees take falls straight through the chain to
-    Leave Without Pay. This is the largest live money issue the page surfaces.
+    Leave Without Pay. Someone holding one type and not the other is not
+    flagged — see the note below.
     """
     frappe.only_for(READ_ROLES)
     as_of_date = getdate(as_of_date or today())
@@ -637,7 +638,12 @@ def get_unallocated_employees(as_of_date=None):
     out = []
     for e, meta in emps.items():
         missing = [t for t in wanted if t not in held.get(e, set())]
-        if not missing:
+        # Only ever flag someone who has NO paid leave at all. A zero balance in
+        # one type is a legitimate position — after the client's outstanding-leave
+        # sheet was applied, several people correctly hold Casual and nothing else,
+        # and ERPNext cannot store a zero-day allocation, so no Annual record
+        # exists. Flagging those would invite HR to grant days they do not have.
+        if not missing or held.get(e):
             continue
         absences = frappe.db.sql("""
             SELECT COUNT(*) n FROM `tabAttendance`
