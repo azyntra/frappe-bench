@@ -1061,13 +1061,25 @@ def _balances_for(employee, on_date):
             SELECT SUM(total_leave_days) d FROM `tabLeave Application`
             WHERE docstatus = 0 AND status = 'Open' AND employee = %s AND leave_type = %s
         """, (employee, lt), as_dict=True)[0].d)
+        # Leave Adjustments live only in the ledger (Reduce = negative leaves).
+        # They are how leave taken in months never imported into this system
+        # is recorded WITHOUT touching the allocation, so "of 14" stays the
+        # company entitlement while the balance comes down.
+        adjusted = flt(frappe.db.sql("""
+            SELECT SUM(leaves) d FROM `tabLeave Ledger Entry`
+            WHERE docstatus = 1 AND transaction_type = 'Leave Adjustment'
+              AND employee = %s AND leave_type = %s
+              AND from_date <= %s AND to_date >= %s
+        """, (employee, lt, a.to_date if a else on_date, a.from_date if a else on_date),
+            as_dict=True)[0].d)
         allocated = flt(a.total_leaves_allocated) if a else 0.0
         out.append({
             "leave_type": lt,
             "allocated": allocated,
             "taken": taken,
             "pending": pending,
-            "left": max(allocated - taken - pending, 0) if a else 0.0,
+            "adjusted": adjusted,
+            "left": max(allocated + adjusted - taken - pending, 0) if a else 0.0,
             "has_allocation": bool(a),
             "allocation": a.name if a else None,
             "allocation_from": str(a.from_date) if a else None,
@@ -1114,6 +1126,17 @@ def search_employees(query="", limit=200):
     """, {"e": tuple(names), "d": on_date}, as_dict=True):
         taken[(r.employee, r.leave_type)] = flt(r.d)
 
+    # same correction as the popup: adjustments reduce the balance, not the "of"
+    adj = {}
+    for r in frappe.db.sql("""
+        SELECT employee, leave_type, SUM(leaves) d
+        FROM `tabLeave Ledger Entry`
+        WHERE docstatus = 1 AND transaction_type = 'Leave Adjustment'
+          AND employee IN %(e)s AND from_date <= %(d)s AND to_date >= %(d)s
+        GROUP BY employee, leave_type
+    """, {"e": tuple(names), "d": on_date}, as_dict=True):
+        adj[(r.employee, r.leave_type)] = flt(r.d)
+
     absent = {}
     for r in frappe.db.sql("""
         SELECT employee, COUNT(*) n FROM `tabAttendance`
@@ -1133,7 +1156,7 @@ def search_employees(query="", limit=200):
             if not a:
                 missing_setup = True
             bal.append({"leave_type": t, "allocated": a,
-                        "left": max(a - taken.get((e, t), 0.0), 0)})
+                        "left": max(a + adj.get((e, t), 0.0) - taken.get((e, t), 0.0), 0)})
         out.append({
             "employee": e, "employee_name": meta.employee_name,
             "department": meta.department, "balances": bal,
