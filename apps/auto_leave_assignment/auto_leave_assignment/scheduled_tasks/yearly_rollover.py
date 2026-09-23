@@ -31,6 +31,13 @@ WEEKLY_OFF = "Sunday"
 # from this month onward the job prepares the following year
 PREPARE_FROM_MONTH = 11
 
+# What a monthly employee is granted each year. Deliberately NOT read from
+# Leave Type.max_leaves_allowed, which is only the ceiling the system will store.
+STANDARD_ENTITLEMENT = {
+    "Casual Leave": 7.0,
+    "Annual Leave": 14.0,
+}
+
 
 def _company():
     return (frappe.db.get_single_value("Global Defaults", "default_company")
@@ -133,10 +140,16 @@ def ensure_leave_allocations(year, dry_run=False):
     y_from, y_to = getdate("%s-01-01" % year), getdate("%s-12-31" % year)
     prev_from, prev_to = getdate("%s-01-01" % (year - 1)), getdate("%s-12-31" % (year - 1))
 
+    # The yearly GRANT and the system CEILING are different things. The ceiling
+    # (Leave Type.max_leaves_allowed) has to sit above the grant so a balance
+    # carried over from an earlier year can be recorded at all — Annual is capped
+    # at 28 for that reason. Reading the grant off the ceiling would hand every
+    # new joiner 28 days, so the standard entitlement is stated explicitly here.
     types = frappe.get_all("Leave Type", filters={"is_lwp": 0},
                            fields=["name", "max_leaves_allowed"])
-    standard = {t.name: flt(t.max_leaves_allowed) for t in types
-                if flt(t.max_leaves_allowed) > 0}
+    standard = {t.name: flt(STANDARD_ENTITLEMENT.get(t.name, t.max_leaves_allowed))
+                for t in types
+                if flt(STANDARD_ENTITLEMENT.get(t.name, t.max_leaves_allowed)) > 0}
     if not standard:
         return {"year": year, "created": 0, "skipped": 0,
                 "problems": ["No leave type has a yearly maximum set."]}
